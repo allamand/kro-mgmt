@@ -4,7 +4,7 @@ metadata:
   name: workload2
 spec:
     name: workload2
-    region: AWS_REGION
+    region: us-west-2
     k8sVersion: '1.30'
     accountId: '111222333444'
     nodesCount: 3

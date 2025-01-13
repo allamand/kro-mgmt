@@ -1,4 +1,4 @@
-region: AWS_REGION
-clusterName: CLUSTER_NAME
-accountId: ACCOUNT_ID
+region: us-west-2
+clusterName: kro-mgmt
+accountId: 382076407153
 oidcProvider: OIDC_PROVIDER

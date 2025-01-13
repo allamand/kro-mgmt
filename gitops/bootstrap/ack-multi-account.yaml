@@ -11,7 +11,7 @@ spec:
     namespace: default
   project: default
   source:
-    repoURL: MY_REPO_URL
+    repoURL: https://github.com/allamand/kro-mgmt.git
     targetRevision: HEAD
     path: charts/ack-multi-account
     helm:

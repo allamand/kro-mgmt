@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     path: gitops/bootstrap
-    repoURL: MY_REPO_URL
+    repoURL: https://github.com/allamand/kro-mgmt.git
     targetRevision: HEAD
   syncPolicy:
     automated:

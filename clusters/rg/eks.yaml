@@ -127,7 +127,7 @@ spec:
               {
                 "Effect": "Allow",
                 "Principal": {
-                  "AWS": "arn:aws:iam::ACCOUNT_ID:role/argocd-hub-role"
+                  "AWS": "arn:aws:iam::382076407153:role/argocd-hub-role"
                 },
                 "Action": [
                   "sts:TagSession",
