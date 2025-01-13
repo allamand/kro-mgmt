@@ -22,7 +22,15 @@ spec:
       k8sVersion: string
       nodesCount: integer
   resources:
+  - id: namespace
+    template:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: ${schema.spec.name}
   - id: vpc
+    dependsOn:
+      - namespace
     template:
       apiVersion: kro.run/v1alpha1
       kind: Vpc
@@ -38,6 +46,8 @@ spec:
           privateSubnet1Cidr: ${schema.spec.cidr.privateSubnet1Cidr}
           privateSubnet2Cidr: ${schema.spec.cidr.privateSubnet2Cidr}
   - id: eks
+    dependsOn:
+      - vpc
     template:
       apiVersion: kro.run/v1alpha1
       kind: EksCluster
