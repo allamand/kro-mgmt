@@ -5,7 +5,7 @@ metadata:
   namespace: ack-system
 data:
   {{- range $key, $value := .Values.clusters }}
-  ec2.{{ $key }}: "arn:aws:iam::{{ $value }}:role/eks-cluster-mgmt-ec2"
-  eks.{{ $key }}: "arn:aws:iam::{{ $value }}:role/eks-cluster-mgmt-eks"
-  iam.{{ $key }}: "arn:aws:iam::{{ $value }}:role/eks-cluster-mgmt-iam"
+  ec2.{{ $key }}: "arn:aws:iam::{{ $value.account }}:role/eks-cluster-mgmt-ec2"
+  eks.{{ $key }}: "arn:aws:iam::{{ $value.account }}:role/eks-cluster-mgmt-eks"
+  iam.{{ $key }}: "arn:aws:iam::{{ $value.account }}:role/eks-cluster-mgmt-iam"
   {{- end }}

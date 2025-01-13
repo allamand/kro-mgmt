@@ -6,4 +6,6 @@ metadata:
   name: {{ $key }}
   annotations:
     services.k8s.aws/team-id: "{{ $key }}"
+    services.k8s.aws/default-region: "{{ $value.region }}"
+    argocd.argoproj.io/tracking-id: "{{ $key }}:apps/Namespace:{{ $key }}/{{ $key }}"
 {{- end }}

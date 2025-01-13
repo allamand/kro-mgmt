@@ -22,15 +22,15 @@ spec:
       k8sVersion: string
       nodesCount: integer
   resources:
-  - id: createNamespace
-    template:
-      apiVersion: v1
-      kind: Namespace
-      metadata:
-        name: ${schema.spec.name}
-        annotations:
-          services.k8s.aws/default-region: ${schema.spec.region}  
-          argocd.argoproj.io/tracking-id: ${schema.spec.name}:apps/Namespace:${schema.spec.name}/${schema.spec.name}             
+  # - id: createNamespace
+  #   template:
+  #     apiVersion: v1
+  #     kind: Namespace
+  #     metadata:
+  #       name: ${schema.spec.name}
+  #       annotations:
+  #         services.k8s.aws/default-region: ${schema.spec.region}  
+  #         argocd.argoproj.io/tracking-id: ${schema.spec.name}:apps/Namespace:${schema.spec.name}/${schema.spec.name}             
   - id: vpc
     template:
       apiVersion: kro.run/v1alpha1
