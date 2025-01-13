@@ -22,7 +22,7 @@ spec:
       k8sVersion: string
       nodesCount: integer
   resources:
-  - id: create-namespace
+  - id: createNamespace
     template:
       apiVersion: v1
       kind: Namespace
@@ -30,7 +30,7 @@ spec:
         name: ${schema.spec.name}
   - id: vpc
     dependsOn:
-      - create-namespace
+      - createNamespace
     template:
       apiVersion: kro.run/v1alpha1
       kind: Vpc
