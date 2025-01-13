@@ -29,8 +29,6 @@ spec:
       metadata:
         name: ${schema.spec.name}
   - id: vpc
-    dependsOn:
-      - createNamespace
     template:
       apiVersion: kro.run/v1alpha1
       kind: Vpc
@@ -46,8 +44,6 @@ spec:
           privateSubnet1Cidr: ${schema.spec.cidr.privateSubnet1Cidr}
           privateSubnet2Cidr: ${schema.spec.cidr.privateSubnet2Cidr}
   - id: eks
-    dependsOn:
-      - vpc
     template:
       apiVersion: kro.run/v1alpha1
       kind: EksCluster
