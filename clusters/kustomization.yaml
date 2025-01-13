@@ -4,5 +4,6 @@ resources:
 - rg/vpc.yaml
 - rg/eks.yaml
 - rg/eks-w-vpc.yaml
-- workload1.yaml
-- workload2.yaml
+- cluster-workload1.yaml
+- cluster-workload2.yaml
+- cluster-workload3.yaml
