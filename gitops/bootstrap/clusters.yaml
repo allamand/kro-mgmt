@@ -18,3 +18,6 @@ spec:
     automated:
       prune: true
       selfHeal: true
+
+
+#argocd.argoproj.io/tracking-id: clusters:services.k8s.aws/VPC:${schema.spec.name}/${schema.spec.name}

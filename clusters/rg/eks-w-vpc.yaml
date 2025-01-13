@@ -38,7 +38,7 @@ spec:
       metadata:
         name: ${schema.spec.name}
         annotations:
-          argocd.argoproj.io/tracking-id: ${schema.spec.name}:apps/Vpc:${schema.spec.name}/${schema.spec.name}           
+          argocd.argoproj.io/tracking-id: clusters:kro.run/Vpc:${schema.spec.name}/${schema.spec.name}           
       spec:
         name: ${schema.spec.name}
         region: ${schema.spec.region}
@@ -55,7 +55,7 @@ spec:
       metadata:
         name: ${schema.spec.name}
         annotations:
-          argocd.argoproj.io/tracking-id: ${schema.spec.name}:apps/EksCluster:${schema.spec.name}/${schema.spec.name}          
+          argocd.argoproj.io/tracking-id: clusters:kro.run/EksCluster:${schema.spec.name}/${schema.spec.name}                     
       spec:
           name: ${schema.spec.name}
           region: ${schema.spec.region}
