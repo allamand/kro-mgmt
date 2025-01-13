@@ -30,6 +30,8 @@ spec:
       metadata:
         namespace: ${schema.spec.name}
         name: ${schema.spec.name}-cluster-role
+        annotations:
+          argocd.argoproj.io/tracking-id: ${schema.spec.name}:apps/clusterRole:${schema.spec.name}/${schema.spec.name}        
       spec:
         name: ${schema.spec.name}-cluster-role
         policies:

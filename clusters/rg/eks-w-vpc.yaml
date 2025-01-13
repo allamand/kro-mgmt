@@ -30,12 +30,15 @@ spec:
         name: ${schema.spec.name}
         annotations:
           services.k8s.aws/default-region: ${schema.spec.region}  
+          argocd.argoproj.io/tracking-id: ${schema.spec.name}:apps/Namespace:${schema.spec.name}/${schema.spec.name}             
   - id: vpc
     template:
       apiVersion: kro.run/v1alpha1
       kind: Vpc
       metadata:
         name: ${schema.spec.name}
+        annotations:
+          argocd.argoproj.io/tracking-id: ${schema.spec.name}:apps/Vpc:${schema.spec.name}/${schema.spec.name}           
       spec:
         name: ${schema.spec.name}
         region: ${schema.spec.region}
@@ -51,6 +54,8 @@ spec:
       kind: EksCluster
       metadata:
         name: ${schema.spec.name}
+        annotations:
+          argocd.argoproj.io/tracking-id: ${schema.spec.name}:apps/EksCluster:${schema.spec.name}/${schema.spec.name}          
       spec:
           name: ${schema.spec.name}
           region: ${schema.spec.region}
