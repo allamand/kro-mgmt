@@ -28,6 +28,8 @@ spec:
       kind: Namespace
       metadata:
         name: ${schema.spec.name}
+        annotations:
+          services.k8s.aws/default-region: ${schema.spec.region}  
   - id: vpc
     template:
       apiVersion: kro.run/v1alpha1
