@@ -28,6 +28,7 @@ spec:
       kind: Vpc
       metadata:
         name: ${schema.spec.name}
+        namespace: ${schema.spec.name}
         annotations:
           argocd.argoproj.io/tracking-id: clusters:kro.run/Vpc:${schema.spec.name}/${schema.spec.name}
       spec:
@@ -45,6 +46,7 @@ spec:
       kind: EksCluster
       metadata:
         name: ${schema.spec.name}
+        namespace: ${schema.spec.name}
         annotations:
           argocd.argoproj.io/tracking-id: clusters:kro.run/EksCluster:${schema.spec.name}/${schema.spec.name}                     
       spec:
