@@ -11,3 +11,6 @@ clusters:
   workload-cluster4: 
     account: "418272784034"
     region: "us-west-2"
+  workload-cluster5: 
+    account: "418272784034"
+    region: "us-west-2"  
