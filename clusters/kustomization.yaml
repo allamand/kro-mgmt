@@ -7,3 +7,4 @@ resources:
 - cluster-workload1.yaml
 - cluster-workload2.yaml
 - cluster-workload3.yaml
+- cluster-workload4.yaml
