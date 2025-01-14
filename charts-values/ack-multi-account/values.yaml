@@ -8,3 +8,6 @@ clusters:
   workload-cluster3:
     account: "382076407153"
     region: "eu-west-1"
+  workload-cluster4: 
+    account: "418272784034"
+    region: "us-west-2"
