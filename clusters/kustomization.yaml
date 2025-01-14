@@ -8,5 +8,5 @@ resources:
 #- cluster-workload2.yaml
 - cluster-workload3.yaml
 #- cluster-workload4.yaml
-- cluster-workload5.yaml
+#- cluster-workload5.yaml
 
