@@ -5,8 +5,8 @@ resources:
 - rg/eks.yaml
 - rg/eks-w-vpc.yaml
 - cluster-workload1.yaml
-- cluster-workload2.yaml
+#- cluster-workload2.yaml
 - cluster-workload3.yaml
-- cluster-workload4.yaml
+#- cluster-workload4.yaml
 - cluster-workload5.yaml
 
