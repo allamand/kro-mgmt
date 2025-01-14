@@ -28,10 +28,8 @@ spec:
       kind: Vpc
       metadata:
         name: ${schema.spec.name}
-        labels:
-          app.kubernetes.io/instance: clusters        
-        #annotations:
-        #  argocd.argoproj.io/tracking-id: clusters:kro.run/Vpc:${schema.spec.name}/${schema.spec.name}
+        annotations:
+          argocd.argoproj.io/tracking-id: clusters:kro.run/Vpc:${schema.spec.name}/${schema.spec.name}
       spec:
         name: ${schema.spec.name}
         region: ${schema.spec.region}
@@ -47,10 +45,8 @@ spec:
       kind: EksCluster
       metadata:
         name: ${schema.spec.name}
-        labels:
-          app.kubernetes.io/instance: clusters
-        #annotations:
-        #  argocd.argoproj.io/tracking-id: clusters:kro.run/EksCluster:${schema.spec.name}/${schema.spec.name}                     
+        annotations:
+          argocd.argoproj.io/tracking-id: clusters:kro.run/EksCluster:${schema.spec.name}/${schema.spec.name}                     
       spec:
           name: ${schema.spec.name}
           region: ${schema.spec.region}
