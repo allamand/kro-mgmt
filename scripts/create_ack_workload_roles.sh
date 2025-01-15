@@ -21,7 +21,10 @@ create_ack_workload_roles() {
             "Principal": {
                 "AWS": "arn:aws:iam::${MGMT_ACCOUNT_ID}:role/ack-${service}-controller"
             },
-            "Action": "sts:AssumeRole",
+            "Action": [
+              "sts:AssumeRole",
+              "sts:TagSession"
+              ],
             "Condition": {}
         }
     ]
