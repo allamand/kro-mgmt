@@ -1,4 +1,0 @@
-region: us-west-2
-clusterName: kro-mgmt
-accountId: 382076407153
-oidcProvider: oidc.eks.us-west-2.amazonaws.com/id/509522E31117C4C5CAF626FD5669C414
