@@ -1,12 +1,12 @@
 apiVersion: kro.run/v1alpha1
 kind: EksclusterWithVpc
 metadata:
-  name: cluster-workload1
+  name: workload-cluster3
 spec:
-    name: cluster-workload1
+    name: workload-cluster3
     region: us-west-2
     k8sVersion: '1.30'
-    accountId: '382076407153'
+    accountId: '798082067117'
     nodesCount: 3
     cidr:
       vpcCidr: "10.0.0.0/16"
