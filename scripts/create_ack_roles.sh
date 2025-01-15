@@ -1,10 +1,10 @@
 #!/bin/bash
 
 create_ack_roles() {
-    local kro-mgmt="$1"
-    local 382076407153S="$2"
+    local CLUSTER_NAME="$1"
+    local ACCOUNT_IDS="$2"
 
-    if [ -z "$kro-mgmt" ] || [ -z "$382076407153S" ]; then
+    if [ -z "$CLUSTER_NAME" ] || [ -z "$ACCOUNT_IDS" ]; then
         echo "Usage: create_ack_roles <cluster_name> <account_ids>"
         echo "Example: create_ack_roles my-cluster '123456789012 987654321098'"
         return 1
@@ -13,7 +13,7 @@ create_ack_roles() {
     # Helper function to generate cross-account policy
     generate_policy() {
         local resource_arns=""
-        for account in $382076407153S; do
+        for account in $ACCOUNT_IDS; do
             if [ -n "$resource_arns" ]; then
                 resource_arns="${resource_arns},"
             fi
@@ -133,7 +133,7 @@ EOF
         fi
 
         aws eks create-pod-identity-association \
-            --cluster-name "$kro-mgmt" \
+            --cluster-name "$CLUSTER_NAME" \
             --role-arn "$ACK_CONTROLLER_IAM_ROLE_ARN" \
             --namespace "$ACK_K8S_NAMESPACE" \
             --service-account "$ACK_K8S_SERVICE_ACCOUNT_NAME"
@@ -145,13 +145,13 @@ EOF
     return 0
 }
 
-if [[ ! -z "$kro-mgmt" && ! -z "$382076407153S" ]]; then
-  echo "kro-mgmt: $kro-mgmt"
-  echo "382076407153S: $382076407153S"
-  create_ack_roles "$kro-mgmt" "$382076407153S"
+if [[ ! -z "$CLUSTER_NAME" && ! -z "$ACCOUNT_IDS" ]]; then
+  echo "CLUSTER_NAME: $CLUSTER_NAME"
+  echo "ACCOUNT_IDS: $ACCOUNT_IDS"
+  create_ack_roles "$CLUSTER_NAME" "$ACCOUNT_IDS"
 else
   echo "You must configure the environments variables first"
-  echo "kro-mgmt: $kro-mgmt"
-  echo "382076407153S: $382076407153S"
+  echo "CLUSTER_NAME: $CLUSTER_NAME"
+  echo "ACCOUNT_IDS: $ACCOUNT_IDS"
   exit -1
 fi

@@ -91,19 +91,19 @@ export 382076407153S="111222333444 222333444555" # list of aws accounts you want
     git clone $https://github.com/allamand/kro-mgmt.git $WORKSPACE_PATH/${GITHUB_REPO_NAME}
     ```
 
-12. Populate the repo:
+7. Populate the repo:
 
     ```sh
     cp -r $WORKSPACE_PATH/kro/examples/eks-cluster-mgmt/* $WORKSPACE_PATH/${GITHUB_REPO_NAME}
 
-    find $WORKSPACE_PATH/${GITHUB_REPO_NAME} -type f -exec sed -i "s~382076407153~$382076407153~g" {} +
-    find $WORKSPACE_PATH/${GITHUB_REPO_NAME} -type f -exec sed -i "s~https://github.com/allamand/kro-mgmt.git~$https://github.com/allamand/kro-mgmt.git~g" {} +
-    find $WORKSPACE_PATH/${GITHUB_REPO_NAME} -type f -exec sed -i "s~us-west-2~$us-west-2~g" {} +
-    find $WORKSPACE_PATH/${GITHUB_REPO_NAME} -type f -exec sed -i "s~kro-mgmt~$kro-mgmt~g" {} +
-    find $WORKSPACE_PATH/${GITHUB_REPO_NAME} -type f -exec sed -i "s~~$~g" {} +
+    find $WORKSPACE_PATH/${GITHUB_REPO_NAME} -type f -not -path "*/scripts/*" -exec sed -i "s~382076407153~$382076407153~g" {} +
+    find $WORKSPACE_PATH/${GITHUB_REPO_NAME} -type f -not -path "*/scripts/*" -exec sed -i "s~https://github.com/allamand/kro-mgmt.git~$https://github.com/allamand/kro-mgmt.git~g" {} +
+    find $WORKSPACE_PATH/${GITHUB_REPO_NAME} -type f -not -path "*/scripts/*" -exec sed -i "s~us-west-2~$us-west-2~g" {} +
+    find $WORKSPACE_PATH/${GITHUB_REPO_NAME} -type f -not -path "*/scripts/*" -exec sed -i "s~kro-mgmt~$kro-mgmt~g" {} +
+    find $WORKSPACE_PATH/${GITHUB_REPO_NAME} -type f -not -path "*/scripts/*" -exec sed -i "s~oidc.eks.us-west-2.amazonaws.com/id/509522E31117C4C5CAF626FD5669C414~$oidc.eks.us-west-2.amazonaws.com/id/509522E31117C4C5CAF626FD5669C414~g" {} +
     ```
 
-13. Push the changes
+8. Push the changes
 
     ```sh
     cd $WORKSPACE_PATH/${GITHUB_REPO_NAME}
@@ -113,19 +113,19 @@ export 382076407153S="111222333444 222333444555" # list of aws accounts you want
     cd $WORKSPACE_PATH
     ```
 
-3. Create IAM OIDC provider for the cluster:
+9. Create IAM OIDC provider for the cluster:
 
     ```sh
     eksctl utils associate-iam-oidc-provider --cluster $kro-mgmt --approve
     ```
 
-4. Save OIDC provider URL in an environment variable:
+10. Save OIDC provider URL in an environment variable:
 
     ```sh
-    =$(aws eks describe-cluster --name $kro-mgmt --region $us-west-2 --query "cluster.identity.oidc.issuer" --output text | sed -e "s/^https:\/\///")
+    oidc.eks.us-west-2.amazonaws.com/id/509522E31117C4C5CAF626FD5669C414=$(aws eks describe-cluster --name $kro-mgmt --region $us-west-2 --query "cluster.identity.oidc.issuer" --output text | sed -e "s/^https:\/\///")
     ```
 
-5. Install the following ACK controllers on the management cluster:
+1. Install the following ACK controllers on the management cluster:
 
     * Create IAM Roles and associates with Pod Identity
 
