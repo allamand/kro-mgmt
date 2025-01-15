@@ -1,0 +1,4 @@
+region: us-west-2
+clusterName: kro-mgmt
+accountId: 382076407153
+oidcProvider: 

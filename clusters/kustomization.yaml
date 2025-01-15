@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- rg/vpc.yaml
+- rg/eks.yaml
+- rg/eks-w-vpc.yaml
+#- cluster-workload1.yaml
+#- cluster-workload2.yaml
+#- cluster-workload3.yaml
+#- cluster-workload4.yaml
+#- cluster-workload5.yaml
+
