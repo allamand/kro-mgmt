@@ -19,6 +19,7 @@ spec:
         privateSubnet1Cidr: string | default="10.0.11.0/24"
         privateSubnet2Cidr: string | default="10.0.12.0/24"
       accountId: string
+      managementAccountId: string
       k8sVersion: string
       nodesCount: integer
       adminRoleName: string | default="Admin"
@@ -74,6 +75,7 @@ spec:
                 subnet1ID: ${vpc.status.privateSubnet1ID}
                 subnet2ID: ${vpc.status.privateSubnet2ID}
           accountId: ${schema.spec.accountId}
+          managementAccountId: ${schema.spec.managementAccountId}
           k8sVersion: ${schema.spec.k8sVersion}
           nodesCount: ${schema.spec.nodesCount}
           adminRoleName: ${schema.spec.adminRoleName}

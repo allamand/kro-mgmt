@@ -22,17 +22,17 @@ spec:
             subnet1ID: string
             subnet2ID: string
       accountId: string
+      managementAccountId: string
       k8sVersion: string
       nodesCount: integer
       adminRoleName: string
       gitops:
-        awsManagementAccount: string | default=""
-        addonsRepoBasepath: string | default=""
+        addonsRepoBasepath: string
         addonsRepoPath: string | default="bootstrap"
         addonsRepoRevision: string | default="HEAD"
         addonsRepoSecretKey: string | default="eks-fleet-workshop-gitops-addons"
         addonsRepoUrl: string | default="https://d1t8il14om2k8l.cloudfront.net/gitea/workshop-user/eks-fleet-workshop-gitops-addons"
-        fleetRepoBasepath: string | default=""
+        fleetRepoBasepath: string
         fleetRepoPath: string | default="bootstrap"
         fleetRepoRevision: string | default="HEAD"
         fleetRepoSecretKey: string | default="eks-fleet-workshop-gitops-fleet"
@@ -142,7 +142,7 @@ spec:
               {
                 "Effect": "Allow",
                 "Principal": {
-                  "AWS": "arn:aws:iam::${schema.spec.awsManagementAccount}:role/argocd-hub-role"
+                  "AWS": "arn:aws:iam::${schema.spec.managementAccountId}:role/argocd-hub-role"
                 },
                 "Action": [
                   "sts:TagSession",

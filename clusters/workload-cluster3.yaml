@@ -7,6 +7,7 @@ spec:
     region: us-west-2
     k8sVersion: '1.30'
     accountId: '798082067117'
+    managementAccountId: '382076407153'
     nodesCount: 3
     cidr:
       vpcCidr: "10.0.0.0/16"
