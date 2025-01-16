@@ -12,6 +12,11 @@ spec:
     spec:
       name: string
       region: string
+      accountId: string
+      managementAccountId: string
+      k8sVersion: string
+      adminRoleName: string
+      nodesCount: integer
       network:
         vpcID: string
         subnets:
@@ -21,11 +26,6 @@ spec:
           workers:
             subnet1ID: string
             subnet2ID: string
-      accountId: string
-      managementAccountId: string
-      k8sVersion: string
-      nodesCount: integer
-      adminRoleName: string
       gitops:
         addonsRepoBasePath: string | default=""
         addonsRepoPath: string | default="bootstrap"

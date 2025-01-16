@@ -12,17 +12,17 @@ spec:
     spec:
       name: string
       region: string
+      k8sVersion: string
+      accountId: string
+      managementAccountId: string
+      adminRoleName: string | default="Admin"
+      nodesCount: integer
       cidr:
         vpcCidr: string | default="10.0.0.0/16"
         publicSubnet1Cidr: string | default="10.0.1.0/24"
         publicSubnet2Cidr: string | default="10.0.2.0/24"
         privateSubnet1Cidr: string | default="10.0.11.0/24"
         privateSubnet2Cidr: string | default="10.0.12.0/24"
-      accountId: string
-      managementAccountId: string
-      k8sVersion: string
-      nodesCount: integer
-      adminRoleName: string | default="Admin"
       gitops:
         addonsRepoBasePath: string | default=""
         addonsRepoPath: string | default="bootstrap"
@@ -65,6 +65,11 @@ spec:
       spec:
           name: ${schema.spec.name}
           region: ${schema.spec.region}
+          accountId: ${schema.spec.accountId}
+          managementAccountId: ${schema.spec.managementAccountId}
+          k8sVersion: ${schema.spec.k8sVersion}
+          adminRoleName: ${schema.spec.adminRoleName}
+          nodesCount: ${schema.spec.nodesCount}
           network:
             vpcID: ${vpc.status.vpcID}
             subnets:
@@ -74,11 +79,6 @@ spec:
               workers:
                 subnet1ID: ${vpc.status.privateSubnet1ID}
                 subnet2ID: ${vpc.status.privateSubnet2ID}
-          accountId: ${schema.spec.accountId}
-          managementAccountId: ${schema.spec.managementAccountId}
-          k8sVersion: ${schema.spec.k8sVersion}
-          nodesCount: ${schema.spec.nodesCount}
-          adminRoleName: ${schema.spec.adminRoleName}
           gitops:
             addonsRepoBasePath: ${schema.spec.gitops.addonsRepoBasePath}
             addonsRepoPath: ${schema.spec.gitops.addonsRepoPath}

@@ -8,6 +8,7 @@ spec:
     k8sVersion: '1.30'
     accountId: '798082067117'
     managementAccountId: '382076407153'
+    adminRoleName: Admin
     nodesCount: 3
     cidr:
       vpcCidr: "10.0.0.0/16"
@@ -15,7 +16,6 @@ spec:
       publicSubnet2Cidr: "10.0.2.0/24"
       privateSubnet1Cidr: "10.0.11.0/24"
       privateSubnet2Cidr: "10.0.12.0/24"
-    adminRoleName: Admin
     gitops:
         addonsRepoPath: "bootstrap"
         addonsRepoRevision: "HEAD"
