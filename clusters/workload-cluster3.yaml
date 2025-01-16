@@ -16,12 +16,10 @@ spec:
       privateSubnet2Cidr: "10.0.12.0/24"
     adminRoleName: Admin
     gitops:
-        addonsRepoBasePath: ""
         addonsRepoPath: "bootstrap"
         addonsRepoRevision: "HEAD"
         addonsRepoSecretKey: "eks-fleet-workshop-gitops-addons"
         addonsRepoUrl: "https://d1t8il14om2k8l.cloudfront.net/gitea/workshop-user/eks-fleet-workshop-gitops-addons"
-        fleetRepoBasePath: ""
         fleetRepoPath: "bootstrap"
         fleetRepoRevision: "HEAD"
         fleetRepoSecretKey: "eks-fleet-workshop-gitops-fleet"
