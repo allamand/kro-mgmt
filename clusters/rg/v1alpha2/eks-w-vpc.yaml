@@ -23,12 +23,12 @@ spec:
       nodesCount: integer
       adminRoleName: string | default="Admin"
       gitops:
-        addonsRepoBasepath: string | default=""
+        addonsRepoBasePath: string | default=""
         addonsRepoPath: string | default="bootstrap"
         addonsRepoRevision: string | default="HEAD"
         addonsRepoSecretKey: string | default="eks-fleet-workshop-gitops-addons"
         addonsRepoUrl: string | default="https://d1t8il14om2k8l.cloudfront.net/gitea/workshop-user/eks-fleet-workshop-gitops-addons"
-        fleetRepoBasepath: string | default=""
+        fleetRepoBasePath: string | default=""
         fleetRepoPath: string | default="bootstrap"
         fleetRepoRevision: string | default="HEAD"
         fleetRepoSecretKey: string | default="eks-fleet-workshop-gitops-fleet"
@@ -76,12 +76,12 @@ spec:
           nodesCount: ${schema.spec.nodesCount}
           adminRoleName: ${schema.spec.adminRoleName}
           gitops:
-            addonsRepoBasepath: ${schema.spec.gitops.addonsRepoBasepath}
+            addonsRepoBasePath: ${schema.spec.gitops.addonsRepoBasePath}
             addonsRepoPath: ${schema.spec.gitops.addonsRepoPath}
             addonsRepoRevision: ${schema.spec.gitops.addonsRepoRevision}
             addonsRepoSecretKey: ${schema.spec.gitops.addonsRepoSecretKey}
             addonsRepoUrl: ${schema.spec.gitops.addonsRepoUrl}
-            fleetRepoBasepath: ${schema.spec.gitops.fleetRepoBasepath}
+            fleetRepoBasePath: ${schema.spec.gitops.fleetRepoBasePath}
             fleetRepoPath: ${schema.spec.gitops.fleetRepoPath}
             fleetRepoRevision: ${schema.spec.gitops.fleetRepoRevision}
             fleetRepoSecretKey: ${schema.spec.gitops.fleetRepoSecretKey}

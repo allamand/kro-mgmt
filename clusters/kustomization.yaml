@@ -5,7 +5,7 @@ resources:
 - rg/v1alpha2
 - workload-cluster1.yaml
 - workload-cluster2.yaml
-#- workload-cluster3.yaml
+- workload-cluster3.yaml
 #- workload-cluster4.yaml
 #- workload-cluster5.yaml
 
