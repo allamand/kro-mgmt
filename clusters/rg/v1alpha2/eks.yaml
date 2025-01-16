@@ -13,6 +13,7 @@ spec:
       name: string
       region: string
       network:
+        awsVpcID: string
         subnets:
           controlplane:
             subnet1ID: string
@@ -87,7 +88,7 @@ spec:
               }
             ]
           }
-  - id: ekscluster
+  - id: ekscluster # https://aws-controllers-k8s.github.io/community/reference/eks/v1alpha1/cluster/
     template:
       apiVersion: eks.services.k8s.aws/v1alpha1
       kind: Cluster
@@ -179,9 +180,8 @@ spec:
           fleet_repo_revision: ${schema.spec.gitops.fleetRepoRevision}
           fleet_repo_secret_key: ${schema.spec.gitops.fleetRepoSecretKey}
           fleet_repo_url: ${schema.spec.gitops.fleetRepoUrl}
-          aws_vpc_id: 
+          aws_vpc_id: ${schema.spec.network.awsVpcID}
           
-
       type: Opaque
       stringData:
         name: ${schema.spec.name}
@@ -203,7 +203,7 @@ spec:
       kind: AccessEntry
       metadata:
         namespace: ${schema.spec.name}
-        name: ${schema.spec.name}-accessentry
+        name: ${schema.spec.name}-accessEntry
       spec:
         clusterName: ${schema.spec.name}
         accessPolicies:
@@ -217,7 +217,7 @@ spec:
       kind: AccessEntry
       metadata:
         namespace: ${schema.spec.name}
-        name: ${schema.spec.name}-accessentryadmin
+        name: ${schema.spec.name}-accessEntryAdmin
       spec:
         clusterName: ${schema.spec.name}
         accessPolicies:
@@ -231,7 +231,7 @@ spec:
       kind: OpenIDConnectProvider
       metadata:
         namespace: ${schema.spec.name}
-        name: ${schema.spec.name}-odic
+        name: ${schema.spec.name}-oidc
       spec:
         url: ${ekscluster.status.identity.oidc.issuer}
         clientIDs:
