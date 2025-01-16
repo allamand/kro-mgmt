@@ -12,18 +12,20 @@ spec:
     spec:
       name: string
       region: string
-      subnets:
-        controlplane:
-          subnet1ID: string
-          subnet2ID: string
-        workers:
-          subnet1ID: string
-          subnet2ID: string
+      network:
+        subnets:
+          controlplane:
+            subnet1ID: string
+            subnet2ID: string
+          workers:
+            subnet1ID: string
+            subnet2ID: string
       accountId: string
       k8sVersion: string
       nodesCount: integer
       adminRoleName: string
       gitops:
+        awsManagementAccount: string | default=""
         addonsRepoBasepath: string | default=""
         addonsRepoPath: string | default="bootstrap"
         addonsRepoRevision: string | default="HEAD"
@@ -101,8 +103,8 @@ spec:
           endpointPrivateAccess: false
           endpointPublicAccess: true
           subnetIDs:
-            - ${schema.spec.subnets.controlplane.subnet1ID}
-            - ${schema.spec.subnets.controlplane.subnet2ID}
+            - ${schema.spec.network.subnets.controlplane.subnet1ID}
+            - ${schema.spec.network.subnets.controlplane.subnet2ID}
         #version: ${schema.spec.k8sVersion} a bug needs to be fixed for this to work
   - id: nodegroup
     template:
@@ -115,8 +117,8 @@ spec:
         name: ${schema.spec.name}-nodegroup
         clusterName: ${schema.spec.name}
         subnets:
-          - ${schema.spec.subnets.workers.subnet1ID}
-          - ${schema.spec.subnets.workers.subnet2ID}
+          - ${schema.spec.network.subnets.workers.subnet1ID}
+          - ${schema.spec.network.subnets.workers.subnet2ID}
         nodeRole: ${nodeRole.status.ackResourceMetadata.arn}
         updateConfig:
           maxUnavailable: 1
@@ -139,7 +141,7 @@ spec:
               {
                 "Effect": "Allow",
                 "Principal": {
-                  "AWS": "arn:aws:iam::382076407153:role/argocd-hub-role"
+                  "AWS": "arn:aws:iam::${schema.spec.awsManagementAccount}:role/argocd-hub-role"
                 },
                 "Action": [
                   "sts:TagSession",
@@ -162,18 +164,23 @@ spec:
         annotations:
           #GitOps Bridge
           accountId: ${schema.spec.accountId}
+          aws_account_id: ${schema.spec.accountId}
           region: ${schema.spec.region}
+          aws_region: ${schema.spec.region}
           oidcProvider: ${ekscluster.status.identity.oidc.issuer}
-          addons_repo_basepath: ${schema.spec.gitops.addonsRepoBasepath}
+          aws_cluster_name: ${schema.spec.name}
+          addons_repo_basepath: ${schema.spec.gitops.addonsRepoBasePath}
           addons_repo_path: ${schema.spec.gitops.addonsRepoPath}
           addons_repo_revision: ${schema.spec.gitops.addonsRepoRevision}
           addons_repo_secret_key: ${schema.spec.gitops.addonsRepoSecretKey}
           addons_repo_url: ${schema.spec.gitops.addonsRepoUrl}
-          fleet_repo_basepath: ${schema.spec.gitops.fleetRepoBasepath}
+          fleet_repo_basepath: ${schema.spec.gitops.fleetRepoBasePath}
           fleet_repo_path: ${schema.spec.gitops.fleetRepoPath}
           fleet_repo_revision: ${schema.spec.gitops.fleetRepoRevision}
           fleet_repo_secret_key: ${schema.spec.gitops.fleetRepoSecretKey}
           fleet_repo_url: ${schema.spec.gitops.fleetRepoUrl}
+          aws_vpc_id: 
+          
 
       type: Opaque
       stringData:
