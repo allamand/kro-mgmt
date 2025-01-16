@@ -13,7 +13,7 @@ spec:
       name: string
       region: string
       network:
-        awsVpcID: string
+        vpcID: string
         subnets:
           controlplane:
             subnet1ID: string
@@ -180,7 +180,7 @@ spec:
           fleet_repo_revision: ${schema.spec.gitops.fleetRepoRevision}
           fleet_repo_secret_key: ${schema.spec.gitops.fleetRepoSecretKey}
           fleet_repo_url: ${schema.spec.gitops.fleetRepoUrl}
-          aws_vpc_id: ${schema.spec.network.awsVpcID}
+          aws_vpc_id: ${schema.spec.network.vpcID}
           
       type: Opaque
       stringData:
