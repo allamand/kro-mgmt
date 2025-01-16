@@ -146,6 +146,7 @@ spec:
         labels:
           argocd.argoproj.io/secret-type: cluster
         annotations:
+          #GitOps Bridge
           accountId: ${schema.spec.accountId}
           region: ${schema.spec.region}
           oidcProvider: ${ekscluster.status.identity.oidc.issuer}

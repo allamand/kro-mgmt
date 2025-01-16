@@ -12,12 +12,13 @@ create_ack_roles() {
 
     # Helper function to generate cross-account policy
     generate_policy() {
+        local service="$1"
         local resource_arns=""
         for account in $ACCOUNT_IDS; do
             if [ -n "$resource_arns" ]; then
                 resource_arns="${resource_arns},"
             fi
-            resource_arns="${resource_arns}\"arn:aws:iam::${account}:role/eks-cluster-mgmt-iam\""
+            resource_arns="${resource_arns}\"arn:aws:iam::${account}:role/eks-cluster-mgmt-$service\""
         done
 
         cat <<EOF
@@ -42,18 +43,6 @@ EOF
     for SERVICE in iam ec2 eks; do
         echo ">>>>>>>>>SERVICE:$SERVICE"
         local ACK_CONTROLLER_IAM_ROLE="ack-${SERVICE}-controller"
-
-        # First, detach any managed policies
-        for policy in $(aws iam list-attached-role-policies --role-name "${ACK_CONTROLLER_IAM_ROLE}" --query 'AttachedPolicies[*].PolicyArn' --output text 2>/dev/null); do
-            aws iam detach-role-policy --role-name "${ACK_CONTROLLER_IAM_ROLE}" --policy-arn "$policy"
-        done
-
-        # Delete any inline policies
-        for policy in $(aws iam list-role-policies --role-name "${ACK_CONTROLLER_IAM_ROLE}" --query 'PolicyNames[*]' --output text 2>/dev/null); do
-            aws iam delete-role-policy --role-name "${ACK_CONTROLLER_IAM_ROLE}" --policy-name "$policy"
-        done
-        
-        aws iam delete-role --role-name "${ACK_CONTROLLER_IAM_ROLE}" 2>/dev/null
         
         local ACK_K8S_NAMESPACE=ack-system
         local ACK_K8S_SERVICE_ACCOUNT_NAME=ack-$SERVICE-controller
@@ -117,7 +106,7 @@ EOF
 
         # Generate and apply cross-account policy
         local CROSS_ACCOUNT_POLICY
-        CROSS_ACCOUNT_POLICY=$(generate_policy)
+        CROSS_ACCOUNT_POLICY=$(generate_policy $SERVICE)
 
         echo -n "Putting cross-account inline policy... "
         aws iam put-role-policy \
