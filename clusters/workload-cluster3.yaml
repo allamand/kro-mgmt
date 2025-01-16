@@ -1,4 +1,4 @@
-apiVersion: kro.run/v1alpha2
+apiVersion: kro.run/v1alpha1
 kind: EksclusterWithVpc
 metadata:
   name: workload-cluster3
