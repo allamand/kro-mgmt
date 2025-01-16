@@ -1,0 +1,89 @@
+apiVersion: kro.run/v1alpha1
+kind: ResourceGroup
+metadata:
+  name: eksclusterwithvpc.kro.run
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  schema:
+    apiVersion: v1alpha2
+    kind: EksclusterWithVpc
+    spec:
+      name: string
+      region: string
+      cidr:
+        vpcCidr: string | default="10.0.0.0/16"
+        publicSubnet1Cidr: string | default="10.0.1.0/24"
+        publicSubnet2Cidr: string | default="10.0.2.0/24"
+        privateSubnet1Cidr: string | default="10.0.11.0/24"
+        privateSubnet2Cidr: string | default="10.0.12.0/24"
+      accountId: string
+      k8sVersion: string
+      nodesCount: integer
+      adminRoleName: string | default="Admin"
+      gitops:
+        addonsRepoBasepath: string | default=""
+        addonsRepoPath: string | default="bootstrap"
+        addonsRepoRevision: string | default="HEAD"
+        addonsRepoSecretKey: string | default="eks-fleet-workshop-gitops-addons"
+        addonsRepoUrl: string | default="https://d1t8il14om2k8l.cloudfront.net/gitea/workshop-user/eks-fleet-workshop-gitops-addons"
+        fleetRepoBasepath: string | default=""
+        fleetRepoPath: string | default="bootstrap"
+        fleetRepoRevision: string | default="HEAD"
+        fleetRepoSecretKey: string | default="eks-fleet-workshop-gitops-fleet"
+        fleetRepoUrl: string | default="https://d1t8il14om2k8l.cloudfront.net/gitea/workshop-user/eks-fleet-workshop-gitops-fleet" 
+  resources:
+  - id: vpc
+    template:
+      apiVersion: kro.run/v1alpha1
+      kind: Vpc
+      metadata:
+        name: ${schema.spec.name}
+        namespace: ${schema.spec.name}
+        annotations:
+          argocd.argoproj.io/tracking-id: clusters:kro.run/Vpc:${schema.spec.name}/${schema.spec.name}
+      spec:
+        name: ${schema.spec.name}
+        region: ${schema.spec.region}
+        cidr:
+          vpcCidr: ${schema.spec.cidr.vpcCidr}
+          publicSubnet1Cidr: ${schema.spec.cidr.publicSubnet1Cidr}
+          publicSubnet2Cidr: ${schema.spec.cidr.publicSubnet2Cidr}
+          privateSubnet1Cidr: ${schema.spec.cidr.privateSubnet1Cidr}
+          privateSubnet2Cidr: ${schema.spec.cidr.privateSubnet2Cidr}
+  - id: eks
+    template:
+      apiVersion: kro.run/v1alpha2
+      kind: EksCluster
+      metadata:
+        name: ${schema.spec.name}
+        namespace: ${schema.spec.name}
+        annotations:
+          argocd.argoproj.io/tracking-id: clusters:kro.run/EksCluster:${schema.spec.name}/${schema.spec.name}                     
+      spec:
+          name: ${schema.spec.name}
+          region: ${schema.spec.region}
+          subnets:
+            controlplane:
+              subnet1ID: ${vpc.status.privateSubnet1ID}
+              subnet2ID: ${vpc.status.privateSubnet2ID}
+            workers:
+              subnet1ID: ${vpc.status.privateSubnet1ID}
+              subnet2ID: ${vpc.status.privateSubnet2ID}
+          accountId: ${schema.spec.accountId}
+          k8sVersion: ${schema.spec.k8sVersion}
+          nodesCount: ${schema.spec.nodesCount}
+          adminRoleName: ${schema.spec.adminRoleName}
+          gitops:
+            addonsRepoBasepath: ${schema.spec.gitops.addonsRepoBasepath}
+            addonsRepoPath: ${schema.spec.gitops.addonsRepoPath}
+            addonsRepoRevision: ${schema.spec.gitops.addonsRepoRevision}
+            addonsRepoSecretKey: ${schema.spec.gitops.addonsRepoSecretKey}
+            addonsRepoUrl: ${schema.spec.gitops.addonsRepoUrl}
+            fleetRepoBasepath: ${schema.spec.gitops.fleetRepoBasepath}
+            fleetRepoPath: ${schema.spec.gitops.fleetRepoPath}
+            fleetRepoRevision: ${schema.spec.gitops.fleetRepoRevision}
+            fleetRepoSecretKey: ${schema.spec.gitops.fleetRepoSecretKey}
+            fleetRepoUrl: ${schema.spec.gitops.fleetRepoUrl}
+
