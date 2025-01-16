@@ -145,6 +145,8 @@ spec:
         namespace: argocd
         labels:
           argocd.argoproj.io/secret-type: cluster
+          #compatible fleet-management
+          fleet_member: spoke
         annotations:
           #GitOps Bridge
           accountId: ${schema.spec.accountId}

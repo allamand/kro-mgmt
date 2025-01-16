@@ -17,29 +17,7 @@ controllers installation) will be automated via the GitOps flow.
 ## Prerequisites
 
 1. AWS account for the management cluster
-2. AWS account for workload clusters; each with the following IAM roles:
 
-   - `eks-cluster-mgmt-ec2`
-   - `eks-cluster-mgmt-eks`
-   - `eks-cluster-mgmt-iam`
-
-   The permissions should be as needed for every controller. Trust policy:
-
-   ```json
-   {
-     "Version": "2012-10-17",
-     "Statement": [
-       {
-         "Effect": "Allow",
-         "Principal": {
-           "AWS": "arn:aws:iam::<mgmt-account-id>:role/ack-<srvc-name>-controller"
-         },
-         "Action": "sts:AssumeRole",
-         "Condition": {}
-       }
-     ]
-   }
-   ```
 
 ## Instructions
 
@@ -51,12 +29,12 @@ controllers installation) will be automated via the GitOps flow.
 ```sh
 export KRO_REPO_URL="https://github.com/awslabs/kro.git"
 export WORKSPACE_PATH=<workspace-path> #the directory where repos will be cloned e.g. ~/environment
-export 382076407153=$(aws sts get-caller-identity --output text --query Account)
-export us-west-2=<region> #e.g. us-west-2
-export kro-mgmt=mgmt
+export ACCOUNT_ID=$(aws sts get-caller-identity --output text --query Account)
+export AWS_REGION=<region> #e.g. us-west-2
+export CLUSTER_NAME=mgmt
 export GITHUB_REPO_NAME=cluster-mgmt
 export ARGOCD_CHART_VERSION=7.5.2
-export 382076407153S="111222333444 222333444555" # list of aws accounts you want to be able to manage from management cluster
+export ACCOUNT_IDS="111222333444 222333444555" # list of aws accounts you want to be able to manage from management cluster
 ```
 
 ### Management cluster
@@ -64,7 +42,7 @@ export 382076407153S="111222333444 222333444555" # list of aws accounts you want
 2. Create an EKS cluster (management cluster)
     You can create it with your prefered method, or use the command below:
     ```bash
-    aws eks create-addon --cluster-name $kro-mgmt --addon-name eks-pod-identity-agent --addon-version v1.3.4-eksbuild.1
+    aws eks create-addon --cluster-name $CLUSTER_NAME --addon-name eks-pod-identity-agent --addon-version v1.3.4-eksbuild.1
     ```
 
 ### Repo
@@ -82,13 +60,13 @@ export 382076407153S="111222333444 222333444555" # list of aws accounts you want
 5. Save the URL of the created repo in an environment variable:
 
     ```sh
-    export https://github.com/allamand/kro-mgmt.git=<repo-url> #e.g. https://github.com/iamahgoub/${GITHUB_REPO_NAME}.git
+    export MY_REPO_URL=<repo-url> #e.g. https://github.com/iamahgoub/${GITHUB_REPO_NAME}.git
     ```
 
 6. Clone the created repo:
 
     ```sh
-    git clone $https://github.com/allamand/kro-mgmt.git $WORKSPACE_PATH/${GITHUB_REPO_NAME}
+    git clone $MY_REPO_URL $WORKSPACE_PATH/${GITHUB_REPO_NAME}
     ```
 
 7. Populate the repo:
@@ -96,11 +74,11 @@ export 382076407153S="111222333444 222333444555" # list of aws accounts you want
     ```sh
     cp -r $WORKSPACE_PATH/kro/examples/eks-cluster-mgmt/* $WORKSPACE_PATH/${GITHUB_REPO_NAME}
 
-    find $WORKSPACE_PATH/${GITHUB_REPO_NAME} -type f -not -path "*/scripts/*" -exec sed -i "s~382076407153~$382076407153~g" {} +
-    find $WORKSPACE_PATH/${GITHUB_REPO_NAME} -type f -not -path "*/scripts/*" -exec sed -i "s~https://github.com/allamand/kro-mgmt.git~$https://github.com/allamand/kro-mgmt.git~g" {} +
-    find $WORKSPACE_PATH/${GITHUB_REPO_NAME} -type f -not -path "*/scripts/*" -exec sed -i "s~us-west-2~$us-west-2~g" {} +
-    find $WORKSPACE_PATH/${GITHUB_REPO_NAME} -type f -not -path "*/scripts/*" -exec sed -i "s~kro-mgmt~$kro-mgmt~g" {} +
-    find $WORKSPACE_PATH/${GITHUB_REPO_NAME} -type f -not -path "*/scripts/*" -exec sed -i "s~oidc.eks.us-west-2.amazonaws.com/id/509522E31117C4C5CAF626FD5669C414~$oidc.eks.us-west-2.amazonaws.com/id/509522E31117C4C5CAF626FD5669C414~g" {} +
+    find $WORKSPACE_PATH/${GITHUB_REPO_NAME} -type f \( -path "*/charts/*" -o -path "*/charts-values/*" -o -path "*/clusters/*" -o -path "*/gitops/*" \) -exec sed -i "s~ACCOUNT_ID~$ACCOUNT_ID~g" {} +
+    find $WORKSPACE_PATH/${GITHUB_REPO_NAME} -type f \( -path "*/charts/*" -o -path "*/charts-values/*" -o -path "*/clusters/*" -o -path "*/gitops/*" \) -exec sed -i "s~MY_REPO_URL~$MY_REPO_URL~g" {} +
+    find $WORKSPACE_PATH/${GITHUB_REPO_NAME} -type f \( -path "*/charts/*" -o -path "*/charts-values/*" -o -path "*/clusters/*" -o -path "*/gitops/*" \) -exec sed -i "s~AWS_REGION~$AWS_REGION~g" {} +
+    find $WORKSPACE_PATH/${GITHUB_REPO_NAME} -type f \( -path "*/charts/*" -o -path "*/charts-values/*" -o -path "*/clusters/*" -o -path "*/gitops/*" \) -exec sed -i "s~CLUSTER_NAME~$CLUSTER_NAME~g" {} +
+    find $WORKSPACE_PATH/${GITHUB_REPO_NAME} -type f \( -path "*/charts/*" -o -path "*/charts-values/*" -o -path "*/clusters/*" -o -path "*/gitops/*" \) -exec sed -i "s~OIDC_PROVIDER~$OIDC_PROVIDER~g" {} +
     ```
 
 8. Push the changes
@@ -110,39 +88,57 @@ export 382076407153S="111222333444 222333444555" # list of aws accounts you want
     git add .
     git commit -m "initial setup"
     git push
-    cd $WORKSPACE_PATH
+    cd $WORKSPACE_PATH/kro
     ```
 
 9. Create IAM OIDC provider for the cluster:
 
     ```sh
-    eksctl utils associate-iam-oidc-provider --cluster $kro-mgmt --approve
+    eksctl utils associate-iam-oidc-provider --cluster $CLUSTER_NAME --approve
     ```
 
 10. Save OIDC provider URL in an environment variable:
 
     ```sh
-    oidc.eks.us-west-2.amazonaws.com/id/509522E31117C4C5CAF626FD5669C414=$(aws eks describe-cluster --name $kro-mgmt --region $us-west-2 --query "cluster.identity.oidc.issuer" --output text | sed -e "s/^https:\/\///")
+    OIDC_PROVIDER=$(aws eks describe-cluster --name $CLUSTER_NAME --region $AWS_REGION --query "cluster.identity.oidc.issuer" --output text | sed -e "s/^https:\/\///")
     ```
 
-1. Install the following ACK controllers on the management cluster:
+11. Install the following ACK controllers on the management cluster:
 
-    * Create IAM Roles and associates with Pod Identity
+    * Create ACK IAM Roles and associates with Pod Identity in Management Account
 
         ```bash
-        ./scripts/create_ack_roles.sh 
+        cd $WORKSPACE_PATH/${GITHUB_REPO_NAME}
+        ./scripts/create_ack_roles.sh
+        cd $WORKSPACE_PATH/kro
         ```
+
+    * Create IAM Roles in workload accounts that will be assumed by ACK controllers in management account. 
+        - `eks-cluster-mgmt-ec2`
+        - `eks-cluster-mgmt-eks`
+        - `eks-cluster-mgmt-iam`
+
+        If you want to create clusters in additionals AWS accounts, you need to properly feel the `$AWS_ACCOUNT_IDS` with all the accounts (including management if you want to deploy cluster there)
+
+        Connect to each individual account, and execute the following, in order to create the IAM roles with appropriate trust policy:
+
+        ```bash
+        # *******CONNECT TO OTHER AWS ACCOUNTS BEFORE******
+        cd $WORKSPACE_PATH/${GITHUB_REPO_NAME}
+        ./scripts/create_ack_workload_roles.sh
+        cd $WORKSPACE_PATH/kro
+        ```
+
+        > **Notes**: If you recreate the ACK roles in management cluster, you'll need to recreate the roles in workloads accounts as the internal id for trust relationship will change.
 
     * Install controllers
         - ACK IAM controller
         - ACK EC2 controller
         - ACK EKS controller
 
-        **NOTES:** 
-        - Make sure to enable CARMv2 by setting the feature flags `ServiceLevelCARM` and `TeamLevelCARM` to true.
-        - Make sure to grant IAM permissions to assume role in workload cluster accounts
+        > **NOTES:** we enable CARMv2 by setting the feature flags `ServiceLevelCARM` and `TeamLevelCARM` to true.
 
-        You can execute the following snippet:
+        You can execute the following snippet to install ACKs controllers:
 
         ```bash
         #Login to public ECR
@@ -153,13 +149,13 @@ export 382076407153S="111222333444 222333444555" # list of aws accounts you want
             export ACK_SYSTEM_NAMESPACE=ack-system
 
             helm install --create-namespace -n $ACK_SYSTEM_NAMESPACE ack-$SERVICE-controller \
-            oci://public.ecr.aws/aws-controllers-k8s/$SERVICE-chart --version=$RELEASE_VERSION --set=aws.region=$us-west-2 \
+            oci://public.ecr.aws/aws-controllers-k8s/$SERVICE-chart --version=$RELEASE_VERSION --set=aws.region=$AWS_REGION \
             --set=featureGates.ServiceLevelCARM=true --set=featureGates.TeamLevelCARM=true
         done
         ```
 
 
-6. Install kro on the management cluster. Please note that this example is
+12. Install kro on the management cluster. Please note that this example is
    tested on 0.1.0.
 
     ```sh
@@ -169,10 +165,11 @@ export 382076407153S="111222333444 222333444555" # list of aws accounts you want
     --create-namespace \
     --version=0.1.0
     ```
-7. Install EKS pod identity add-on (If not already done):
+
+13. Install EKS pod identity add-on (If not already done):
 
     ```sh
-    aws eks create-addon --cluster-name $kro-mgmt --addon-name eks-pod-identity-agent --addon-version v1.0.0-eksbuild.1
+    aws eks create-addon --cluster-name $CLUSTER_NAME --addon-name eks-pod-identity-agent --addon-version v1.0.0-eksbuild.1
     ```
 
 
@@ -237,9 +234,9 @@ export 382076407153S="111222333444 222333444555" # list of aws accounts you want
 
     # Create
     aws iam create-role --role-name "${ROLE_NAME}" --assume-role-policy-document file://argocd-trust-relationship.json --description ""
-    aws iam attach-role-policy --role-name "${ROLE_NAME}" --policy-arn=arn:aws:iam::$382076407153:policy/$POLICY_NAME
+    aws iam attach-role-policy --role-name "${ROLE_NAME}" --policy-arn=arn:aws:iam::$ACCOUNT_ID:policy/$POLICY_NAME
 
-    aws eks create-pod-identity-association --cluster-name $kro-mgmt --role-arn arn:aws:iam::${382076407153}:role/"${ROLE_NAME}" --namespace argocd --service-account argocd-application-controller
+    aws eks create-pod-identity-association --cluster-name $CLUSTER_NAME --role-arn arn:aws:iam::${ACCOUNT_ID}:role/"${ROLE_NAME}" --namespace argocd --service-account argocd-application-controller
     ```
 
 15. Install ArgoCD helm chart:
@@ -252,10 +249,21 @@ export 382076407153S="111222333444 222333444555" # list of aws accounts you want
     --wait
     ```
 
+    ### connect to ArgoCD UI
+
+    Wait few minutes for DNS propagation then:
+
+    ```bash
+    echo "ArgoCD URL: https://$(kubectl get svc argocd-server -n argocd -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+    Username: admin
+    Password: $(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)"
+    ```
+
 ### Bootstrapping
 
-16. Create ArgoCD `Repository` resource that points to `${GITHUB_REPO_NAME}` repo
-    created in an earlier instruction
+16. If using private repo, Create ArgoCD `Repository` resource that points to `${GITHUB_REPO_NAME}` repo created in an earlier instruction
+
+    > If using public github, this is not necessary
 
 
 17. Apply the bootstrap ArgoCD application:
@@ -266,20 +274,32 @@ export 382076407153S="111222333444 222333444555" # list of aws accounts you want
 
 ### Adding workload clusters
 
-18. Add the cluster name and corresponding account number in
-    `charts-values/ack-multi-account/values.yaml`.
+18. Add the cluster name and corresponding account number in `charts-values/ack-multi-account/values.yaml`.
+
 19. Commit/push the changes to Git, then wait for the sync operation to complete by checking ArgoCD UI.
-20. Add a workload cluster by adding a manifest for it under `clusters/`. Refer to `clusters/workload1.yaml` as an example.
+
+20. Add a workload cluster by adding a manifest for it under `clusters/`. Refer to `clusters/workload-cluster1.yaml` as an example.
+
 21. Include the new cluster manifest in `clusters/kustomization.yaml`.
-22. Commit/push the changes to Git, then wait for the sync operation to complete by checking ArgoCD UI. Finally, log on to the workload cluster account to confirm that the cluster is created as expected.
 
-### connect to ArgoCD UI
+22. Commit/push the changes to Git, then wait for the Argo CD sync operation to complete by checking Argo CD UI. Finally, log on to the workload cluster account to confirm that the cluster is created as expected.
 
-```bash
-echo "ArgoCD URL: https://$(kubectl get svc argocd-server -n argocd -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-Username: admin
-Password: $(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)"
-```
+## Troubleshoot
+
+When working with Kro, actually, there is no ownership dependencies created at kubernetes level, that mean you annot easilly see the created resources in Argo CD UI for example.
+
+You may need to start from the high level object, see if there are somme errors, then check manually the status of child objects.
+The common reason for resources not to create would generally be a bad permission from ACK to the targeted account, you can also check the controlers logs to help identify thoses issues
+
+Check logs for controller:
+
+    ```bash
+    kubectl stern -n kro kro
+    ```
+
+    ```bash
+    kubectl stern -n ack-system ack
+    ```
 
 ## Clean-up
 
@@ -305,7 +325,7 @@ aws iam delete-role --role-name argocd-hub-role
 4. Delete ArgoCD IAM policy
 
 ```sh
-aws iam delete-policy --policy-arn arn:aws:iam::$382076407153:policy/argocd-policy
+aws iam delete-policy --policy-arn arn:aws:iam::$ACCOUNT_ID:policy/argocd-policy
 ```
 
 5. Delete ACK controllers and kro
