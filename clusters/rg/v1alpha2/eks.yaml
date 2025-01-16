@@ -203,7 +203,7 @@ spec:
       kind: AccessEntry
       metadata:
         namespace: ${schema.spec.name}
-        name: ${schema.spec.name}-accessEntry
+        name: ${schema.spec.name}-access-entry
       spec:
         clusterName: ${schema.spec.name}
         accessPolicies:
@@ -217,7 +217,7 @@ spec:
       kind: AccessEntry
       metadata:
         namespace: ${schema.spec.name}
-        name: ${schema.spec.name}-accessEntryAdmin
+        name: ${schema.spec.name}-access-entry-admin
       spec:
         clusterName: ${schema.spec.name}
         accessPolicies:
