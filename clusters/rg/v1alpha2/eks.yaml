@@ -179,7 +179,7 @@ spec:
           tenant: ${schema.spec.tenant}
           environment: ${schema.spec.environment}
           aws_cluster_name: ${schema.spec.name}
-          workloads: true
+          workloads: "true"
         annotations:
           #GitOps Bridge
           accountId: ${schema.spec.accountId}

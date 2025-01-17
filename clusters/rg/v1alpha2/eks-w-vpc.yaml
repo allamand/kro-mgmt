@@ -11,8 +11,8 @@ spec:
     kind: EksclusterWithVpc
     spec:
       name: string
-      tenant: string
-      environment: string
+      tenant: string | default="tenant1"
+      environment: string | default="staging"
       region: string
       k8sVersion: string
       accountId: string
