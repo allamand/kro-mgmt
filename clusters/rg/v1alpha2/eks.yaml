@@ -212,7 +212,33 @@ spec:
           workload_repo_url: ${schema.spec.gitops.workloadRepoUrl}
           #Specific for External-DNS
           external_dns_domain_filters: ${schema.spec.domainName}
+          external_dns_namespace: external-dns
           external_dns_policy: sync
+
+          #Generic
+          external_dns_service_account: external-dns-sa
+          external_secrets_namespace: external-secrets
+          external_secrets_namespace_fleet: argocd
+          external_secrets_service_account: external-secrets-sa
+          external_secrets_service_account_fleet: external-secrets-sa
+          aws_load_balancer_controller_namespace: kube-system
+          aws_load_balancer_controller_service_account: aws-load-balancer-controller-sa
+          adot_collector_namespace: adot-collector-kubeprometheus
+          adot_collector_serviceaccount: adot-collector-kubeprometheus
+          amp_endpoint_url: ""
+          # amp_endpoint_url=https://aps-workspaces.eu-west-1.amazonaws.com/workspaces/ws-2ca820a0-a732-4c4b-8f76-3b84e38f8f44/
+          # aws_account_id=382076407153
+          # aws_central_region=eu-west-1
+          # aws_cluster_name=fleet-spoke-prod
+
+
+
+          # fleet_secret_manager_secret_name=fleet-hub-cluster/fleet-spoke-prod
+
+          # karpenter_namespace=kube-system
+          # karpenter_node_iam_role_name=Karpenter-fleet-spoke-prod-20241108160545410700000034
+          # karpenter_service_account=karpenter
+          # karpenter_sqs_queue_name=Karpenter-fleet-spoke-prod
           
       type: Opaque
       stringData:
