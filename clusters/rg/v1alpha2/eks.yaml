@@ -11,12 +11,15 @@ spec:
     kind: EksCluster
     spec:
       name: string
+      tenant: string
+      environment: string
       region: string
       accountId: string
       managementAccountId: string
       k8sVersion: string
       adminRoleName: string
       nodesCount: integer
+      domainName: string
       network:
         vpcID: string
         subnets:
@@ -27,16 +30,27 @@ spec:
             subnet1ID: string
             subnet2ID: string
       gitops:
-        addonsRepoBasePath: string | default=""
-        addonsRepoPath: string | default="bootstrap"
-        addonsRepoRevision: string | default="HEAD"
-        addonsRepoSecretKey: string | default="eks-fleet-workshop-gitops-addons"
-        addonsRepoUrl: string | default="https://d1t8il14om2k8l.cloudfront.net/gitea/workshop-user/eks-fleet-workshop-gitops-addons"
-        fleetRepoBasePath: string | default=""
-        fleetRepoPath: string | default="bootstrap"
-        fleetRepoRevision: string | default="HEAD"
-        fleetRepoSecretKey: string | default="eks-fleet-workshop-gitops-fleet"
-        fleetRepoUrl: string | default="https://d1t8il14om2k8l.cloudfront.net/gitea/workshop-user/eks-fleet-workshop-gitops-fleet"       
+        addonsRepoBasePath: string        
+        addonsRepoPath: string
+        addonsRepoRevision: string
+        addonsRepoSecretKey: string
+        addonsRepoUrl: string
+        fleetRepoBasePath: string
+        fleetRepoPath: string
+        fleetRepoRevision: string
+        fleetRepoSecretKey: string
+        fleetRepoUrl: string
+        platformRepoBasePath: string
+        platformRepoPath: string
+        platformRepoRevision: string
+        platformRepoSecretKey: string
+        platformRepoUrl: string
+        workloadRepoBasePath: string
+        workloadRepoPath: string
+        workloadRepoRevision: string
+        workloadRepoSecretKey: string
+        workloadRepoUrl: string
+
   resources:
   - id: clusterRole
     template:
@@ -162,6 +176,10 @@ spec:
           argocd.argoproj.io/secret-type: cluster
           #compatible fleet-management
           fleet_member: spoke
+          tenant: ${schema.spec.tenant}
+          environment: ${schema.spec.environment}
+          aws_cluster_name: ${schema.spec.name}
+          workloads: true
         annotations:
           #GitOps Bridge
           accountId: ${schema.spec.accountId}
@@ -170,6 +188,8 @@ spec:
           aws_region: ${schema.spec.region}
           oidcProvider: ${ekscluster.status.identity.oidc.issuer}
           aws_cluster_name: ${schema.spec.name}
+          aws_vpc_id: ${schema.spec.network.vpcID}
+          #GitOps Configuration
           addons_repo_basepath: ${schema.spec.gitops.addonsRepoBasePath}
           addons_repo_path: ${schema.spec.gitops.addonsRepoPath}
           addons_repo_revision: ${schema.spec.gitops.addonsRepoRevision}
@@ -180,7 +200,19 @@ spec:
           fleet_repo_revision: ${schema.spec.gitops.fleetRepoRevision}
           fleet_repo_secret_key: ${schema.spec.gitops.fleetRepoSecretKey}
           fleet_repo_url: ${schema.spec.gitops.fleetRepoUrl}
-          aws_vpc_id: ${schema.spec.network.vpcID}
+          platform_repo_basepath: ${schema.spec.gitops.platformRepoBasePath}
+          platform_repo_path: ${schema.spec.gitops.platformRepoPath}
+          platform_repo_revision: ${schema.spec.gitops.platformRepoRevision}
+          platform_repo_secret_key: ${schema.spec.gitops.platformRepoSecretKey}
+          platform_repo_url: ${schema.spec.gitops.platformRepoUrl}
+          workload_repo_basepath: ${schema.spec.gitops.workloadRepoBasePath}
+          workload_repo_path: ${schema.spec.gitops.workloadRepoPath}
+          workload_repo_revision: ${schema.spec.gitops.workloadRepoRevision}
+          workload_repo_secret_key: ${schema.spec.gitops.workloadRepoSecretKey}
+          workload_repo_url: ${schema.spec.gitops.workloadRepoUrl}
+          #Specific for External-DNS
+          external_dns_domain_filters: ${schema.spec.domainName}
+          external_dns_policy: sync
           
       type: Opaque
       stringData:

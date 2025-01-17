@@ -4,12 +4,15 @@ metadata:
   name: workload-cluster3
 spec:
     name: workload-cluster3
+    tenant: tenant1
+    environment: staging
     region: us-west-2
     k8sVersion: '1.30'
     accountId: '798082067117'
     managementAccountId: '382076407153'
     adminRoleName: Admin
     nodesCount: 3
+    domainName: workload-cluster3.rosa.allamand.com
     cidr:
       vpcCidr: "10.0.0.0/16"
       publicSubnet1Cidr: "10.0.1.0/24"
@@ -25,3 +28,13 @@ spec:
         fleetRepoRevision: "HEAD"
         fleetRepoSecretKey: "eks-fleet-workshop-gitops-fleet"
         fleetRepoUrl: "https://d1t8il14om2k8l.cloudfront.net/gitea/workshop-user/eks-fleet-workshop-gitops-fleet"
+        platformRepoBasePath: ""
+        platformRepoPath: "bootstrap"
+        platformRepoRevision: "HEAD"
+        platformRepoSecretKey: "eks-fleet-workshop-gitops-platform"
+        platformRepoUrl: "=https://d1t8il14om2k8l.cloudfront.net/gitea/workshop-user/eks-fleet-workshop-gitops-platform"
+        workloadRepoBasePath: ""
+        workloadRepoPath: ""
+        workloadRepoRevision: "HEAD"
+        workloadRepoSecretKey: "eks-fleet-workshop-gitops-workloads"
+        workloadRepoUrl: "https://d1t8il14om2k8l.cloudfront.net/gitea/workshop-user/eks-fleet-workshop-gitops-apps"
