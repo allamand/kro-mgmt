@@ -8,5 +8,5 @@ data:
   ec2.{{ $key }}: "arn:aws:iam::{{ $value }}:role/eks-cluster-mgmt-ec2"
   eks.{{ $key }}: "arn:aws:iam::{{ $value }}:role/eks-cluster-mgmt-eks"
   iam.{{ $key }}: "arn:aws:iam::{{ $value }}:role/eks-cluster-mgmt-iam"
-  secretmanager.{{ $key }}: "arn:aws:iam::{{ $value }}:role/eks-cluster-mgmt-secretmanager"
+  secretsmanager.{{ $key }}: "arn:aws:iam::{{ $value }}:role/eks-cluster-mgmt-secretsmanager"
   {{- end }}
