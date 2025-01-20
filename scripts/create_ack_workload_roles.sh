@@ -32,7 +32,7 @@ create_ack_workload_roles() {
 EOF
     }
 
-    for SERVICE in iam ec2 eks; do
+    for SERVICE in iam ec2 eks secretsmanager; do
         echo ">>>>>>>>>SERVICE:$SERVICE"
         local ROLE_NAME="eks-cluster-mgmt-${SERVICE}"
 

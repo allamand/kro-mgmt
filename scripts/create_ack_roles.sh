@@ -40,7 +40,7 @@ create_ack_roles() {
 EOF
     }
 
-    for SERVICE in iam ec2 eks; do
+    for SERVICE in iam ec2 eks secretsmanager; do
         echo ">>>>>>>>>SERVICE:$SERVICE"
         local ACK_CONTROLLER_IAM_ROLE="ack-${SERVICE}-controller"
         
