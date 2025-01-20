@@ -186,6 +186,7 @@ spec:
           aws_account_id: ${schema.spec.accountId}
           region: ${schema.spec.region}
           aws_region: ${schema.spec.region}
+          aws_central_region: ${schema.spec.region} # used in fleet-management gitops
           oidcProvider: ${ekscluster.status.identity.oidc.issuer}
           aws_cluster_name: ${schema.spec.name}
           aws_vpc_id: ${schema.spec.network.vpcID}
@@ -227,14 +228,7 @@ spec:
           adot_collector_serviceaccount: adot-collector-kubeprometheus
           amp_endpoint_url: ""
           # amp_endpoint_url=https://aps-workspaces.eu-west-1.amazonaws.com/workspaces/ws-2ca820a0-a732-4c4b-8f76-3b84e38f8f44/
-          # aws_account_id=382076407153
-          # aws_central_region=eu-west-1
-          # aws_cluster_name=fleet-spoke-prod
-
-
-
           # fleet_secret_manager_secret_name=fleet-hub-cluster/fleet-spoke-prod
-
           # karpenter_namespace=kube-system
           # karpenter_node_iam_role_name=Karpenter-fleet-spoke-prod-20241108160545410700000034
           # karpenter_service_account=karpenter
