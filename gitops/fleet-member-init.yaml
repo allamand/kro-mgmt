@@ -9,9 +9,11 @@ spec:
     namespace: argocd
   project: default
   sources:
-    - path: gitops/fleet/bootstrap/control-plane/members-init
-      repoURL: >-
-        https://github.com/aws-samples/fleet-management-on-amazon-eks-workshop
+    - path: bootstrap/control-plane/members-init
+      #path: gitops/fleet/bootstrap/control-plane/members-init
+      ##https://github.com/aws-samples/fleet-management-on-amazon-eks-workshop
+      repoURL: >-        
+        https://d1t8il14om2k8l.cloudfront.net/gitea/workshop-user/eks-fleet-workshop-gitops-fleet
       targetRevision: HEAD
   syncPolicy:
     automated:
