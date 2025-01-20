@@ -150,7 +150,8 @@ spec:
         namespace: ${schema.spec.name}
       spec:
         name: eks-pod-identity-agent
-        addonVersion: v1.3.4-eksbuild.1
+        #addonVersion: v1.3.4-eksbuild.1
+        addonVersion: v1.3.4
         clusterName: ${schema.spec.name}
         podIdentityAssociations:
           - roleARN: ${externalSecretsRole.status.ackResourceMetadata.arn}
