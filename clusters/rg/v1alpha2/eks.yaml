@@ -153,7 +153,7 @@ spec:
         addonVersion: v1.3.4-eksbuild.1
         clusterName: ${schema.spec.name}
         podIdentityAssociations:
-          - roleArn: ${externalSecretsRole.status.ackResourceMetadata.arn}
+          - roleARN: ${externalSecretsRole.status.ackResourceMetadata.arn}
             serviceAccount: external-secrets-sa
   - id: argocdRole
     template:
