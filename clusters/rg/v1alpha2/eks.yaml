@@ -405,7 +405,7 @@ spec:
                 "Action": [
                   "sts:AssumeRole",
                   "sts:TagSession"
-                ],
+                ]
               }
             ]
           }
