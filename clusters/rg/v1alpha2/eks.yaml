@@ -382,46 +382,46 @@ spec:
         thumbprints:
           - '9e99a48a9960b14926bb7f3b02e22da2b0ab7280'
 
-- id: externalSecretsRole
-  template:
-    apiVersion: iam.services.k8s.aws/v1alpha1
-    kind: Role
-    metadata:
-      namespace: argocd
-      name: ${schema.spec.name}-external-secrets-role
-    spec:
-      name: ${schema.spec.name}-external-secrets-role
-      policies:
-        - arn:aws:iam::aws:policy/SecretsManagerReadWrite
-      assumeRolePolicyDocument: |
-        {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "pods.eks.amazonaws.com"
-              },
-              "Action": [
-                "sts:AssumeRole",
-                "sts:TagSession"
-              ],
-            }
-          ]
-        }
+  - id: externalSecretsRole
+    template:
+      apiVersion: iam.services.k8s.aws/v1alpha1
+      kind: Role
+      metadata:
+        namespace: argocd
+        name: ${schema.spec.name}-external-secrets-role
+      spec:
+        name: ${schema.spec.name}-external-secrets-role
+        policies:
+          - arn:aws:iam::aws:policy/SecretsManagerReadWrite
+        assumeRolePolicyDocument: |
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "pods.eks.amazonaws.com"
+                },
+                "Action": [
+                  "sts:AssumeRole",
+                  "sts:TagSession"
+                ],
+              }
+            ]
+          }
 
-- id: externalSecretsAccessEntry
-  template:
-    apiVersion: eks.services.k8s.aws/v1alpha1
-    kind: AccessEntry
-    metadata:
-      namespace: ${schema.spec.name}
-      name: ${schema.spec.name}-external-secrets-access-entry
-    spec:
-      clusterName: ${schema.spec.name}
-      accessPolicies:
-      - accessScope:
-          type: "namespace"
-          namespaces: ["${schema.spec.name}"]
-        policyARN: "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
-      principalARN: "${externalSecretsRole.status.ackResourceMetadata.arn}"
+  - id: externalSecretsAccessEntry
+    template:
+      apiVersion: eks.services.k8s.aws/v1alpha1
+      kind: AccessEntry
+      metadata:
+        namespace: ${schema.spec.name}
+        name: ${schema.spec.name}-external-secrets-access-entry
+      spec:
+        clusterName: ${schema.spec.name}
+        accessPolicies:
+        - accessScope:
+            type: "namespace"
+            namespaces: ["${schema.spec.name}"]
+          policyARN: "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
+        principalARN: "${externalSecretsRole.status.ackResourceMetadata.arn}"
