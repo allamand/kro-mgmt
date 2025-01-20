@@ -152,6 +152,9 @@ spec:
         name: eks-pod-identity-agent
         addonVersion: v1.3.4-eksbuild.1
         clusterName: ${schema.spec.name}
+        podIdentityAssociations:
+          - roleArn: ${externalSecretsRole.status.ackResourceMetadata.arn}
+            serviceAccount: external-secrets-sa
   - id: argocdRole
     template:
       apiVersion: iam.services.k8s.aws/v1alpha1
@@ -421,18 +424,4 @@ spec:
             ]
           }
 
-  - id: externalSecretsAccessEntry
-    template:
-      apiVersion: eks.services.k8s.aws/v1alpha1
-      kind: AccessEntry
-      metadata:
-        namespace: ${schema.spec.name}
-        name: ${schema.spec.name}-external-secrets-access-entry
-      spec:
-        clusterName: ${schema.spec.name}
-        accessPolicies:
-        - accessScope:
-            type: "namespace"
-            namespaces: ["${schema.spec.name}"]
-          policyARN: "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
-        principalARN: "${externalSecretsRole.status.ackResourceMetadata.arn}"
+
