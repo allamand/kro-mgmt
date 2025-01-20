@@ -401,7 +401,7 @@ spec:
       apiVersion: iam.services.k8s.aws/v1alpha1
       kind: Role
       metadata:
-        namespace: argocd
+        namespace: ${schema.spec.name}
         name: ${schema.spec.name}-external-secrets-role
       spec:
         name: ${schema.spec.name}-external-secrets-role
