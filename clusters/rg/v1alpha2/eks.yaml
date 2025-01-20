@@ -141,6 +141,18 @@ spec:
           minSize: 3 #${schema.spec.nodesCount} a bug needs to be fixed for this to work
           maxSize: 3 #${schema.spec.nodesCount} a bug needs to be fixed for this to work
           desiredSize: 3 #${schema.spec.nodesCount} a bug needs to be fixed for this to work
+  - id: podIdentityAddon
+    template:
+      apiVersion: eks.services.k8s.aws/v1alpha1
+      kind: Addon
+      metadata:
+        name: eks-pod-identity-agent
+        namespace: ${schema.spec.name}
+      spec:
+        addonName: eks-pod-identity-agent
+        addonVersion: v1.3.4-eksbuild.1
+        clusterName: ${schema.spec.name}
+        preserveOnDelete: false  
   - id: argocdRole
     template:
       apiVersion: iam.services.k8s.aws/v1alpha1
