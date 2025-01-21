@@ -272,7 +272,7 @@ spec:
       apiVersion: v1
       kind: Secret
       metadata:
-        name: ${schema.spec.name}
+        name: ${schema.spec.name}-for-ack
         namespace: ${schema.spec.name}
 
       type: Opaque
