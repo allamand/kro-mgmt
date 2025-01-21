@@ -33,7 +33,7 @@ spec:
         platformRepoPath: "bootstrap"
         platformRepoRevision: "HEAD"
         platformRepoSecretKey: "eks-fleet-workshop-gitops-platform"
-        platformRepoUrl: "=https://d1t8il14om2k8l.cloudfront.net/gitea/workshop-user/eks-fleet-workshop-gitops-platform"
+        platformRepoUrl: "https://d1t8il14om2k8l.cloudfront.net/gitea/workshop-user/eks-fleet-workshop-gitops-platform"
         workloadRepoBasePath: ""
         workloadRepoPath: ""
         workloadRepoRevision: "HEAD"
