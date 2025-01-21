@@ -272,6 +272,7 @@ spec:
       kind: Secret
       metadata:
         name: ${schema.spec.name}-argocd-secret
+        namespace: ${schema.spec.name}
       spec:
         name: ${schema.spec.name}-argocd-secret
         description: "ArgoCD cluster configuration secret for ${schema.spec.name}"
