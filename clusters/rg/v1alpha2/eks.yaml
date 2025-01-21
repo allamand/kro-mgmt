@@ -19,7 +19,7 @@ spec:
       k8sVersion: string
       adminRoleName: string
       nodesCount: integer
-      fleetSecretManagerSecretName: string
+      fleetSecretManagerSecretName2: string
       domainName: string
       network:
         vpcID: string
@@ -245,7 +245,7 @@ spec:
           amp_endpoint_url: ""
           # amp_endpoint_url=https://aps-workspaces.eu-west-1.amazonaws.com/workspaces/ws-2ca820a0-a732-4c4b-8f76-3b84e38f8f44/
           
-          fleet_secret_manager_secret_name: ${schema.spec.fleetSecretManagerSecretName}
+          fleet_secret_manager_secret_name: ${schema.spec.fleetSecretManagerSecretName2}
           
           # karpenter_namespace=kube-system
           # karpenter_node_iam_role_name=Karpenter-fleet-spoke-prod-20241108160545410700000034
