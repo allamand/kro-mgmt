@@ -42,7 +42,7 @@ spec:
         platformRepoPath: string | default="bootstrap"
         platformRepoRevision: string | default="HEAD"
         platformRepoSecretKey: string | default="eks-fleet-workshop-gitops-platform"
-        platformRepoUrl: string | default="=https://d1t8il14om2k8l.cloudfront.net/gitea/workshop-user/eks-fleet-workshop-gitops-platform"
+        platformRepoUrl: string | default="https://d1t8il14om2k8l.cloudfront.net/gitea/workshop-user/eks-fleet-workshop-gitops-platform"
         workloadRepoBasePath: string | default=""
         workloadRepoPath: string | default=""
         workloadRepoRevision: string | default="HEAD"
