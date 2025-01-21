@@ -19,6 +19,7 @@ spec:
       managementAccountId: string
       adminRoleName: string | default="Admin"
       nodesCount: integer
+      fleetSecretManagerSecretName: string
       domainName: string
       cidr:
         vpcCidr: string | default="10.0.0.0/16"
@@ -86,6 +87,7 @@ spec:
           k8sVersion: ${schema.spec.k8sVersion}
           adminRoleName: ${schema.spec.adminRoleName}
           nodesCount: ${schema.spec.nodesCount}
+          fleetSecretManagerSecretName: ${schema.spec.fleetSecretManagerSecretName}
           domainName: ${schema.spec.domainName}
           network:
             vpcID: ${vpc.status.vpcID}

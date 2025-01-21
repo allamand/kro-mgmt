@@ -12,6 +12,7 @@ spec:
     managementAccountId: '382076407153'
     adminRoleName: Admin
     nodesCount: 3
+    fleetSecretManagerSecretName: workload-cluster3-argocd-secret
     domainName: workload-cluster3.rosa.allamand.com
     cidr:
       vpcCidr: "10.0.0.0/16"
