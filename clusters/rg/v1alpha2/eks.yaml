@@ -246,7 +246,7 @@ spec:
           # amp_endpoint_url=https://aps-workspaces.eu-west-1.amazonaws.com/workspaces/ws-2ca820a0-a732-4c4b-8f76-3b84e38f8f44/
           
           #fleet_secret_manager_secret_name: ${schema.spec.fleetSecretManagerSecretName2}
-          fleet_secret_manager_secret_name: "workload-cluster3-argocd-secret"
+          fleet_secret_manager_secret_name: "workload-cluster3-argocd-secret2"
 
           # karpenter_namespace=kube-system
           # karpenter_node_iam_role_name=Karpenter-fleet-spoke-prod-20241108160545410700000034
@@ -352,7 +352,7 @@ spec:
         name: ${schema.spec.name}-argocd-secret
         namespace: ${schema.spec.name}
       spec:
-        name: ${schema.spec.name}-argocd-secret
+        name: ${schema.spec.name}-argocd-secret2
         description: "ArgoCD cluster configuration secret for ${schema.spec.name}"
         tags:
           - key: fleet_member
