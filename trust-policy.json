@@ -1,0 +1,15 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::382076407153:role/argocd-hub-role"
+      },
+      "Action": [
+        "sts:TagSession",
+        "sts:AssumeRole"
+      ]
+    }
+  ]
+}

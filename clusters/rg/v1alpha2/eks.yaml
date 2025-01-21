@@ -279,11 +279,12 @@ spec:
       stringData:
         name: ${schema.spec.name}
         server: "${ekscluster.status.endpoint}"
+        # use k8sVersion need to fix bug, use 1.30 for now
         config: |
           {
             "addons": {
               "aws_cluster_name": "${schema.spec.name}",
-              "kubernetes_version": "${schema.spec.k8sVersion}"
+              "kubernetes_version": "1.30"
             },
             "config": {
               "awsAuthConfig": {
