@@ -2,3 +2,6 @@ cluster3
 test-secret.yaml
 cluster1
 .vscode
+secret.yaml
+secret3.yaml
+secret-cluster3.yaml

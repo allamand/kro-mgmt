@@ -246,7 +246,7 @@ spec:
           # amp_endpoint_url=https://aps-workspaces.eu-west-1.amazonaws.com/workspaces/ws-2ca820a0-a732-4c4b-8f76-3b84e38f8f44/
           
           #fleet_secret_manager_secret_name: ${schema.spec.fleetSecretManagerSecretName2}
-          fleet_secret_manager_secret_name: "workload-cluster3-argocd-secret4"
+          fleet_secret_manager_secret_name: "workload-cluster3-argocd-secret5"
 
           # karpenter_namespace=kube-system
           # karpenter_node_iam_role_name=Karpenter-fleet-spoke-prod-20241108160545410700000034
@@ -340,7 +340,7 @@ spec:
               "adot_collector_namespace": "adot-collector-kubeprometheus",
               "adot_collector_serviceaccount": "adot-collector-kubeprometheus",
               "amp_endpoint_url": "",
-              "fleet_secret_manager_secret_name": "workload-cluster3-argocd-secret4"
+              "fleet_secret_manager_secret_name": "workload-cluster3-argocd-secret5"
             },
             "server": "${ekscluster.status.endpoint}"
           }
@@ -350,10 +350,10 @@ spec:
       apiVersion: secretsmanager.services.k8s.aws/v1alpha1
       kind: Secret
       metadata:
-        name: ${schema.spec.name}-argocd-secret4
+        name: ${schema.spec.name}-argocd-secret5
         namespace: ${schema.spec.name}
       spec:
-        name: ${schema.spec.name}-argocd-secret4
+        name: ${schema.spec.name}-argocd-secret5
         description: "ArgoCD cluster configuration secret for ${schema.spec.name}"
         tags:
           - key: fleet_member
