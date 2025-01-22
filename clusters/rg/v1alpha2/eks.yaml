@@ -472,7 +472,7 @@ spec:
         name: ${schema.spec.name}-aws-load-balancer-controller-role
         policyRefs:
           - from:
-              name: {{ .Values.clusterName}}-aws-load-balancer-controller-policy
+              name: ${schema.spec.name}-aws-load-balancer-controller-policy
         assumeRolePolicyDocument: |
           {
               "Version": "2012-10-17",
