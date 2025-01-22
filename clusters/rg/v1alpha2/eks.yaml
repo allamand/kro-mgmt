@@ -498,7 +498,7 @@ spec:
         name: ${schema.spec.name}-aws-load-balancer-controller-policy
       spec:
         name: ${schema.spec.name}-aws-load-balancer-controller-policy
-        document: |
+        policyDocument: |
           {
               "Statement": [
                   {
