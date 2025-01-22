@@ -470,9 +470,35 @@ spec:
         name: ${schema.spec.name}-aws-load-balancer-controller-role
       spec:
         name: ${schema.spec.name}-aws-load-balancer-controller-role
-        inlinePolicies:
-          - name: AWSLoadBalancerControllerPolicy
-            policy: |
+        policies:
+        - arn:aws:iam::aws:policy/AWSLoadBalancerControllerPolicy
+        assumeRolePolicyDocument: |
+          {
+              "Version": "2012-10-17",
+              "Statement": [
+                  {
+                      "Effect": "Allow",
+                      "Principal": {
+                          "Service": "pods.eks.amazonaws.com"
+                      },
+                      "Action": [
+                          "sts:TagSession",
+                          "sts:AssumeRole"
+                      ]
+                  }
+              ]
+          }
+
+  - id: awsLoadBalancerControllerPolicy
+    template:
+      apiVersion: iam.services.k8s.aws/v1alpha1
+      kind: Policy
+      metadata:
+        namespace: ${schema.spec.name}
+        name: ${schema.spec.name}-aws-load-balancer-controller-policy
+      spec:
+        name: ${schema.spec.name}-aws-load-balancer-controller-policy
+        document: |
               {
                   "Statement": [
                       {
