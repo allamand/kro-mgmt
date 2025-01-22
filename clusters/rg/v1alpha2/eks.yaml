@@ -739,7 +739,7 @@ spec:
         namespace: ${schema.spec.name}
       spec:
         clusterName: ${schema.spec.name}
-        namespace: argocd
+        namespace: kube-system
         roleARN: ${awsLoadBalancerControllerRole.status.ackResourceMetadata.arn}
         serviceAccount: aws-load-balancer-controller-sa
         tags:
