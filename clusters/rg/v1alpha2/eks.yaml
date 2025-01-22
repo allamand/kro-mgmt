@@ -470,8 +470,9 @@ spec:
         name: ${schema.spec.name}-aws-load-balancer-controller-role
       spec:
         name: ${schema.spec.name}-aws-load-balancer-controller-role
-        policies:
-        - arn:aws:iam::aws:policy/AWSLoadBalancerControllerPolicy
+        policyRefs:
+          - from:
+              name: {{ .Values.clusterName}}-aws-load-balancer-controller-policy
         assumeRolePolicyDocument: |
           {
               "Version": "2012-10-17",
