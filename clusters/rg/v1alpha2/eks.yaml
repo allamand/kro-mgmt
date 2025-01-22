@@ -139,9 +139,9 @@ spec:
         updateConfig:
           maxUnavailable: 1
         scalingConfig:
-          minSize: 3 #${schema.spec.nodesCount} a bug needs to be fixed for this to work
-          maxSize: 3 #${schema.spec.nodesCount} a bug needs to be fixed for this to work
-          desiredSize: 3 #${schema.spec.nodesCount} a bug needs to be fixed for this to work
+          minSize: 6 #${schema.spec.nodesCount} a bug needs to be fixed for this to work
+          maxSize: 6 #${schema.spec.nodesCount} a bug needs to be fixed for this to work
+          desiredSize: 6 #${schema.spec.nodesCount} a bug needs to be fixed for this to work
   - id: podIdentityAddon
     template:
       apiVersion: eks.services.k8s.aws/v1alpha1
