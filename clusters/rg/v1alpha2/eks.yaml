@@ -391,7 +391,7 @@ spec:
           clusterName: ${schema.spec.name}
           accessPolicies:
             - accessScope:
-              type: "cluster"
+              # type: "cluster"
               policyARN: "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
           principalARN: "${argocdRole.status.ackResourceMetadata.arn}"
     - id: accessEntryAdmin
@@ -405,7 +405,7 @@ spec:
           clusterName: ${schema.spec.name}
           accessPolicies:
             - accessScope:
-              type: "cluster"
+              # type: "cluster"
               policyARN: "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
           principalARN: "arn:aws:iam::${schema.spec.accountId}:role/${schema.spec.adminRoleName}"
     - id: oidcProvider
