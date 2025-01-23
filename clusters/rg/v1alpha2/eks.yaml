@@ -801,48 +801,48 @@ spec:
     #           ]
     #         }
 
-    - id: externalDnsRole
-      # dependsOn:
-      #   - externalDnsPolicy    
-      template:
-        apiVersion: iam.services.k8s.aws/v1alpha1
-        kind: Role
-        metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-external-dns-role
-        spec:
-          name: ${schema.spec.name}-external-dns-role
-          policyRefs:
-            - from:
-                name: ${schema.spec.name}-external-dns-policy
-          assumeRolePolicyDocument: |
-            {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Effect": "Allow",
-                  "Principal": {
-                    "Service": "pods.eks.amazonaws.com"
-                  },
-                  "Action": [
-                    "sts:AssumeRole",
-                    "sts:TagSession"
-                  ]
-                }
-              ]
-            }
+    # - id: externalDnsRole
+    #   # dependsOn:
+    #   #   - externalDnsPolicy    
+    #   template:
+    #     apiVersion: iam.services.k8s.aws/v1alpha1
+    #     kind: Role
+    #     metadata:
+    #       namespace: ${schema.spec.name}
+    #       name: ${schema.spec.name}-external-dns-role
+    #     spec:
+    #       name: ${schema.spec.name}-external-dns-role
+    #       policyRefs:
+    #         - from:
+    #             name: ${schema.spec.name}-external-dns-policy
+    #       assumeRolePolicyDocument: |
+    #         {
+    #           "Version": "2012-10-17",
+    #           "Statement": [
+    #             {
+    #               "Effect": "Allow",
+    #               "Principal": {
+    #                 "Service": "pods.eks.amazonaws.com"
+    #               },
+    #               "Action": [
+    #                 "sts:AssumeRole",
+    #                 "sts:TagSession"
+    #               ]
+    #             }
+    #           ]
+    #         }
 
-    - id: externalDnsPodIdentity
-      # dependsOn:
-      #   - externalDnsRole    
-      template:
-        apiVersion: eks.services.k8s.aws/v1alpha1
-        kind: PodIdentityAssociation
-        metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-external-dns
-        spec:
-          clusterName: ${schema.spec.name}
-          namespace: external-dns
-          roleARN: ${externalDnsRole.status.ackResourceMetadata.arn}
-          serviceAccount: external-dns
+    # - id: externalDnsPodIdentity
+    #   # dependsOn:
+    #   #   - externalDnsRole    
+    #   template:
+    #     apiVersion: eks.services.k8s.aws/v1alpha1
+    #     kind: PodIdentityAssociation
+    #     metadata:
+    #       namespace: ${schema.spec.name}
+    #       name: ${schema.spec.name}-external-dns
+    #     spec:
+    #       clusterName: ${schema.spec.name}
+    #       namespace: external-dns
+    #       roleARN: ${externalDnsRole.status.ackResourceMetadata.arn}
+    #       serviceAccount: external-dns
