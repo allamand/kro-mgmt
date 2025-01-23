@@ -766,40 +766,40 @@ spec:
     ###########################################################
     # External DNS AddOn
     ###########################################################
-    - id: externalDnsPolicy
-      template:
-        apiVersion: iam.services.k8s.aws/v1alpha1
-        kind: Policy
-        metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-external-dns-policy
-        spec:
-          name: ${schema.spec.name}-external-dns-policy
-          policyDocument: |
-            {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "route53:ChangeResourceRecordSets"
-                  ],
-                  "Resource": [
-                    "arn:aws:route53:::hostedzone/*"
-                  ]
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "route53:ListHostedZones",
-                    "route53:ListResourceRecordSets"
-                  ],
-                  "Resource": [
-                    "*"
-                  ]
-                }
-              ]
-            }
+    # - id: externalDnsPolicy
+    #   template:
+    #     apiVersion: iam.services.k8s.aws/v1alpha1
+    #     kind: Policy
+    #     metadata:
+    #       namespace: ${schema.spec.name}
+    #       name: ${schema.spec.name}-external-dns-policy
+    #     spec:
+    #       name: ${schema.spec.name}-external-dns-policy
+    #       policyDocument: |
+    #         {
+    #           "Version": "2012-10-17",
+    #           "Statement": [
+    #             {
+    #               "Effect": "Allow",
+    #               "Action": [
+    #                 "route53:ChangeResourceRecordSets"
+    #               ],
+    #               "Resource": [
+    #                 "arn:aws:route53:::hostedzone/*"
+    #               ]
+    #             },
+    #             {
+    #               "Effect": "Allow",
+    #               "Action": [
+    #                 "route53:ListHostedZones",
+    #                 "route53:ListResourceRecordSets"
+    #               ],
+    #               "Resource": [
+    #                 "*"
+    #               ]
+    #             }
+    #           ]
+    #         }
 
     - id: externalDnsRole
       # dependsOn:
