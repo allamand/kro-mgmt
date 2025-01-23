@@ -802,6 +802,8 @@ spec:
             }
 
     - id: externalDnsRole
+      dependsOn:
+        - externalDnsPolicy    
       template:
         apiVersion: iam.services.k8s.aws/v1alpha1
         kind: Role
@@ -831,6 +833,8 @@ spec:
             }
 
     - id: externalDnsPodIdentity
+      dependsOn:
+        - externalDnsRole    
       template:
         apiVersion: eks.services.k8s.aws/v1alpha1
         kind: PodIdentityAssociation
