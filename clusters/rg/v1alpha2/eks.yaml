@@ -1,3 +1,4 @@
+# yamllint disable rule:line-length
 ---
 apiVersion: kro.run/v1alpha1
 kind: ResourceGroup
@@ -68,7 +69,7 @@ spec:
         spec:
           name: ${schema.spec.name}-cluster-role
           policies:
-          - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+            - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
           assumeRolePolicyDocument: |
             {
               "Version": "2012-10-17",
@@ -92,9 +93,9 @@ spec:
         spec:
           name: ${schema.spec.name}-cluster-node-role
           policies:
-          - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
-          - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
-          - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+            - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+            - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+            - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
           assumeRolePolicyDocument: |
             {
               "Version": "2012-10-17",
@@ -108,8 +109,8 @@ spec:
                 }
               ]
             }
-    # https://aws-controllers-k8s.github.io/community/reference/eks/v1alpha1/cluster/          
-    - id: ekscluster 
+    # https://aws-controllers-k8s.github.io/community/reference/eks/v1alpha1/cluster/
+    - id: ekscluster
       template:
         apiVersion: eks.services.k8s.aws/v1alpha1
         kind: Cluster
@@ -119,6 +120,7 @@ spec:
         spec:
           name: ${schema.spec.name}
           roleARN: ${clusterRole.status.ackResourceMetadata.arn}
+          # version: ${schema.spec.k8sVersion} a bug needs to be fixed for this to work
           accessConfig:
             authenticationMode: "API_AND_CONFIG_MAP"
           resourcesVPCConfig:
@@ -127,7 +129,6 @@ spec:
             subnetIDs:
               - ${schema.spec.network.subnets.controlplane.subnet1ID}
               - ${schema.spec.network.subnets.controlplane.subnet2ID}
-          #version: ${schema.spec.k8sVersion} a bug needs to be fixed for this to work
     - id: nodegroup
       template:
         apiVersion: eks.services.k8s.aws/v1alpha1
@@ -145,9 +146,9 @@ spec:
           updateConfig:
             maxUnavailable: 1
           scalingConfig:
-            minSize: 6 #${schema.spec.nodesCount} a bug needs to be fixed for this to work
-            maxSize: 6 #${schema.spec.nodesCount} a bug needs to be fixed for this to work
-            desiredSize: 6 #${schema.spec.nodesCount} a bug needs to be fixed for this to work
+            minSize: 6      # ${schema.spec.nodesCount} a bug needs to be fixed for this to work
+            maxSize: 6      # ${schema.spec.nodesCount} a bug needs to be fixed for this to work
+            desiredSize: 6  # ${schema.spec.nodesCount} a bug needs to be fixed for this to work
     - id: podIdentityAddon
       template:
         apiVersion: eks.services.k8s.aws/v1alpha1
@@ -196,23 +197,23 @@ spec:
           namespace: argocd
           labels:
             argocd.argoproj.io/secret-type: cluster
-            #compatible fleet-management
+            # compatible fleet-management
             fleet_member: spoke
             tenant: ${schema.spec.tenant}
             environment: ${schema.spec.environment}
             aws_cluster_name: ${schema.spec.name}
             workloads: "true"
           annotations:
-            #GitOps Bridge
+            # GitOps Bridge
             accountId: ${schema.spec.accountId}
             aws_account_id: ${schema.spec.accountId}
             region: ${schema.spec.region}
             aws_region: ${schema.spec.region}
-            aws_central_region: ${schema.spec.region} # used in fleet-management gitops
+            aws_central_region: ${schema.spec.region}   # used in fleet-management gitops
             oidcProvider: ${ekscluster.status.identity.oidc.issuer}
             aws_cluster_name: ${schema.spec.name}
             aws_vpc_id: ${schema.spec.network.vpcID}
-            #GitOps Configuration
+            # GitOps Configuration
             addons_repo_basepath: ${schema.spec.gitops.addonsRepoBasePath}
             addons_repo_path: ${schema.spec.gitops.addonsRepoPath}
             addons_repo_revision: ${schema.spec.gitops.addonsRepoRevision}
@@ -233,12 +234,12 @@ spec:
             workload_repo_revision: ${schema.spec.gitops.workloadRepoRevision}
             workload_repo_secret_key: ${schema.spec.gitops.workloadRepoSecretKey}
             workload_repo_url: ${schema.spec.gitops.workloadRepoUrl}
-            #Specific for External-DNS
+            # Specific for External-DNS
             external_dns_domain_filters: ${schema.spec.domainName}
             external_dns_namespace: external-dns
             external_dns_policy: sync
 
-            #Generic
+            # Generic
             external_dns_service_account: external-dns-sa
             external_secrets_namespace: external-secrets
             external_secrets_namespace_fleet: argocd
@@ -250,15 +251,15 @@ spec:
             adot_collector_serviceaccount: adot-collector-kubeprometheus
             amp_endpoint_url: ""
             # amp_endpoint_url=https://aps-workspaces.eu-west-1.amazonaws.com/workspaces/ws-2ca820a0-a732-4c4b-8f76-3b84e38f8f44/
-            
-            #fleet_secret_manager_secret_name: ${schema.spec.fleetSecretManagerSecretName2}
+
+            # fleet_secret_manager_secret_name: ${schema.spec.fleetSecretManagerSecretName2}
             fleet_secret_manager_secret_name: "workload-cluster3-argocd-secret5"
 
             # karpenter_namespace=kube-system
             # karpenter_node_iam_role_name=Karpenter-fleet-spoke-prod-20241108160545410700000034
             # karpenter_service_account=karpenter
             # karpenter_sqs_queue_name=Karpenter-fleet-spoke-prod
-            
+
         type: Opaque
         stringData:
           name: ${schema.spec.name}
@@ -314,7 +315,7 @@ spec:
                 "aws_cluster_name": "${schema.spec.name}",
                 "aws_vpc_id": "${schema.spec.network.vpcID}",
                 "addons_repo_basepath": "",
-                "addons_repo_path": "${schema.spec.gitops.addonsRepoPath}",              
+                "addons_repo_path": "${schema.spec.gitops.addonsRepoPath}",
                 "addons_repo_revision": "${schema.spec.gitops.addonsRepoRevision}",
                 "addons_repo_secret_key": "${schema.spec.gitops.addonsRepoSecretKey}",
                 "addons_repo_url": "${schema.spec.gitops.addonsRepoUrl}",
@@ -350,7 +351,7 @@ spec:
               },
               "server": "${ekscluster.status.endpoint}"
             }
-    
+
     - id: argocdAWSSecret
       template:
         apiVersion: secretsmanager.services.k8s.aws/v1alpha1
@@ -374,7 +375,7 @@ spec:
               value: "true"
             - key: argocd.argoproj.io/secret-type
               value: cluster
-          secretString: 
+          secretString:
             key: "config"
             name: ${schema.spec.name}-for-ack
             namespace: ${schema.spec.name}
@@ -389,9 +390,9 @@ spec:
         spec:
           clusterName: ${schema.spec.name}
           accessPolicies:
-          - accessScope:
+            - accessScope:
               type: "cluster"
-            policyARN: "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+              policyARN: "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
           principalARN: "${argocdRole.status.ackResourceMetadata.arn}"
     - id: accessEntryAdmin
       template:
@@ -403,10 +404,10 @@ spec:
         spec:
           clusterName: ${schema.spec.name}
           accessPolicies:
-          - accessScope:
+            - accessScope:
               type: "cluster"
-            policyARN: "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-          principalARN: "arn:aws:iam::${schema.spec.accountId}:role/${schema.spec.adminRoleName}"       
+              policyARN: "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          principalARN: "arn:aws:iam::${schema.spec.accountId}:role/${schema.spec.adminRoleName}"
     - id: oidcProvider
       template:
         apiVersion: iam.services.k8s.aws/v1alpha1
@@ -740,7 +741,7 @@ spec:
                     }
                 ],
                 "Version": "2012-10-17"
-            }            
+            }
 
     - id: awsLoadBalancerControllerPodIdentityAssociation
       template:
@@ -764,39 +765,39 @@ spec:
     # External DNS AddOn
     ###########################################################
     - id: externalDnsPolicy
-        template:
-          apiVersion: iam.services.k8s.aws/v1alpha1
-          kind: Policy
-          metadata:
-            namespace: ${schema.spec.name}
-            name: ${schema.spec.name}-external-dns-policy
-          spec:
-            name: ${schema.spec.name}-external-dns-policy
-            policyDocument: |
-              {
-                "Version": "2012-10-17",
-                "Statement": [
-                  {
-                    "Effect": "Allow",
-                    "Action": [
-                      "route53:ChangeResourceRecordSets"
-                    ],
-                    "Resource": [
-                      "arn:aws:route53:::hostedzone/*"
-                    ]
-                  },
-                  {
-                    "Effect": "Allow",
-                    "Action": [
-                      "route53:ListHostedZones",
-                      "route53:ListResourceRecordSets"
-                    ],
-                    "Resource": [
-                      "*"
-                    ]
-                  }
-                ]
-              }
+      template:
+        apiVersion: iam.services.k8s.aws/v1alpha1
+        kind: Policy
+        metadata:
+          namespace: ${schema.spec.name}
+          name: ${schema.spec.name}-external-dns-policy
+        spec:
+          name: ${schema.spec.name}-external-dns-policy
+          policyDocument: |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "route53:ChangeResourceRecordSets"
+                  ],
+                  "Resource": [
+                    "arn:aws:route53:::hostedzone/*"
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "route53:ListHostedZones",
+                    "route53:ListResourceRecordSets"
+                  ],
+                  "Resource": [
+                    "*"
+                  ]
+                }
+              ]
+            }
 
     - id: externalDnsRole
       template:
