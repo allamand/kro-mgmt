@@ -53,6 +53,10 @@ spec:
         workloadRepoUrl: string
 
   resources:
+
+###########################################################
+# EKS Cluster
+###########################################################
   - id: clusterRole
     template:
       apiVersion: iam.services.k8s.aws/v1alpha1
@@ -152,11 +156,11 @@ spec:
       spec:
         name: eks-pod-identity-agent
         addonVersion: v1.3.4-eksbuild.1
-        #addonVersion: v1.3.4
         clusterName: ${schema.spec.name}
-        #podIdentityAssociations:
-        #  - roleARN: ${externalSecretsRole.status.ackResourceMetadata.arn}
-        #    serviceAccount: external-secrets-sa
+
+###########################################################
+# ArgoCD Integration
+###########################################################
   - id: argocdRole
     template:
       apiVersion: iam.services.k8s.aws/v1alpha1
@@ -415,7 +419,10 @@ spec:
         thumbprints:
           - '9e99a48a9960b14926bb7f3b02e22da2b0ab7280'
 
-# External Secrets
+
+###########################################################
+# External Secrets AddOn
+###########################################################
   - id: externalSecretsRole
     template:
       apiVersion: iam.services.k8s.aws/v1alpha1
@@ -460,7 +467,9 @@ spec:
           managedBy: ACK
           application: external-secrets
 
+###########################################################
 # load balancer controller
+###########################################################
   - id: awsLoadBalancerControllerRole
     template:
       apiVersion: iam.services.k8s.aws/v1alpha1
@@ -747,3 +756,84 @@ spec:
           environment: ${schema.spec.environment}
           managedBy: ACK
           application: aws-load-balancer-controller
+
+
+###########################################################
+# External DNS AddOn
+###########################################################
+
+- id: externalDnsPolicy
+    template:
+      apiVersion: iam.services.k8s.aws/v1alpha1
+      kind: Policy
+      metadata:
+        namespace: ${schema.spec.name}
+        name: ${schema.spec.name}-external-dns-policy
+      spec:
+        policyDocument: |
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "route53:ChangeResourceRecordSets"
+                ],
+                "Resource": [
+                  "arn:aws:route53:::hostedzone/*"
+                ]
+              },
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "route53:ListHostedZones",
+                  "route53:ListResourceRecordSets"
+                ],
+                "Resource": [
+                  "*"
+                ]
+              }
+            ]
+          }
+
+  - id: externalDnsRole
+    template:
+      apiVersion: iam.services.k8s.aws/v1alpha1
+      kind: Role
+      metadata:
+        namespace: ${schema.spec.name}
+        name: ${schema.spec.name}-external-dns-role
+      spec:
+        name: ${schema.spec.name}-external-dns-role
+        policyRefs:
+          - from:
+              name: ${schema.spec.name}-external-dns-policy
+        assumeRolePolicyDocument: |
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "pods.eks.amazonaws.com"
+                },
+                "Action": [
+                  "sts:AssumeRole",
+                  "sts:TagSession"
+                ]
+              }
+            ]
+          }
+
+  - id: externalDnsPodIdentity
+    template:
+      apiVersion: eks.services.k8s.aws/v1alpha1
+      kind: PodIdentityAssociation
+      metadata:
+        namespace: ${schema.spec.name}
+        name: ${schema.spec.name}-external-dns
+      spec:
+        clusterName: ${schema.spec.name}
+        namespace: external-dns
+        roleARN: ${externalDnsRole.status.ackResourceMetadata.arn}
+        serviceAccount: external-dns
