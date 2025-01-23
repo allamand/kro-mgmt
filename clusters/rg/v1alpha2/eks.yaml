@@ -770,6 +770,7 @@ spec:
         namespace: ${schema.spec.name}
         name: ${schema.spec.name}-external-dns-policy
       spec:
+        name: ${schema.spec.name}-external-dns-policy
         policyDocument: |
           {
             "Version": "2012-10-17",
