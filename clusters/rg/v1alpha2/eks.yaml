@@ -1,3 +1,4 @@
+---
 apiVersion: kro.run/v1alpha1
 kind: ResourceGroup
 metadata:
@@ -31,7 +32,7 @@ spec:
             subnet1ID: string
             subnet2ID: string
       gitops:
-        addonsRepoBasePath: string      
+        addonsRepoBasePath: string
         addonsRepoPath: string
         addonsRepoRevision: string
         addonsRepoSecretKey: string
@@ -54,245 +55,216 @@ spec:
 
   resources:
 
-###########################################################
-# EKS Cluster
-###########################################################
-  - id: clusterRole
-    template:
-      apiVersion: iam.services.k8s.aws/v1alpha1
-      kind: Role
-      metadata:
-        namespace: ${schema.spec.name}
-        name: ${schema.spec.name}-cluster-role
-      spec:
-        name: ${schema.spec.name}-cluster-role
-        policies:
-        - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
-        assumeRolePolicyDocument: |
-          {
-            "Version": "2012-10-17",
-            "Statement": [
-              {
-                "Effect": "Allow",
-                "Principal": {
-                  "Service": "eks.amazonaws.com"
-                },
-                "Action": "sts:AssumeRole"
-              }
-            ]
-          }
-  - id: nodeRole
-    template:
-      apiVersion: iam.services.k8s.aws/v1alpha1
-      kind: Role
-      metadata:
-        namespace: ${schema.spec.name}
-        name: ${schema.spec.name}-cluster-node-role
-      spec:
-        name: ${schema.spec.name}-cluster-node-role
-        policies:
-        - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
-        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
-        - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
-        assumeRolePolicyDocument: |
-          {
-            "Version": "2012-10-17",
-            "Statement": [
-              {
-                "Effect": "Allow",
-                "Principal": {
-                  "Service": "ec2.amazonaws.com"
-                },
-                "Action": "sts:AssumeRole"
-              }
-            ]
-          }
-  - id: ekscluster # https://aws-controllers-k8s.github.io/community/reference/eks/v1alpha1/cluster/
-    template:
-      apiVersion: eks.services.k8s.aws/v1alpha1
-      kind: Cluster
-      metadata:
-        namespace: ${schema.spec.name}
-        name: ${schema.spec.name}
-      spec:
-        name: ${schema.spec.name}
-        roleARN: ${clusterRole.status.ackResourceMetadata.arn}
-        accessConfig:
-          authenticationMode: "API_AND_CONFIG_MAP"
-        resourcesVPCConfig:
-          endpointPrivateAccess: false
-          endpointPublicAccess: true
-          subnetIDs:
-            - ${schema.spec.network.subnets.controlplane.subnet1ID}
-            - ${schema.spec.network.subnets.controlplane.subnet2ID}
-        #version: ${schema.spec.k8sVersion} a bug needs to be fixed for this to work
-  - id: nodegroup
-    template:
-      apiVersion: eks.services.k8s.aws/v1alpha1
-      kind: Nodegroup
-      metadata:
-        namespace: ${schema.spec.name}
-        name: ${schema.spec.name}-nodegroup
-      spec:
-        name: ${schema.spec.name}-nodegroup
-        clusterName: ${schema.spec.name}
-        subnets:
-          - ${schema.spec.network.subnets.workers.subnet1ID}
-          - ${schema.spec.network.subnets.workers.subnet2ID}
-        nodeRole: ${nodeRole.status.ackResourceMetadata.arn}
-        updateConfig:
-          maxUnavailable: 1
-        scalingConfig:
-          minSize: 6 #${schema.spec.nodesCount} a bug needs to be fixed for this to work
-          maxSize: 6 #${schema.spec.nodesCount} a bug needs to be fixed for this to work
-          desiredSize: 6 #${schema.spec.nodesCount} a bug needs to be fixed for this to work
-  - id: podIdentityAddon
-    template:
-      apiVersion: eks.services.k8s.aws/v1alpha1
-      kind: Addon
-      metadata:
-        name: eks-pod-identity-agent
-        namespace: ${schema.spec.name}
-      spec:
-        name: eks-pod-identity-agent
-        addonVersion: v1.3.4-eksbuild.1
-        clusterName: ${schema.spec.name}
-
-###########################################################
-# ArgoCD Integration
-###########################################################
-  - id: argocdRole
-    template:
-      apiVersion: iam.services.k8s.aws/v1alpha1
-      kind: Role
-      metadata:
-        name: ${schema.spec.name}-argocd-role
-      spec:
-        name: ${schema.spec.name}-argocd-role
-        assumeRolePolicyDocument: |
-          {
-            "Version": "2012-10-17",
-            "Statement": [
-              {
-                "Effect": "Allow",
-                "Principal": {
-                  "AWS": "arn:aws:iam::${schema.spec.managementAccountId}:role/argocd-hub-role"
-                },
-                "Action": [
-                  "sts:TagSession",
-                  "sts:AssumeRole"
-                ]
-              }
-            ]
-          }
-  - id: argocdSecret
-    template:
-      apiVersion: v1
-      kind: Secret
-      metadata:
-        name: ${schema.spec.name}
-        namespace: argocd
-        labels:
-          argocd.argoproj.io/secret-type: cluster
-          #compatible fleet-management
-          fleet_member: spoke
-          tenant: ${schema.spec.tenant}
-          environment: ${schema.spec.environment}
-          aws_cluster_name: ${schema.spec.name}
-          workloads: "true"
-        annotations:
-          #GitOps Bridge
-          accountId: ${schema.spec.accountId}
-          aws_account_id: ${schema.spec.accountId}
-          region: ${schema.spec.region}
-          aws_region: ${schema.spec.region}
-          aws_central_region: ${schema.spec.region} # used in fleet-management gitops
-          oidcProvider: ${ekscluster.status.identity.oidc.issuer}
-          aws_cluster_name: ${schema.spec.name}
-          aws_vpc_id: ${schema.spec.network.vpcID}
-          #GitOps Configuration
-          addons_repo_basepath: ${schema.spec.gitops.addonsRepoBasePath}
-          addons_repo_path: ${schema.spec.gitops.addonsRepoPath}
-          addons_repo_revision: ${schema.spec.gitops.addonsRepoRevision}
-          addons_repo_secret_key: ${schema.spec.gitops.addonsRepoSecretKey}
-          addons_repo_url: ${schema.spec.gitops.addonsRepoUrl}
-          fleet_repo_basepath: ${schema.spec.gitops.fleetRepoBasePath}
-          fleet_repo_path: ${schema.spec.gitops.fleetRepoPath}
-          fleet_repo_revision: ${schema.spec.gitops.fleetRepoRevision}
-          fleet_repo_secret_key: ${schema.spec.gitops.fleetRepoSecretKey}
-          fleet_repo_url: ${schema.spec.gitops.fleetRepoUrl}
-          platform_repo_basepath: ${schema.spec.gitops.platformRepoBasePath}
-          platform_repo_path: ${schema.spec.gitops.platformRepoPath}
-          platform_repo_revision: ${schema.spec.gitops.platformRepoRevision}
-          platform_repo_secret_key: ${schema.spec.gitops.platformRepoSecretKey}
-          platform_repo_url: ${schema.spec.gitops.platformRepoUrl}
-          workload_repo_basepath: ${schema.spec.gitops.workloadRepoBasePath}
-          workload_repo_path: ${schema.spec.gitops.workloadRepoPath}
-          workload_repo_revision: ${schema.spec.gitops.workloadRepoRevision}
-          workload_repo_secret_key: ${schema.spec.gitops.workloadRepoSecretKey}
-          workload_repo_url: ${schema.spec.gitops.workloadRepoUrl}
-          #Specific for External-DNS
-          external_dns_domain_filters: ${schema.spec.domainName}
-          external_dns_namespace: external-dns
-          external_dns_policy: sync
-
-          #Generic
-          external_dns_service_account: external-dns-sa
-          external_secrets_namespace: external-secrets
-          external_secrets_namespace_fleet: argocd
-          external_secrets_service_account: external-secrets-sa
-          external_secrets_service_account_fleet: external-secrets-sa
-          aws_load_balancer_controller_namespace: kube-system
-          aws_load_balancer_controller_service_account: aws-load-balancer-controller-sa
-          adot_collector_namespace: adot-collector-kubeprometheus
-          adot_collector_serviceaccount: adot-collector-kubeprometheus
-          amp_endpoint_url: ""
-          # amp_endpoint_url=https://aps-workspaces.eu-west-1.amazonaws.com/workspaces/ws-2ca820a0-a732-4c4b-8f76-3b84e38f8f44/
-          
-          #fleet_secret_manager_secret_name: ${schema.spec.fleetSecretManagerSecretName2}
-          fleet_secret_manager_secret_name: "workload-cluster3-argocd-secret5"
-
-          # karpenter_namespace=kube-system
-          # karpenter_node_iam_role_name=Karpenter-fleet-spoke-prod-20241108160545410700000034
-          # karpenter_service_account=karpenter
-          # karpenter_sqs_queue_name=Karpenter-fleet-spoke-prod
-          
-      type: Opaque
-      stringData:
-        name: ${schema.spec.name}
-        server: "${ekscluster.status.endpoint}"
-        config: |
-          {
-            "awsAuthConfig": {
-              "clusterName": "${schema.spec.name}",
-              "roleARN": "${argocdRole.status.ackResourceMetadata.arn}"
-            },
-            "tlsClientConfig": {
-              "caData": "${ekscluster.status.certificateAuthority.data}",
-              "insecure": false
+    ###########################################################
+    # EKS Cluster
+    ###########################################################
+    - id: clusterRole
+      template:
+        apiVersion: iam.services.k8s.aws/v1alpha1
+        kind: Role
+        metadata:
+          namespace: ${schema.spec.name}
+          name: ${schema.spec.name}-cluster-role
+        spec:
+          name: ${schema.spec.name}-cluster-role
+          policies:
+          - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+          assumeRolePolicyDocument: |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": "eks.amazonaws.com"
+                  },
+                  "Action": "sts:AssumeRole"
+                }
+              ]
             }
-          }
+    - id: nodeRole
+      template:
+        apiVersion: iam.services.k8s.aws/v1alpha1
+        kind: Role
+        metadata:
+          namespace: ${schema.spec.name}
+          name: ${schema.spec.name}-cluster-node-role
+        spec:
+          name: ${schema.spec.name}-cluster-node-role
+          policies:
+          - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+          - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+          - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+          assumeRolePolicyDocument: |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": "ec2.amazonaws.com"
+                  },
+                  "Action": "sts:AssumeRole"
+                }
+              ]
+            }
+    # https://aws-controllers-k8s.github.io/community/reference/eks/v1alpha1/cluster/          
+    - id: ekscluster 
+      template:
+        apiVersion: eks.services.k8s.aws/v1alpha1
+        kind: Cluster
+        metadata:
+          namespace: ${schema.spec.name}
+          name: ${schema.spec.name}
+        spec:
+          name: ${schema.spec.name}
+          roleARN: ${clusterRole.status.ackResourceMetadata.arn}
+          accessConfig:
+            authenticationMode: "API_AND_CONFIG_MAP"
+          resourcesVPCConfig:
+            endpointPrivateAccess: false
+            endpointPublicAccess: true
+            subnetIDs:
+              - ${schema.spec.network.subnets.controlplane.subnet1ID}
+              - ${schema.spec.network.subnets.controlplane.subnet2ID}
+          #version: ${schema.spec.k8sVersion} a bug needs to be fixed for this to work
+    - id: nodegroup
+      template:
+        apiVersion: eks.services.k8s.aws/v1alpha1
+        kind: Nodegroup
+        metadata:
+          namespace: ${schema.spec.name}
+          name: ${schema.spec.name}-nodegroup
+        spec:
+          name: ${schema.spec.name}-nodegroup
+          clusterName: ${schema.spec.name}
+          subnets:
+            - ${schema.spec.network.subnets.workers.subnet1ID}
+            - ${schema.spec.network.subnets.workers.subnet2ID}
+          nodeRole: ${nodeRole.status.ackResourceMetadata.arn}
+          updateConfig:
+            maxUnavailable: 1
+          scalingConfig:
+            minSize: 6 #${schema.spec.nodesCount} a bug needs to be fixed for this to work
+            maxSize: 6 #${schema.spec.nodesCount} a bug needs to be fixed for this to work
+            desiredSize: 6 #${schema.spec.nodesCount} a bug needs to be fixed for this to work
+    - id: podIdentityAddon
+      template:
+        apiVersion: eks.services.k8s.aws/v1alpha1
+        kind: Addon
+        metadata:
+          name: eks-pod-identity-agent
+          namespace: ${schema.spec.name}
+        spec:
+          name: eks-pod-identity-agent
+          addonVersion: v1.3.4-eksbuild.1
+          clusterName: ${schema.spec.name}
 
-  - id: argocdSecretForACK
-    template:
-      apiVersion: v1
-      kind: Secret
-      metadata:
-        name: ${schema.spec.name}-for-ack
-        namespace: ${schema.spec.name}
+    ###########################################################
+    # ArgoCD Integration
+    ###########################################################
+    - id: argocdRole
+      template:
+        apiVersion: iam.services.k8s.aws/v1alpha1
+        kind: Role
+        metadata:
+          name: ${schema.spec.name}-argocd-role
+        spec:
+          name: ${schema.spec.name}-argocd-role
+          assumeRolePolicyDocument: |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "AWS": "arn:aws:iam::${schema.spec.managementAccountId}:role/argocd-hub-role"
+                  },
+                  "Action": [
+                    "sts:TagSession",
+                    "sts:AssumeRole"
+                  ]
+                }
+              ]
+            }
+    - id: argocdSecret
+      template:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: ${schema.spec.name}
+          namespace: argocd
+          labels:
+            argocd.argoproj.io/secret-type: cluster
+            #compatible fleet-management
+            fleet_member: spoke
+            tenant: ${schema.spec.tenant}
+            environment: ${schema.spec.environment}
+            aws_cluster_name: ${schema.spec.name}
+            workloads: "true"
+          annotations:
+            #GitOps Bridge
+            accountId: ${schema.spec.accountId}
+            aws_account_id: ${schema.spec.accountId}
+            region: ${schema.spec.region}
+            aws_region: ${schema.spec.region}
+            aws_central_region: ${schema.spec.region} # used in fleet-management gitops
+            oidcProvider: ${ekscluster.status.identity.oidc.issuer}
+            aws_cluster_name: ${schema.spec.name}
+            aws_vpc_id: ${schema.spec.network.vpcID}
+            #GitOps Configuration
+            addons_repo_basepath: ${schema.spec.gitops.addonsRepoBasePath}
+            addons_repo_path: ${schema.spec.gitops.addonsRepoPath}
+            addons_repo_revision: ${schema.spec.gitops.addonsRepoRevision}
+            addons_repo_secret_key: ${schema.spec.gitops.addonsRepoSecretKey}
+            addons_repo_url: ${schema.spec.gitops.addonsRepoUrl}
+            fleet_repo_basepath: ${schema.spec.gitops.fleetRepoBasePath}
+            fleet_repo_path: ${schema.spec.gitops.fleetRepoPath}
+            fleet_repo_revision: ${schema.spec.gitops.fleetRepoRevision}
+            fleet_repo_secret_key: ${schema.spec.gitops.fleetRepoSecretKey}
+            fleet_repo_url: ${schema.spec.gitops.fleetRepoUrl}
+            platform_repo_basepath: ${schema.spec.gitops.platformRepoBasePath}
+            platform_repo_path: ${schema.spec.gitops.platformRepoPath}
+            platform_repo_revision: ${schema.spec.gitops.platformRepoRevision}
+            platform_repo_secret_key: ${schema.spec.gitops.platformRepoSecretKey}
+            platform_repo_url: ${schema.spec.gitops.platformRepoUrl}
+            workload_repo_basepath: ${schema.spec.gitops.workloadRepoBasePath}
+            workload_repo_path: ${schema.spec.gitops.workloadRepoPath}
+            workload_repo_revision: ${schema.spec.gitops.workloadRepoRevision}
+            workload_repo_secret_key: ${schema.spec.gitops.workloadRepoSecretKey}
+            workload_repo_url: ${schema.spec.gitops.workloadRepoUrl}
+            #Specific for External-DNS
+            external_dns_domain_filters: ${schema.spec.domainName}
+            external_dns_namespace: external-dns
+            external_dns_policy: sync
 
-      type: Opaque
-      stringData:
-        name: ${schema.spec.name}
-        server: "${ekscluster.status.endpoint}"
-        # use k8sVersion need to fix bug, use 1.30 for now
-        config: |
-          {
-            "addons": {
-              "aws_cluster_name": "${schema.spec.name}",
-              "kubernetes_version": "1.30"
-            },
-            "config": {
+            #Generic
+            external_dns_service_account: external-dns-sa
+            external_secrets_namespace: external-secrets
+            external_secrets_namespace_fleet: argocd
+            external_secrets_service_account: external-secrets-sa
+            external_secrets_service_account_fleet: external-secrets-sa
+            aws_load_balancer_controller_namespace: kube-system
+            aws_load_balancer_controller_service_account: aws-load-balancer-controller-sa
+            adot_collector_namespace: adot-collector-kubeprometheus
+            adot_collector_serviceaccount: adot-collector-kubeprometheus
+            amp_endpoint_url: ""
+            # amp_endpoint_url=https://aps-workspaces.eu-west-1.amazonaws.com/workspaces/ws-2ca820a0-a732-4c4b-8f76-3b84e38f8f44/
+            
+            #fleet_secret_manager_secret_name: ${schema.spec.fleetSecretManagerSecretName2}
+            fleet_secret_manager_secret_name: "workload-cluster3-argocd-secret5"
+
+            # karpenter_namespace=kube-system
+            # karpenter_node_iam_role_name=Karpenter-fleet-spoke-prod-20241108160545410700000034
+            # karpenter_service_account=karpenter
+            # karpenter_sqs_queue_name=Karpenter-fleet-spoke-prod
+            
+        type: Opaque
+        stringData:
+          name: ${schema.spec.name}
+          server: "${ekscluster.status.endpoint}"
+          config: |
+            {
               "awsAuthConfig": {
                 "clusterName": "${schema.spec.name}",
                 "roleARN": "${argocdRole.status.ackResourceMetadata.arn}"
@@ -301,540 +273,569 @@ spec:
                 "caData": "${ekscluster.status.certificateAuthority.data}",
                 "insecure": false
               }
-            },
-            "metadata": {
-              "accountId": "${schema.spec.accountId}",
-              "aws_account_id": "${schema.spec.accountId}",
-              "region": "${schema.spec.region}",
-              "aws_region": "${schema.spec.region}",
-              "aws_central_region": "${schema.spec.region}",
-              "oidcProvider": "${ekscluster.status.identity.oidc.issuer}",
-              "aws_cluster_name": "${schema.spec.name}",
-              "aws_vpc_id": "${schema.spec.network.vpcID}",
-              "addons_repo_basepath": "",
-              "addons_repo_path": "${schema.spec.gitops.addonsRepoPath}",              
-              "addons_repo_revision": "${schema.spec.gitops.addonsRepoRevision}",
-              "addons_repo_secret_key": "${schema.spec.gitops.addonsRepoSecretKey}",
-              "addons_repo_url": "${schema.spec.gitops.addonsRepoUrl}",
-              "fleet_repo_basepath": "",
-              "fleet_repo_path": "${schema.spec.gitops.fleetRepoPath}",
-              "fleet_repo_revision": "${schema.spec.gitops.fleetRepoRevision}",
-              "fleet_repo_secret_key": "${schema.spec.gitops.fleetRepoSecretKey}",
-              "fleet_repo_url": "${schema.spec.gitops.fleetRepoUrl}",
-              "platform_repo_basepath": "",
-              "platform_repo_path": "${schema.spec.gitops.platformRepoPath}",
-              "platform_repo_revision": "${schema.spec.gitops.platformRepoRevision}",
-              "platform_repo_secret_key": "${schema.spec.gitops.platformRepoSecretKey}",
-              "platform_repo_url": "${schema.spec.gitops.platformRepoUrl}",
-              "workload_repo_basepath": "",
-              "workload_repo_path": "${schema.spec.gitops.workloadRepoPath}",
-              "workload_repo_revision": "${schema.spec.gitops.workloadRepoRevision}",
-              "workload_repo_secret_key": "${schema.spec.gitops.workloadRepoSecretKey}",
-              "workload_repo_url": "${schema.spec.gitops.workloadRepoUrl}",
-              "external_dns_domain_filters": "${schema.spec.domainName}",
-              "external_dns_namespace": "external-dns",
-              "external_dns_policy": "sync",
-              "external_dns_service_account": "external-dns-sa",
-              "external_secrets_namespace": "external-secrets",
-              "external_secrets_namespace_fleet": "argocd",
-              "external_secrets_service_account": "external-secrets-sa",
-              "external_secrets_service_account_fleet": "external-secrets-sa",
-              "aws_load_balancer_controller_namespace": "kube-system",
-              "aws_load_balancer_controller_service_account": "aws-load-balancer-controller-sa",
-              "adot_collector_namespace": "adot-collector-kubeprometheus",
-              "adot_collector_serviceaccount": "adot-collector-kubeprometheus",
-              "amp_endpoint_url": "",
-              "fleet_secret_manager_secret_name": "workload-cluster3-argocd-secret5"
-            },
-            "server": "${ekscluster.status.endpoint}"
-          }
-  
-  - id: argocdAWSSecret
-    template:
-      apiVersion: secretsmanager.services.k8s.aws/v1alpha1
-      kind: Secret
-      metadata:
-        name: ${schema.spec.name}-argocd-secret5
-        namespace: ${schema.spec.name}
-      spec:
-        name: ${schema.spec.name}-argocd-secret5
-        description: "ArgoCD cluster configuration secret for ${schema.spec.name}"
-        tags:
-          - key: fleet_member
-            value: spoke
-          - key: tenant
-            value: ${schema.spec.tenant}
-          - key: environment
-            value: ${schema.spec.environment}
-          - key: aws_cluster_name
-            value: ${schema.spec.name}
-          - key: workloads
-            value: "true"
-          - key: argocd.argoproj.io/secret-type
-            value: cluster
-        secretString: 
-          key: "config"
+            }
+
+    - id: argocdSecretForACK
+      template:
+        apiVersion: v1
+        kind: Secret
+        metadata:
           name: ${schema.spec.name}-for-ack
           namespace: ${schema.spec.name}
 
-  - id: accessEntry
-    template:
-      apiVersion: eks.services.k8s.aws/v1alpha1
-      kind: AccessEntry
-      metadata:
-        namespace: ${schema.spec.name}
-        name: ${schema.spec.name}-access-entry
-      spec:
-        clusterName: ${schema.spec.name}
-        accessPolicies:
-        - accessScope:
-            type: "cluster"
-          policyARN: "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-        principalARN: "${argocdRole.status.ackResourceMetadata.arn}"
-  - id: accessEntryAdmin
-    template:
-      apiVersion: eks.services.k8s.aws/v1alpha1
-      kind: AccessEntry
-      metadata:
-        namespace: ${schema.spec.name}
-        name: ${schema.spec.name}-access-entry-admin
-      spec:
-        clusterName: ${schema.spec.name}
-        accessPolicies:
-        - accessScope:
-            type: "cluster"
-          policyARN: "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-        principalARN: "arn:aws:iam::${schema.spec.accountId}:role/${schema.spec.adminRoleName}"       
-  - id: oidcProvider
-    template:
-      apiVersion: iam.services.k8s.aws/v1alpha1
-      kind: OpenIDConnectProvider
-      metadata:
-        namespace: ${schema.spec.name}
-        name: ${schema.spec.name}-oidc
-      spec:
-        url: ${ekscluster.status.identity.oidc.issuer}
-        clientIDs:
-          - sts.amazonaws.com
-        thumbprints:
-          - '9e99a48a9960b14926bb7f3b02e22da2b0ab7280'
-
-
-###########################################################
-# External Secrets AddOn
-###########################################################
-  - id: externalSecretsRole
-    template:
-      apiVersion: iam.services.k8s.aws/v1alpha1
-      kind: Role
-      metadata:
-        namespace: ${schema.spec.name}
-        name: ${schema.spec.name}-external-secrets-role
-      spec:
-        name: ${schema.spec.name}-external-secrets-role
-        policies:
-          - arn:aws:iam::aws:policy/SecretsManagerReadWrite
-        assumeRolePolicyDocument: |
-          {
-            "Version": "2012-10-17",
-            "Statement": [
-              {
-                "Effect": "Allow",
-                "Principal": {
-                  "Service": "pods.eks.amazonaws.com"
+        type: Opaque
+        stringData:
+          name: ${schema.spec.name}
+          server: "${ekscluster.status.endpoint}"
+          # use k8sVersion need to fix bug, use 1.30 for now
+          config: |
+            {
+              "addons": {
+                "aws_cluster_name": "${schema.spec.name}",
+                "kubernetes_version": "1.30"
+              },
+              "config": {
+                "awsAuthConfig": {
+                  "clusterName": "${schema.spec.name}",
+                  "roleARN": "${argocdRole.status.ackResourceMetadata.arn}"
                 },
-                "Action": [
-                  "sts:AssumeRole",
-                  "sts:TagSession"
-                ]
-              }
-            ]
-          }
-  - id: externalSecretsPodIdentityAssociation
-    template:
-      apiVersion: eks.services.k8s.aws/v1alpha1
-      kind: PodIdentityAssociation
-      metadata:
-        name: ${schema.spec.name}-external-secrets
-        namespace: ${schema.spec.name}
-      spec:
-        clusterName: ${schema.spec.name}
-        namespace: argocd
-        roleARN: ${externalSecretsRole.status.ackResourceMetadata.arn}
-        serviceAccount: external-secrets-sa
-        tags:
-          environment: ${schema.spec.environment}
-          managedBy: ACK
-          application: external-secrets
+                "tlsClientConfig": {
+                  "caData": "${ekscluster.status.certificateAuthority.data}",
+                  "insecure": false
+                }
+              },
+              "metadata": {
+                "accountId": "${schema.spec.accountId}",
+                "aws_account_id": "${schema.spec.accountId}",
+                "region": "${schema.spec.region}",
+                "aws_region": "${schema.spec.region}",
+                "aws_central_region": "${schema.spec.region}",
+                "oidcProvider": "${ekscluster.status.identity.oidc.issuer}",
+                "aws_cluster_name": "${schema.spec.name}",
+                "aws_vpc_id": "${schema.spec.network.vpcID}",
+                "addons_repo_basepath": "",
+                "addons_repo_path": "${schema.spec.gitops.addonsRepoPath}",              
+                "addons_repo_revision": "${schema.spec.gitops.addonsRepoRevision}",
+                "addons_repo_secret_key": "${schema.spec.gitops.addonsRepoSecretKey}",
+                "addons_repo_url": "${schema.spec.gitops.addonsRepoUrl}",
+                "fleet_repo_basepath": "",
+                "fleet_repo_path": "${schema.spec.gitops.fleetRepoPath}",
+                "fleet_repo_revision": "${schema.spec.gitops.fleetRepoRevision}",
+                "fleet_repo_secret_key": "${schema.spec.gitops.fleetRepoSecretKey}",
+                "fleet_repo_url": "${schema.spec.gitops.fleetRepoUrl}",
+                "platform_repo_basepath": "",
+                "platform_repo_path": "${schema.spec.gitops.platformRepoPath}",
+                "platform_repo_revision": "${schema.spec.gitops.platformRepoRevision}",
+                "platform_repo_secret_key": "${schema.spec.gitops.platformRepoSecretKey}",
+                "platform_repo_url": "${schema.spec.gitops.platformRepoUrl}",
+                "workload_repo_basepath": "",
+                "workload_repo_path": "${schema.spec.gitops.workloadRepoPath}",
+                "workload_repo_revision": "${schema.spec.gitops.workloadRepoRevision}",
+                "workload_repo_secret_key": "${schema.spec.gitops.workloadRepoSecretKey}",
+                "workload_repo_url": "${schema.spec.gitops.workloadRepoUrl}",
+                "external_dns_domain_filters": "${schema.spec.domainName}",
+                "external_dns_namespace": "external-dns",
+                "external_dns_policy": "sync",
+                "external_dns_service_account": "external-dns-sa",
+                "external_secrets_namespace": "external-secrets",
+                "external_secrets_namespace_fleet": "argocd",
+                "external_secrets_service_account": "external-secrets-sa",
+                "external_secrets_service_account_fleet": "external-secrets-sa",
+                "aws_load_balancer_controller_namespace": "kube-system",
+                "aws_load_balancer_controller_service_account": "aws-load-balancer-controller-sa",
+                "adot_collector_namespace": "adot-collector-kubeprometheus",
+                "adot_collector_serviceaccount": "adot-collector-kubeprometheus",
+                "amp_endpoint_url": "",
+                "fleet_secret_manager_secret_name": "workload-cluster3-argocd-secret5"
+              },
+              "server": "${ekscluster.status.endpoint}"
+            }
+    
+    - id: argocdAWSSecret
+      template:
+        apiVersion: secretsmanager.services.k8s.aws/v1alpha1
+        kind: Secret
+        metadata:
+          name: ${schema.spec.name}-argocd-secret5
+          namespace: ${schema.spec.name}
+        spec:
+          name: ${schema.spec.name}-argocd-secret5
+          description: "ArgoCD cluster configuration secret for ${schema.spec.name}"
+          tags:
+            - key: fleet_member
+              value: spoke
+            - key: tenant
+              value: ${schema.spec.tenant}
+            - key: environment
+              value: ${schema.spec.environment}
+            - key: aws_cluster_name
+              value: ${schema.spec.name}
+            - key: workloads
+              value: "true"
+            - key: argocd.argoproj.io/secret-type
+              value: cluster
+          secretString: 
+            key: "config"
+            name: ${schema.spec.name}-for-ack
+            namespace: ${schema.spec.name}
 
-###########################################################
-# load balancer controller
-###########################################################
-  - id: awsLoadBalancerControllerRole
-    template:
-      apiVersion: iam.services.k8s.aws/v1alpha1
-      kind: Role
-      metadata:
-        namespace: ${schema.spec.name}
-        name: ${schema.spec.name}-aws-load-balancer-controller-role
-      spec:
-        name: ${schema.spec.name}-aws-load-balancer-controller-role
-        policyRefs:
-          - from:
-              name: ${schema.spec.name}-aws-load-balancer-controller-policy
-        assumeRolePolicyDocument: |
-          {
+    - id: accessEntry
+      template:
+        apiVersion: eks.services.k8s.aws/v1alpha1
+        kind: AccessEntry
+        metadata:
+          namespace: ${schema.spec.name}
+          name: ${schema.spec.name}-access-entry
+        spec:
+          clusterName: ${schema.spec.name}
+          accessPolicies:
+          - accessScope:
+              type: "cluster"
+            policyARN: "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          principalARN: "${argocdRole.status.ackResourceMetadata.arn}"
+    - id: accessEntryAdmin
+      template:
+        apiVersion: eks.services.k8s.aws/v1alpha1
+        kind: AccessEntry
+        metadata:
+          namespace: ${schema.spec.name}
+          name: ${schema.spec.name}-access-entry-admin
+        spec:
+          clusterName: ${schema.spec.name}
+          accessPolicies:
+          - accessScope:
+              type: "cluster"
+            policyARN: "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          principalARN: "arn:aws:iam::${schema.spec.accountId}:role/${schema.spec.adminRoleName}"       
+    - id: oidcProvider
+      template:
+        apiVersion: iam.services.k8s.aws/v1alpha1
+        kind: OpenIDConnectProvider
+        metadata:
+          namespace: ${schema.spec.name}
+          name: ${schema.spec.name}-oidc
+        spec:
+          url: ${ekscluster.status.identity.oidc.issuer}
+          clientIDs:
+            - sts.amazonaws.com
+          thumbprints:
+            - '9e99a48a9960b14926bb7f3b02e22da2b0ab7280'
+
+
+    ###########################################################
+    # External Secrets AddOn
+    ###########################################################
+    - id: externalSecretsRole
+      template:
+        apiVersion: iam.services.k8s.aws/v1alpha1
+        kind: Role
+        metadata:
+          namespace: ${schema.spec.name}
+          name: ${schema.spec.name}-external-secrets-role
+        spec:
+          name: ${schema.spec.name}-external-secrets-role
+          policies:
+            - arn:aws:iam::aws:policy/SecretsManagerReadWrite
+          assumeRolePolicyDocument: |
+            {
               "Version": "2012-10-17",
               "Statement": [
-                  {
-                      "Effect": "Allow",
-                      "Principal": {
-                          "Service": "pods.eks.amazonaws.com"
-                      },
-                      "Action": [
-                          "sts:TagSession",
-                          "sts:AssumeRole"
-                      ]
-                  }
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": "pods.eks.amazonaws.com"
+                  },
+                  "Action": [
+                    "sts:AssumeRole",
+                    "sts:TagSession"
+                  ]
+                }
               ]
-          }
+            }
+    - id: externalSecretsPodIdentityAssociation
+      template:
+        apiVersion: eks.services.k8s.aws/v1alpha1
+        kind: PodIdentityAssociation
+        metadata:
+          name: ${schema.spec.name}-external-secrets
+          namespace: ${schema.spec.name}
+        spec:
+          clusterName: ${schema.spec.name}
+          namespace: argocd
+          roleARN: ${externalSecretsRole.status.ackResourceMetadata.arn}
+          serviceAccount: external-secrets-sa
+          tags:
+            environment: ${schema.spec.environment}
+            managedBy: ACK
+            application: external-secrets
 
-  - id: awsLoadBalancerControllerPolicy
-    template:
-      apiVersion: iam.services.k8s.aws/v1alpha1
-      kind: Policy
-      metadata:
-        namespace: ${schema.spec.name}
-        name: ${schema.spec.name}-aws-load-balancer-controller-policy
-      spec:
-        name: ${schema.spec.name}-aws-load-balancer-controller-policy
-        policyDocument: |
-          {
-              "Statement": [
+    ###########################################################
+    # load balancer controller
+    ###########################################################
+    - id: awsLoadBalancerControllerRole
+      template:
+        apiVersion: iam.services.k8s.aws/v1alpha1
+        kind: Role
+        metadata:
+          namespace: ${schema.spec.name}
+          name: ${schema.spec.name}-aws-load-balancer-controller-role
+        spec:
+          name: ${schema.spec.name}-aws-load-balancer-controller-role
+          policyRefs:
+            - from:
+                name: ${schema.spec.name}-aws-load-balancer-controller-policy
+          assumeRolePolicyDocument: |
+            {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Principal": {
+                            "Service": "pods.eks.amazonaws.com"
+                        },
+                        "Action": [
+                            "sts:TagSession",
+                            "sts:AssumeRole"
+                        ]
+                    }
+                ]
+            }
+
+    - id: awsLoadBalancerControllerPolicy
+      template:
+        apiVersion: iam.services.k8s.aws/v1alpha1
+        kind: Policy
+        metadata:
+          namespace: ${schema.spec.name}
+          name: ${schema.spec.name}-aws-load-balancer-controller-policy
+        spec:
+          name: ${schema.spec.name}-aws-load-balancer-controller-policy
+          policyDocument: |
+            {
+                "Statement": [
+                    {
+                        "Action": "iam:CreateServiceLinkedRole",
+                        "Condition": {
+                            "StringEquals": {
+                                "iam:AWSServiceName": "elasticloadbalancing.amazonaws.com"
+                            }
+                        },
+                        "Effect": "Allow",
+                        "Resource": "*"
+                    },
+                    {
+                        "Action": [
+                            "elasticloadbalancing:DescribeTrustStores",
+                            "elasticloadbalancing:DescribeTargetHealth",
+                            "elasticloadbalancing:DescribeTargetGroups",
+                            "elasticloadbalancing:DescribeTargetGroupAttributes",
+                            "elasticloadbalancing:DescribeTags",
+                            "elasticloadbalancing:DescribeSSLPolicies",
+                            "elasticloadbalancing:DescribeRules",
+                            "elasticloadbalancing:DescribeLoadBalancers",
+                            "elasticloadbalancing:DescribeLoadBalancerAttributes",
+                            "elasticloadbalancing:DescribeListeners",
+                            "elasticloadbalancing:DescribeListenerCertificates",
+                            "ec2:GetCoipPoolUsage",
+                            "ec2:DescribeVpcs",
+                            "ec2:DescribeVpcPeeringConnections",
+                            "ec2:DescribeTags",
+                            "ec2:DescribeSubnets",
+                            "ec2:DescribeSecurityGroups",
+                            "ec2:DescribeNetworkInterfaces",
+                            "ec2:DescribeInternetGateways",
+                            "ec2:DescribeInstances",
+                            "ec2:DescribeCoipPools",
+                            "ec2:DescribeAvailabilityZones",
+                            "ec2:DescribeAddresses",
+                            "ec2:DescribeAccountAttributes"
+                        ],
+                        "Effect": "Allow",
+                        "Resource": "*"
+                    },
+                    {
+                        "Action": [
+                            "wafv2:GetWebACLForResource",
+                            "wafv2:GetWebACL",
+                            "wafv2:DisassociateWebACL",
+                            "wafv2:AssociateWebACL",
+                            "waf-regional:GetWebACLForResource",
+                            "waf-regional:GetWebACL",
+                            "waf-regional:DisassociateWebACL",
+                            "waf-regional:AssociateWebACL",
+                            "shield:GetSubscriptionState",
+                            "shield:DescribeProtection",
+                            "shield:DeleteProtection",
+                            "shield:CreateProtection",
+                            "iam:ListServerCertificates",
+                            "iam:GetServerCertificate",
+                            "cognito-idp:DescribeUserPoolClient",
+                            "acm:ListCertificates",
+                            "acm:DescribeCertificate"
+                        ],
+                        "Effect": "Allow",
+                        "Resource": "*"
+                    },
+                    {
+                        "Action": [
+                            "ec2:RevokeSecurityGroupIngress",
+                            "ec2:CreateSecurityGroup",
+                            "ec2:AuthorizeSecurityGroupIngress"
+                        ],
+                        "Effect": "Allow",
+                        "Resource": "*"
+                    },
+                    {
+                        "Action": "ec2:CreateTags",
+                        "Condition": {
+                            "Null": {
+                                "aws:RequestTag/elbv2.k8s.aws/cluster": "false"
+                            },
+                            "StringEquals": {
+                                "ec2:CreateAction": "CreateSecurityGroup"
+                            }
+                        },
+                        "Effect": "Allow",
+                        "Resource": "arn:aws:ec2:*:*:security-group/*"
+                    },
+                    {
+                        "Action": [
+                            "ec2:DeleteTags",
+                            "ec2:CreateTags"
+                        ],
+                        "Condition": {
+                            "Null": {
+                                "aws:RequestTag/elbv2.k8s.aws/cluster": "true",
+                                "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
+                            }
+                        },
+                        "Effect": "Allow",
+                        "Resource": "arn:aws:ec2:*:*:security-group/*"
+                    },
+                    {
+                        "Action": [
+                            "ec2:RevokeSecurityGroupIngress",
+                            "ec2:DeleteSecurityGroup",
+                            "ec2:AuthorizeSecurityGroupIngress"
+                        ],
+                        "Condition": {
+                            "Null": {
+                                "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
+                            }
+                        },
+                        "Effect": "Allow",
+                        "Resource": "*"
+                    },
+                    {
+                        "Action": [
+                            "elasticloadbalancing:CreateTargetGroup",
+                            "elasticloadbalancing:CreateLoadBalancer"
+                        ],
+                        "Condition": {
+                            "Null": {
+                                "aws:RequestTag/elbv2.k8s.aws/cluster": "false"
+                            }
+                        },
+                        "Effect": "Allow",
+                        "Resource": "*"
+                    },
+                    {
+                        "Action": [
+                            "elasticloadbalancing:DeleteRule",
+                            "elasticloadbalancing:DeleteListener",
+                            "elasticloadbalancing:CreateRule",
+                            "elasticloadbalancing:CreateListener"
+                        ],
+                        "Effect": "Allow",
+                        "Resource": "*"
+                    },
+                    {
+                        "Action": [
+                            "elasticloadbalancing:RemoveTags",
+                            "elasticloadbalancing:AddTags"
+                        ],
+                        "Condition": {
+                            "Null": {
+                                "aws:RequestTag/elbv2.k8s.aws/cluster": "true",
+                                "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
+                            }
+                        },
+                        "Effect": "Allow",
+                        "Resource": [
+                            "arn:aws:elasticloadbalancing:*:*:targetgroup/*/*",
+                            "arn:aws:elasticloadbalancing:*:*:loadbalancer/net/*/*",
+                            "arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*"
+                        ]
+                    },
+                    {
+                        "Action": [
+                            "elasticloadbalancing:RemoveTags",
+                            "elasticloadbalancing:AddTags"
+                        ],
+                        "Effect": "Allow",
+                        "Resource": [
+                            "arn:aws:elasticloadbalancing:*:*:listener/net/*/*/*",
+                            "arn:aws:elasticloadbalancing:*:*:listener/app/*/*/*",
+                            "arn:aws:elasticloadbalancing:*:*:listener-rule/net/*/*/*",
+                            "arn:aws:elasticloadbalancing:*:*:listener-rule/app/*/*/*"
+                        ]
+                    },
+                    {
+                        "Action": [
+                            "elasticloadbalancing:SetSubnets",
+                            "elasticloadbalancing:SetSecurityGroups",
+                            "elasticloadbalancing:SetIpAddressType",
+                            "elasticloadbalancing:ModifyTargetGroupAttributes",
+                            "elasticloadbalancing:ModifyTargetGroup",
+                            "elasticloadbalancing:ModifyLoadBalancerAttributes",
+                            "elasticloadbalancing:DeleteTargetGroup",
+                            "elasticloadbalancing:DeleteLoadBalancer"
+                        ],
+                        "Condition": {
+                            "Null": {
+                                "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
+                            }
+                        },
+                        "Effect": "Allow",
+                        "Resource": "*"
+                    },
+                    {
+                        "Action": "elasticloadbalancing:AddTags",
+                        "Condition": {
+                            "Null": {
+                                "aws:RequestTag/elbv2.k8s.aws/cluster": "false"
+                            },
+                            "StringEquals": {
+                                "elasticloadbalancing:CreateAction": [
+                                    "CreateTargetGroup",
+                                    "CreateLoadBalancer"
+                                ]
+                            }
+                        },
+                        "Effect": "Allow",
+                        "Resource": [
+                            "arn:aws:elasticloadbalancing:*:*:targetgroup/*/*",
+                            "arn:aws:elasticloadbalancing:*:*:loadbalancer/net/*/*",
+                            "arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*"
+                        ]
+                    },
+                    {
+                        "Action": [
+                            "elasticloadbalancing:RegisterTargets",
+                            "elasticloadbalancing:DeregisterTargets"
+                        ],
+                        "Effect": "Allow",
+                        "Resource": "arn:aws:elasticloadbalancing:*:*:targetgroup/*/*"
+                    },
+                    {
+                        "Action": [
+                            "elasticloadbalancing:SetWebAcl",
+                            "elasticloadbalancing:RemoveListenerCertificates",
+                            "elasticloadbalancing:ModifyRule",
+                            "elasticloadbalancing:ModifyListener",
+                            "elasticloadbalancing:AddListenerCertificates"
+                        ],
+                        "Effect": "Allow",
+                        "Resource": "*"
+                    }
+                ],
+                "Version": "2012-10-17"
+            }            
+
+    - id: awsLoadBalancerControllerPodIdentityAssociation
+      template:
+        apiVersion: eks.services.k8s.aws/v1alpha1
+        kind: PodIdentityAssociation
+        metadata:
+          name: ${schema.spec.name}-aws-load-balancer-controller
+          namespace: ${schema.spec.name}
+        spec:
+          clusterName: ${schema.spec.name}
+          namespace: kube-system
+          roleARN: ${awsLoadBalancerControllerRole.status.ackResourceMetadata.arn}
+          serviceAccount: aws-load-balancer-controller-sa
+          tags:
+            environment: ${schema.spec.environment}
+            managedBy: ACK
+            application: aws-load-balancer-controller
+
+
+    ###########################################################
+    # External DNS AddOn
+    ###########################################################
+    - id: externalDnsPolicy
+        template:
+          apiVersion: iam.services.k8s.aws/v1alpha1
+          kind: Policy
+          metadata:
+            namespace: ${schema.spec.name}
+            name: ${schema.spec.name}-external-dns-policy
+          spec:
+            name: ${schema.spec.name}-external-dns-policy
+            policyDocument: |
+              {
+                "Version": "2012-10-17",
+                "Statement": [
                   {
-                      "Action": "iam:CreateServiceLinkedRole",
-                      "Condition": {
-                          "StringEquals": {
-                              "iam:AWSServiceName": "elasticloadbalancing.amazonaws.com"
-                          }
-                      },
-                      "Effect": "Allow",
-                      "Resource": "*"
+                    "Effect": "Allow",
+                    "Action": [
+                      "route53:ChangeResourceRecordSets"
+                    ],
+                    "Resource": [
+                      "arn:aws:route53:::hostedzone/*"
+                    ]
                   },
                   {
-                      "Action": [
-                          "elasticloadbalancing:DescribeTrustStores",
-                          "elasticloadbalancing:DescribeTargetHealth",
-                          "elasticloadbalancing:DescribeTargetGroups",
-                          "elasticloadbalancing:DescribeTargetGroupAttributes",
-                          "elasticloadbalancing:DescribeTags",
-                          "elasticloadbalancing:DescribeSSLPolicies",
-                          "elasticloadbalancing:DescribeRules",
-                          "elasticloadbalancing:DescribeLoadBalancers",
-                          "elasticloadbalancing:DescribeLoadBalancerAttributes",
-                          "elasticloadbalancing:DescribeListeners",
-                          "elasticloadbalancing:DescribeListenerCertificates",
-                          "ec2:GetCoipPoolUsage",
-                          "ec2:DescribeVpcs",
-                          "ec2:DescribeVpcPeeringConnections",
-                          "ec2:DescribeTags",
-                          "ec2:DescribeSubnets",
-                          "ec2:DescribeSecurityGroups",
-                          "ec2:DescribeNetworkInterfaces",
-                          "ec2:DescribeInternetGateways",
-                          "ec2:DescribeInstances",
-                          "ec2:DescribeCoipPools",
-                          "ec2:DescribeAvailabilityZones",
-                          "ec2:DescribeAddresses",
-                          "ec2:DescribeAccountAttributes"
-                      ],
-                      "Effect": "Allow",
-                      "Resource": "*"
-                  },
-                  {
-                      "Action": [
-                          "wafv2:GetWebACLForResource",
-                          "wafv2:GetWebACL",
-                          "wafv2:DisassociateWebACL",
-                          "wafv2:AssociateWebACL",
-                          "waf-regional:GetWebACLForResource",
-                          "waf-regional:GetWebACL",
-                          "waf-regional:DisassociateWebACL",
-                          "waf-regional:AssociateWebACL",
-                          "shield:GetSubscriptionState",
-                          "shield:DescribeProtection",
-                          "shield:DeleteProtection",
-                          "shield:CreateProtection",
-                          "iam:ListServerCertificates",
-                          "iam:GetServerCertificate",
-                          "cognito-idp:DescribeUserPoolClient",
-                          "acm:ListCertificates",
-                          "acm:DescribeCertificate"
-                      ],
-                      "Effect": "Allow",
-                      "Resource": "*"
-                  },
-                  {
-                      "Action": [
-                          "ec2:RevokeSecurityGroupIngress",
-                          "ec2:CreateSecurityGroup",
-                          "ec2:AuthorizeSecurityGroupIngress"
-                      ],
-                      "Effect": "Allow",
-                      "Resource": "*"
-                  },
-                  {
-                      "Action": "ec2:CreateTags",
-                      "Condition": {
-                          "Null": {
-                              "aws:RequestTag/elbv2.k8s.aws/cluster": "false"
-                          },
-                          "StringEquals": {
-                              "ec2:CreateAction": "CreateSecurityGroup"
-                          }
-                      },
-                      "Effect": "Allow",
-                      "Resource": "arn:aws:ec2:*:*:security-group/*"
-                  },
-                  {
-                      "Action": [
-                          "ec2:DeleteTags",
-                          "ec2:CreateTags"
-                      ],
-                      "Condition": {
-                          "Null": {
-                              "aws:RequestTag/elbv2.k8s.aws/cluster": "true",
-                              "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
-                          }
-                      },
-                      "Effect": "Allow",
-                      "Resource": "arn:aws:ec2:*:*:security-group/*"
-                  },
-                  {
-                      "Action": [
-                          "ec2:RevokeSecurityGroupIngress",
-                          "ec2:DeleteSecurityGroup",
-                          "ec2:AuthorizeSecurityGroupIngress"
-                      ],
-                      "Condition": {
-                          "Null": {
-                              "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
-                          }
-                      },
-                      "Effect": "Allow",
-                      "Resource": "*"
-                  },
-                  {
-                      "Action": [
-                          "elasticloadbalancing:CreateTargetGroup",
-                          "elasticloadbalancing:CreateLoadBalancer"
-                      ],
-                      "Condition": {
-                          "Null": {
-                              "aws:RequestTag/elbv2.k8s.aws/cluster": "false"
-                          }
-                      },
-                      "Effect": "Allow",
-                      "Resource": "*"
-                  },
-                  {
-                      "Action": [
-                          "elasticloadbalancing:DeleteRule",
-                          "elasticloadbalancing:DeleteListener",
-                          "elasticloadbalancing:CreateRule",
-                          "elasticloadbalancing:CreateListener"
-                      ],
-                      "Effect": "Allow",
-                      "Resource": "*"
-                  },
-                  {
-                      "Action": [
-                          "elasticloadbalancing:RemoveTags",
-                          "elasticloadbalancing:AddTags"
-                      ],
-                      "Condition": {
-                          "Null": {
-                              "aws:RequestTag/elbv2.k8s.aws/cluster": "true",
-                              "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
-                          }
-                      },
-                      "Effect": "Allow",
-                      "Resource": [
-                          "arn:aws:elasticloadbalancing:*:*:targetgroup/*/*",
-                          "arn:aws:elasticloadbalancing:*:*:loadbalancer/net/*/*",
-                          "arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*"
-                      ]
-                  },
-                  {
-                      "Action": [
-                          "elasticloadbalancing:RemoveTags",
-                          "elasticloadbalancing:AddTags"
-                      ],
-                      "Effect": "Allow",
-                      "Resource": [
-                          "arn:aws:elasticloadbalancing:*:*:listener/net/*/*/*",
-                          "arn:aws:elasticloadbalancing:*:*:listener/app/*/*/*",
-                          "arn:aws:elasticloadbalancing:*:*:listener-rule/net/*/*/*",
-                          "arn:aws:elasticloadbalancing:*:*:listener-rule/app/*/*/*"
-                      ]
-                  },
-                  {
-                      "Action": [
-                          "elasticloadbalancing:SetSubnets",
-                          "elasticloadbalancing:SetSecurityGroups",
-                          "elasticloadbalancing:SetIpAddressType",
-                          "elasticloadbalancing:ModifyTargetGroupAttributes",
-                          "elasticloadbalancing:ModifyTargetGroup",
-                          "elasticloadbalancing:ModifyLoadBalancerAttributes",
-                          "elasticloadbalancing:DeleteTargetGroup",
-                          "elasticloadbalancing:DeleteLoadBalancer"
-                      ],
-                      "Condition": {
-                          "Null": {
-                              "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
-                          }
-                      },
-                      "Effect": "Allow",
-                      "Resource": "*"
-                  },
-                  {
-                      "Action": "elasticloadbalancing:AddTags",
-                      "Condition": {
-                          "Null": {
-                              "aws:RequestTag/elbv2.k8s.aws/cluster": "false"
-                          },
-                          "StringEquals": {
-                              "elasticloadbalancing:CreateAction": [
-                                  "CreateTargetGroup",
-                                  "CreateLoadBalancer"
-                              ]
-                          }
-                      },
-                      "Effect": "Allow",
-                      "Resource": [
-                          "arn:aws:elasticloadbalancing:*:*:targetgroup/*/*",
-                          "arn:aws:elasticloadbalancing:*:*:loadbalancer/net/*/*",
-                          "arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*"
-                      ]
-                  },
-                  {
-                      "Action": [
-                          "elasticloadbalancing:RegisterTargets",
-                          "elasticloadbalancing:DeregisterTargets"
-                      ],
-                      "Effect": "Allow",
-                      "Resource": "arn:aws:elasticloadbalancing:*:*:targetgroup/*/*"
-                  },
-                  {
-                      "Action": [
-                          "elasticloadbalancing:SetWebAcl",
-                          "elasticloadbalancing:RemoveListenerCertificates",
-                          "elasticloadbalancing:ModifyRule",
-                          "elasticloadbalancing:ModifyListener",
-                          "elasticloadbalancing:AddListenerCertificates"
-                      ],
-                      "Effect": "Allow",
-                      "Resource": "*"
+                    "Effect": "Allow",
+                    "Action": [
+                      "route53:ListHostedZones",
+                      "route53:ListResourceRecordSets"
+                    ],
+                    "Resource": [
+                      "*"
+                    ]
                   }
-              ],
-              "Version": "2012-10-17"
-          }            
-
-  - id: awsLoadBalancerControllerPodIdentityAssociation
-    template:
-      apiVersion: eks.services.k8s.aws/v1alpha1
-      kind: PodIdentityAssociation
-      metadata:
-        name: ${schema.spec.name}-aws-load-balancer-controller
-        namespace: ${schema.spec.name}
-      spec:
-        clusterName: ${schema.spec.name}
-        namespace: kube-system
-        roleARN: ${awsLoadBalancerControllerRole.status.ackResourceMetadata.arn}
-        serviceAccount: aws-load-balancer-controller-sa
-        tags:
-          environment: ${schema.spec.environment}
-          managedBy: ACK
-          application: aws-load-balancer-controller
-
-
-###########################################################
-# External DNS AddOn
-###########################################################
-
-- id: externalDnsPolicy
-    template:
-      apiVersion: iam.services.k8s.aws/v1alpha1
-      kind: Policy
-      metadata:
-        namespace: ${schema.spec.name}
-        name: ${schema.spec.name}-external-dns-policy
-      spec:
-        name: ${schema.spec.name}-external-dns-policy
-        policyDocument: |
-          {
-            "Version": "2012-10-17",
-            "Statement": [
-              {
-                "Effect": "Allow",
-                "Action": [
-                  "route53:ChangeResourceRecordSets"
-                ],
-                "Resource": [
-                  "arn:aws:route53:::hostedzone/*"
-                ]
-              },
-              {
-                "Effect": "Allow",
-                "Action": [
-                  "route53:ListHostedZones",
-                  "route53:ListResourceRecordSets"
-                ],
-                "Resource": [
-                  "*"
                 ]
               }
-            ]
-          }
 
-  - id: externalDnsRole
-    template:
-      apiVersion: iam.services.k8s.aws/v1alpha1
-      kind: Role
-      metadata:
-        namespace: ${schema.spec.name}
-        name: ${schema.spec.name}-external-dns-role
-      spec:
-        name: ${schema.spec.name}-external-dns-role
-        policyRefs:
-          - from:
-              name: ${schema.spec.name}-external-dns-policy
-        assumeRolePolicyDocument: |
-          {
-            "Version": "2012-10-17",
-            "Statement": [
-              {
-                "Effect": "Allow",
-                "Principal": {
-                  "Service": "pods.eks.amazonaws.com"
-                },
-                "Action": [
-                  "sts:AssumeRole",
-                  "sts:TagSession"
-                ]
-              }
-            ]
-          }
+    - id: externalDnsRole
+      template:
+        apiVersion: iam.services.k8s.aws/v1alpha1
+        kind: Role
+        metadata:
+          namespace: ${schema.spec.name}
+          name: ${schema.spec.name}-external-dns-role
+        spec:
+          name: ${schema.spec.name}-external-dns-role
+          policyRefs:
+            - from:
+                name: ${schema.spec.name}-external-dns-policy
+          assumeRolePolicyDocument: |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": "pods.eks.amazonaws.com"
+                  },
+                  "Action": [
+                    "sts:AssumeRole",
+                    "sts:TagSession"
+                  ]
+                }
+              ]
+            }
 
-  - id: externalDnsPodIdentity
-    template:
-      apiVersion: eks.services.k8s.aws/v1alpha1
-      kind: PodIdentityAssociation
-      metadata:
-        namespace: ${schema.spec.name}
-        name: ${schema.spec.name}-external-dns
-      spec:
-        clusterName: ${schema.spec.name}
-        namespace: external-dns
-        roleARN: ${externalDnsRole.status.ackResourceMetadata.arn}
-        serviceAccount: external-dns
+    - id: externalDnsPodIdentity
+      template:
+        apiVersion: eks.services.k8s.aws/v1alpha1
+        kind: PodIdentityAssociation
+        metadata:
+          namespace: ${schema.spec.name}
+          name: ${schema.spec.name}-external-dns
+        spec:
+          clusterName: ${schema.spec.name}
+          namespace: external-dns
+          roleARN: ${externalDnsRole.status.ackResourceMetadata.arn}
+          serviceAccount: external-dns
