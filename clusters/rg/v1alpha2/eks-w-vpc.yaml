@@ -87,7 +87,7 @@ spec:
           k8sVersion: ${schema.spec.k8sVersion}
           adminRoleName: ${schema.spec.adminRoleName}
           nodesCount: ${schema.spec.nodesCount}
-          fleetSecretManagerSecretName2: ${schema.spec.fleetSecretManagerSecretName}
+          fleetSecretManagerSecretName: ${schema.spec.fleetSecretManagerSecretName}
           domainName: ${schema.spec.domainName}
           network:
             vpcID: ${vpc.status.vpcID}
