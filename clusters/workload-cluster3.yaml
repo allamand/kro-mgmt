@@ -14,31 +14,5 @@ spec:
     nodesCount: 6
     fleetSecretManagerSecretNameSuffix: argocd-secret-name
     domainName: workload-cluster3.rosa.allamand.com
-    cidr:
-      vpcCidr: "10.0.0.0/16"
-      publicSubnet1Cidr: "10.0.1.0/24"
-      publicSubnet2Cidr: "10.0.2.0/24"
-      privateSubnet1Cidr: "10.0.11.0/24"
-      privateSubnet2Cidr: "10.0.12.0/24"
     gitops:
-        addonsRepoBasePath: "gitops/addons/"
-        addonsRepoPath: "bootstrap"
-        #addonsRepoRevision: "HEAD"
         addonsRepoRevision: "seb"
-        addonsRepoSecretKey: "eks-fleet-workshop-gitops-addons"
-        addonsRepoUrl: "https://github.com/aws-samples/fleet-management-on-amazon-eks-workshop"
-        fleetRepoBasePath: "gitops/fleet/"
-        fleetRepoPath: "bootstrap"
-        fleetRepoRevision: "HEAD"
-        fleetRepoSecretKey: "eks-fleet-workshop-gitops-fleet"
-        fleetRepoUrl: "https://github.com/aws-samples/fleet-management-on-amazon-eks-workshop"
-        platformRepoBasePath: "gitops/platform/"
-        platformRepoPath: "bootstrap"
-        platformRepoRevision: "HEAD"
-        platformRepoSecretKey: "eks-fleet-workshop-gitops-platform"
-        platformRepoUrl: "https://github.com/aws-samples/fleet-management-on-amazon-eks-workshop"
-        workloadRepoBasePath: "gitops/apps/"
-        workloadRepoPath: ""
-        workloadRepoRevision: "HEAD"
-        workloadRepoSecretKey: "eks-fleet-workshop-gitops-workloads"
-        workloadRepoUrl: "https://github.com/aws-samples/fleet-management-on-amazon-eks-workshop"

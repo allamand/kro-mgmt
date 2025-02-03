@@ -73,9 +73,6 @@ spec:
 
           karpenter_namespace: string | default="karpenter"
           karpenter_service_account: string | default="karpenter-sa"
-
-
-
     status:
       state: string
       conditions:
