@@ -54,23 +54,23 @@ spec:
         workloadRepoSecretKey: string
         workloadRepoUrl: string
       addons:
-          adot_collector_namespace: string | default="adot-collector-kubeprometheus"
-          adot_collector_service_account: string | default="adot-collector-kubeprometheus"
+        adot_collector_namespace: string | default="adot-collector-kubeprometheus"
+        adot_collector_service_account: string | default="adot-collector-kubeprometheus"
 
-          external_dns_namespace: string | default="external-dns"
-          external_dns_service_account: string | default="external-dns-sa"
-          external_dns_policy: string | default="sync"
+        external_dns_namespace: string | default="external-dns"
+        external_dns_service_account: string | default="external-dns-sa"
+        external_dns_policy: string | default="sync"
 
-          external_secrets_namespace: string | default="external-secrets"
-          external_secrets_service_account: string | default="external-secrets-sa"
+        external_secrets_namespace: string | default="external-secrets"
+        external_secrets_service_account: string | default="external-secrets-sa"
 
-          aws_load_balancer_controller_namespace: string | default="kube-system"
-          aws_load_balancer_controller_serviceaccount: string | default="aws-load-balancer-controller-sa"
+        aws_load_balancer_controller_namespace: string | default="kube-system"
+        aws_load_balancer_controller_serviceaccount: string | default="aws-load-balancer-controller-sa"
 
-          amp_endpoint_url: string | default=""
+        amp_endpoint_url: string | default=""
 
-          karpenter_namespace: string | default="karpenter"
-          karpenter_service_account: string | default="karpenter-sa"
+        karpenter_namespace: string | default="karpenter"
+        karpenter_service_account: string | default="karpenter-sa"
     status:
       state: string
       conditions:
