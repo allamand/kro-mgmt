@@ -25,21 +25,21 @@ spec:
       privateSubnet2Cidr: "10.0.12.0/24"
     gitops:
         addonsRepoRevision: "seb"
-      addons:
-          adot_collector_namespace: "adot-collector-kubeprometheus"
-          adot_collector_service_account: "adot-collector-kubeprometheus"
+    addons:
+        adot_collector_namespace: "adot-collector-kubeprometheus"
+        adot_collector_service_account: "adot-collector-kubeprometheus"
 
-          external_dns_namespace: "external-dns"
-          external_dns_service_account: "external-dns-sa"
-          external_dns_policy: "sync"
+        external_dns_namespace: "external-dns"
+        external_dns_service_account: "external-dns-sa"
+        external_dns_policy: "sync"
 
-          external_secrets_namespace: "external-secrets"
-          external_secrets_service_account: "external-secrets-sa"
+        external_secrets_namespace: "external-secrets"
+        external_secrets_service_account: "external-secrets-sa"
 
-          aws_load_balancer_controller_namespace: "kube-system"
-          aws_load_balancer_controller_serviceaccount: "aws-load-balancer-controller-sa"
+        aws_load_balancer_controller_namespace: "kube-system"
+        aws_load_balancer_controller_serviceaccount: "aws-load-balancer-controller-sa"
 
-          amp_endpoint_url: ""
+        amp_endpoint_url: ""
 
-          karpenter_namespace: "karpenter"
-          karpenter_service_account: "karpenter-sa"        
+        karpenter_namespace: "karpenter"
+        karpenter_service_account: "karpenter-sa"        
