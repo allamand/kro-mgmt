@@ -17,5 +17,11 @@ spec:
     nodesCount: 6
     fleetSecretManagerSecretNameSuffix: argocd-secret-name
     domainName: workload-cluster3.rosa.allamand.com
+    cidr:
+      vpcCidr: "10.0.0.0/16"
+      publicSubnet1Cidr: "10.0.1.0/24"
+      publicSubnet2Cidr: "10.0.2.0/24"
+      privateSubnet1Cidr: "10.0.11.0/24"
+      privateSubnet2Cidr: "10.0.12.0/24"
     gitops:
         addonsRepoRevision: "seb"
