@@ -1,8 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-#- rg/v1alpha1
-- rg/v1alpha2
+- rg/
 #- workload-cluster1.yaml
 #- workload-cluster2.yaml
 - workload-cluster3.yaml
