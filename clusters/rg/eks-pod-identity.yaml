@@ -1,0 +1,496 @@
+# yamllint disable rule:line-length
+---
+apiVersion: kro.run/v1alpha1
+kind: ResourceGroup
+metadata:
+  name: ekspodidentity.kro.run
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  schema:
+    apiVersion: v1alpha1
+    kind: EksPodIdentity
+    spec:
+      clusterName: string
+      addonName: string
+      policies: list(string)
+      additional_policy_arns: list(string)
+      
+      associations:
+        namespace: string
+        serviceAccount: string
+
+
+  resources:
+
+    ###########################################################
+    # AddOn Role
+    ###########################################################
+    - id: addonRole
+      template:
+        apiVersion: iam.services.k8s.aws/v1alpha1
+        kind: Role
+        metadata:
+          namespace: ${schema.spec.clusterName}
+          name: ${schema.spec.clusterName}-${schema.spec.addonName}-role
+        spec:
+          name: ${schema.spec.clusterName}-${schema.spec.addonName}-role
+          policies:
+            - $(schema.spec.policies)
+          assumeRolePolicyDocument: |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": "pods.eks.amazonaws.com"
+                  },
+                  "Action": [
+                    "sts:AssumeRole",
+                    "sts:TagSession"
+                  ]
+                }
+              ]
+            }
+    - id: addonPodIdentityAssociation
+      template:
+        apiVersion: eks.services.k8s.aws/v1alpha1
+        kind: PodIdentityAssociation
+        metadata:
+          name: ${schema.spec.clusterName}-${schema.spec.addonName}
+          namespace: ${schema.spec.clusterName}
+        spec:
+          clusterName: ${schema.spec.clusterName}
+          namespace: ${schema.spec.associations.namespace}
+          roleARN: ${addonsRole.status.ackResourceMetadata.arn}
+          serviceAccount: ${schema.spec.associations.serviceAccount}
+          tags:
+            environment: ${schema.spec.environment}
+            managedBy: ACK
+            application: ${schema.spec.addonName}
+
+    ###########################################################
+    # load balancer controller
+    ###########################################################
+    - id: awsLoadBalancerControllerRole
+      template:
+        apiVersion: iam.services.k8s.aws/v1alpha1
+        kind: Role
+        metadata:
+          namespace: ${schema.spec.clusterName}
+          name: ${schema.spec.clusterName}-aws-load-balancer-controller-role
+        spec:
+          name: ${schema.spec.clusterName}-aws-load-balancer-controller-role
+          policyRefs:
+            - from:
+                name: ${schema.spec.clusterName}-aws-load-balancer-controller-policy
+          assumeRolePolicyDocument: |
+            {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Principal": {
+                            "Service": "pods.eks.amazonaws.com"
+                        },
+                        "Action": [
+                            "sts:TagSession",
+                            "sts:AssumeRole"
+                        ]
+                    }
+                ]
+            }
+
+    - id: awsLoadBalancerControllerPolicy
+      template:
+        apiVersion: iam.services.k8s.aws/v1alpha1
+        kind: Policy
+        metadata:
+          namespace: ${schema.spec.clusterName}
+          name: ${schema.spec.clusterName}-aws-load-balancer-controller-policy
+        spec:
+          name: ${schema.spec.clusterName}-aws-load-balancer-controller-policy
+          policyDocument: |
+            {
+                "Statement": [
+                    {
+                        "Action": "iam:CreateServiceLinkedRole",
+                        "Condition": {
+                            "StringEquals": {
+                                "iam:AWSServiceName": "elasticloadbalancing.amazonaws.com"
+                            }
+                        },
+                        "Effect": "Allow",
+                        "Resource": "*"
+                    },
+                    {
+                        "Action": [
+                            "elasticloadbalancing:DescribeTrustStores",
+                            "elasticloadbalancing:DescribeTargetHealth",
+                            "elasticloadbalancing:DescribeTargetGroups",
+                            "elasticloadbalancing:DescribeTargetGroupAttributes",
+                            "elasticloadbalancing:DescribeTags",
+                            "elasticloadbalancing:DescribeSSLPolicies",
+                            "elasticloadbalancing:DescribeRules",
+                            "elasticloadbalancing:DescribeLoadBalancers",
+                            "elasticloadbalancing:DescribeLoadBalancerAttributes",
+                            "elasticloadbalancing:DescribeListeners",
+                            "elasticloadbalancing:DescribeListenerCertificates",
+                            "ec2:GetCoipPoolUsage",
+                            "ec2:DescribeVpcs",
+                            "ec2:DescribeVpcPeeringConnections",
+                            "ec2:DescribeTags",
+                            "ec2:DescribeSubnets",
+                            "ec2:DescribeSecurityGroups",
+                            "ec2:DescribeNetworkInterfaces",
+                            "ec2:DescribeInternetGateways",
+                            "ec2:DescribeInstances",
+                            "ec2:DescribeCoipPools",
+                            "ec2:DescribeAvailabilityZones",
+                            "ec2:DescribeAddresses",
+                            "ec2:DescribeAccountAttributes"
+                        ],
+                        "Effect": "Allow",
+                        "Resource": "*"
+                    },
+                    {
+                        "Action": [
+                            "wafv2:GetWebACLForResource",
+                            "wafv2:GetWebACL",
+                            "wafv2:DisassociateWebACL",
+                            "wafv2:AssociateWebACL",
+                            "waf-regional:GetWebACLForResource",
+                            "waf-regional:GetWebACL",
+                            "waf-regional:DisassociateWebACL",
+                            "waf-regional:AssociateWebACL",
+                            "shield:GetSubscriptionState",
+                            "shield:DescribeProtection",
+                            "shield:DeleteProtection",
+                            "shield:CreateProtection",
+                            "iam:ListServerCertificates",
+                            "iam:GetServerCertificate",
+                            "cognito-idp:DescribeUserPoolClient",
+                            "acm:ListCertificates",
+                            "acm:DescribeCertificate"
+                        ],
+                        "Effect": "Allow",
+                        "Resource": "*"
+                    },
+                    {
+                        "Action": [
+                            "ec2:RevokeSecurityGroupIngress",
+                            "ec2:CreateSecurityGroup",
+                            "ec2:AuthorizeSecurityGroupIngress"
+                        ],
+                        "Effect": "Allow",
+                        "Resource": "*"
+                    },
+                    {
+                        "Action": "ec2:CreateTags",
+                        "Condition": {
+                            "Null": {
+                                "aws:RequestTag/elbv2.k8s.aws/cluster": "false"
+                            },
+                            "StringEquals": {
+                                "ec2:CreateAction": "CreateSecurityGroup"
+                            }
+                        },
+                        "Effect": "Allow",
+                        "Resource": "arn:aws:ec2:*:*:security-group/*"
+                    },
+                    {
+                        "Action": [
+                            "ec2:DeleteTags",
+                            "ec2:CreateTags"
+                        ],
+                        "Condition": {
+                            "Null": {
+                                "aws:RequestTag/elbv2.k8s.aws/cluster": "true",
+                                "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
+                            }
+                        },
+                        "Effect": "Allow",
+                        "Resource": "arn:aws:ec2:*:*:security-group/*"
+                    },
+                    {
+                        "Action": [
+                            "ec2:RevokeSecurityGroupIngress",
+                            "ec2:DeleteSecurityGroup",
+                            "ec2:AuthorizeSecurityGroupIngress"
+                        ],
+                        "Condition": {
+                            "Null": {
+                                "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
+                            }
+                        },
+                        "Effect": "Allow",
+                        "Resource": "*"
+                    },
+                    {
+                        "Action": [
+                            "elasticloadbalancing:CreateTargetGroup",
+                            "elasticloadbalancing:CreateLoadBalancer"
+                        ],
+                        "Condition": {
+                            "Null": {
+                                "aws:RequestTag/elbv2.k8s.aws/cluster": "false"
+                            }
+                        },
+                        "Effect": "Allow",
+                        "Resource": "*"
+                    },
+                    {
+                        "Action": [
+                            "elasticloadbalancing:DeleteRule",
+                            "elasticloadbalancing:DeleteListener",
+                            "elasticloadbalancing:CreateRule",
+                            "elasticloadbalancing:CreateListener"
+                        ],
+                        "Effect": "Allow",
+                        "Resource": "*"
+                    },
+                    {
+                        "Action": [
+                            "elasticloadbalancing:RemoveTags",
+                            "elasticloadbalancing:AddTags"
+                        ],
+                        "Condition": {
+                            "Null": {
+                                "aws:RequestTag/elbv2.k8s.aws/cluster": "true",
+                                "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
+                            }
+                        },
+                        "Effect": "Allow",
+                        "Resource": [
+                            "arn:aws:elasticloadbalancing:*:*:targetgroup/*/*",
+                            "arn:aws:elasticloadbalancing:*:*:loadbalancer/net/*/*",
+                            "arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*"
+                        ]
+                    },
+                    {
+                        "Action": [
+                            "elasticloadbalancing:RemoveTags",
+                            "elasticloadbalancing:AddTags"
+                        ],
+                        "Effect": "Allow",
+                        "Resource": [
+                            "arn:aws:elasticloadbalancing:*:*:listener/net/*/*/*",
+                            "arn:aws:elasticloadbalancing:*:*:listener/app/*/*/*",
+                            "arn:aws:elasticloadbalancing:*:*:listener-rule/net/*/*/*",
+                            "arn:aws:elasticloadbalancing:*:*:listener-rule/app/*/*/*"
+                        ]
+                    },
+                    {
+                        "Action": [
+                            "elasticloadbalancing:SetSubnets",
+                            "elasticloadbalancing:SetSecurityGroups",
+                            "elasticloadbalancing:SetIpAddressType",
+                            "elasticloadbalancing:ModifyTargetGroupAttributes",
+                            "elasticloadbalancing:ModifyTargetGroup",
+                            "elasticloadbalancing:ModifyLoadBalancerAttributes",
+                            "elasticloadbalancing:DeleteTargetGroup",
+                            "elasticloadbalancing:DeleteLoadBalancer"
+                        ],
+                        "Condition": {
+                            "Null": {
+                                "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
+                            }
+                        },
+                        "Effect": "Allow",
+                        "Resource": "*"
+                    },
+                    {
+                        "Action": "elasticloadbalancing:AddTags",
+                        "Condition": {
+                            "Null": {
+                                "aws:RequestTag/elbv2.k8s.aws/cluster": "false"
+                            },
+                            "StringEquals": {
+                                "elasticloadbalancing:CreateAction": [
+                                    "CreateTargetGroup",
+                                    "CreateLoadBalancer"
+                                ]
+                            }
+                        },
+                        "Effect": "Allow",
+                        "Resource": [
+                            "arn:aws:elasticloadbalancing:*:*:targetgroup/*/*",
+                            "arn:aws:elasticloadbalancing:*:*:loadbalancer/net/*/*",
+                            "arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*"
+                        ]
+                    },
+                    {
+                        "Action": [
+                            "elasticloadbalancing:RegisterTargets",
+                            "elasticloadbalancing:DeregisterTargets"
+                        ],
+                        "Effect": "Allow",
+                        "Resource": "arn:aws:elasticloadbalancing:*:*:targetgroup/*/*"
+                    },
+                    {
+                        "Action": [
+                            "elasticloadbalancing:SetWebAcl",
+                            "elasticloadbalancing:RemoveListenerCertificates",
+                            "elasticloadbalancing:ModifyRule",
+                            "elasticloadbalancing:ModifyListener",
+                            "elasticloadbalancing:AddListenerCertificates"
+                        ],
+                        "Effect": "Allow",
+                        "Resource": "*"
+                    }
+                ],
+                "Version": "2012-10-17"
+            }
+
+    - id: awsLoadBalancerControllerPodIdentityAssociation
+      template:
+        apiVersion: eks.services.k8s.aws/v1alpha1
+        kind: PodIdentityAssociation
+        metadata:
+          name: ${schema.spec.clusterName}-aws-load-balancer-controller
+          namespace: ${schema.spec.clusterName}
+        spec:
+          clusterName: ${schema.spec.clusterName}
+          namespace: kube-system
+          roleARN: ${awsLoadBalancerControllerRole.status.ackResourceMetadata.arn}
+          serviceAccount: aws-load-balancer-controller-sa
+          tags:
+            environment: ${schema.spec.environment}
+            managedBy: ACK
+            application: aws-load-balancer-controller
+
+
+    ###########################################################
+    # External DNS AddOn
+    ###########################################################
+    - id: externalDnsPolicy
+      template:
+        apiVersion: iam.services.k8s.aws/v1alpha1
+        kind: Policy
+        metadata:
+          namespace: ${schema.spec.clusterName}
+          name: ${schema.spec.clusterName}-external-dns-policy
+        spec:
+          name: ${schema.spec.clusterName}-external-dns-policy
+          policyDocument: |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "route53:ChangeResourceRecordSets"
+                  ],
+                  "Resource": [
+                    "arn:aws:route53:::hostedzone/*"
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "route53:ListHostedZones",
+                    "route53:ListResourceRecordSets"
+                  ],
+                  "Resource": [
+                    "*"
+                  ]
+                }
+              ]
+            }
+
+    - id: externalDnsRole
+      # dependsOn:
+      #   - externalDnsPolicy    
+      template:
+        apiVersion: iam.services.k8s.aws/v1alpha1
+        kind: Role
+        metadata:
+          namespace: ${schema.spec.clusterName}
+          name: ${schema.spec.clusterName}-external-dns-role
+        spec:
+          name: ${schema.spec.clusterName}-external-dns-role
+          policyRefs:
+            - from:
+                name: ${schema.spec.clusterName}-external-dns-policy
+          assumeRolePolicyDocument: |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": "pods.eks.amazonaws.com"
+                  },
+                  "Action": [
+                    "sts:AssumeRole",
+                    "sts:TagSession"
+                  ]
+                }
+              ]
+            }
+
+    - id: externalDnsPodIdentity
+      # dependsOn:
+      #   - externalDnsRole    
+      template:
+        apiVersion: eks.services.k8s.aws/v1alpha1
+        kind: PodIdentityAssociation
+        metadata:
+          namespace: ${schema.spec.clusterName}
+          name: ${schema.spec.clusterName}-external-dns
+        spec:
+          clusterName: ${schema.spec.clusterName}
+          namespace: external-dns
+          roleARN: ${externalDnsRole.status.ackResourceMetadata.arn}
+          serviceAccount: external-dns
+
+
+  ###########################################################
+  # ADOT Collector
+  ###########################################################
+  - id: adotCollectorRole
+    template:
+      apiVersion: iam.services.k8s.aws/v1alpha1
+      kind: Role
+      metadata:
+        namespace: ${schema.spec.clusterName}
+        name: ${schema.spec.clusterName}-adot-collector-role
+      spec:
+        name: ${schema.spec.clusterName}-adot-collector-role
+        policies:
+          - arn:aws:iam::aws:policy/AmazonPrometheusRemoteWriteAccess
+        assumeRolePolicyDocument: |
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "pods.eks.amazonaws.com"
+                },
+                "Action": [
+                  "sts:AssumeRole",
+                  "sts:TagSession"
+                ]
+              }
+            ]
+          }
+
+  - id: adotCollectorPodIdentityAssociation
+    template:
+      apiVersion: eks.services.k8s.aws/v1alpha1
+      kind: PodIdentityAssociation
+      metadata:
+        name: ${schema.spec.clusterName}-adot-collector
+        namespace: ${schema.spec.clusterName}
+      spec:
+        clusterName: ${schema.spec.clusterName}
+        namespace: ${schema.spec.addons.adot_collector_namespace}
+        roleARN: ${adotCollectorRole.status.ackResourceMetadata.arn}
+        serviceAccount: ${schema.spec.addons.adot_collector_serviceaccount}
+        tags:
+          environment: ${schema.spec.environment}
+          managedBy: ACK
+          application: adot-collector
