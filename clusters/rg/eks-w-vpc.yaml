@@ -137,4 +137,17 @@ spec:
             workloadRepoRevision: ${schema.spec.gitops.workloadRepoRevision}
             workloadRepoSecretKey: ${schema.spec.gitops.workloadRepoSecretKey}
             workloadRepoUrl: ${schema.spec.gitops.workloadRepoUrl}
+          addons:
+            adot_collector_namespace: ${schema.spec.addons.adot_collector_namespace}
+            adot_collector_service_account: ${schema.spec.addons.adot_collector_service_account}
+            external_dns_namespace: ${schema.spec.addons.external_dns_namespace}
+            external_dns_service_account: ${schema.spec.addons.external_dns_service_account}
+            external_dns_policy: ${schema.spec.addons.external_dns_policy}
+            external_secrets_namespace: ${schema.spec.addons.external_secrets_namespace}
+            external_secrets_service_account: ${schema.spec.addons.external_secrets_service_account}
+            aws_load_balancer_controller_namespace: ${schema.spec.addons.aws_load_balancer_controller_namespace}
+            aws_load_balancer_controller_serviceaccount: ${schema.spec.addons.aws_load_balancer_controller_serviceaccount}
+            amp_endpoint_url: ${schema.spec.addons.amp_endpoint_url}
+            karpenter_namespace: ${schema.spec.addons.karpenter_namespace}
+            karpenter_service_account: ${schema.spec.addons.karpenter_service_account}
 
