@@ -63,6 +63,8 @@ spec:
 
           external_secrets_namespace: string | default="external-secrets"
           external_secrets_service_account: string | default="external-secrets-sa"
+          external_secrets_namespace_fleet: string | default="external-secrets"
+          external_secrets_service_account: string | default="external-secrets-sa"
 
           aws_load_balancer_controller_namespace: string | default="kube-system"
           aws_load_balancer_controller_serviceaccount: string | default="aws-load-balancer-controller-sa"
@@ -71,14 +73,14 @@ spec:
 
           karpenter_namespace: string | default="karpenter"
           karpenter_service_account: string | default="karpenter-sa"
-    status:
-      state: string
-      conditions:
-        - type: string # e.g., "Ready", "Progressing"
-          status: string # "True", "False", "Unknown"
-          lastTransitionTime: string
-          reason: string
-          message: string
+    # status:
+    #   state: string
+    #   conditions:
+    #     - type: string # e.g., "Ready", "Progressing"
+    #       status: string # "True", "False", "Unknown"
+    #       lastTransitionTime: string
+    #       reason: string
+    #       message: string
 
 
   resources:
@@ -880,50 +882,50 @@ spec:
           serviceAccount: external-dns
 
 
-    ###########################################################
-    # ADOT Collector
-    ###########################################################
-    - id: adotCollectorRole
-      template:
-        apiVersion: iam.services.k8s.aws/v1alpha1
-        kind: Role
-        metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-adot-collector-role
-        spec:
-          name: ${schema.spec.name}-adot-collector-role
-          policies:
-            - arn:aws:iam::aws:policy/AmazonPrometheusRemoteWriteAccess
-          assumeRolePolicyDocument: |
-            {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Effect": "Allow",
-                  "Principal": {
-                    "Service": "pods.eks.amazonaws.com"
-                  },
-                  "Action": [
-                    "sts:AssumeRole",
-                    "sts:TagSession"
-                  ]
-                }
-              ]
-            }
+  ###########################################################
+  # ADOT Collector
+  ###########################################################
+  - id: adotCollectorRole
+    template:
+      apiVersion: iam.services.k8s.aws/v1alpha1
+      kind: Role
+      metadata:
+        namespace: ${schema.spec.name}
+        name: ${schema.spec.name}-adot-collector-role
+      spec:
+        name: ${schema.spec.name}-adot-collector-role
+        policies:
+          - arn:aws:iam::aws:policy/AmazonPrometheusRemoteWriteAccess
+        assumeRolePolicyDocument: |
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "pods.eks.amazonaws.com"
+                },
+                "Action": [
+                  "sts:AssumeRole",
+                  "sts:TagSession"
+                ]
+              }
+            ]
+          }
 
-    - id: adotCollectorPodIdentityAssociation
-      template:
-        apiVersion: eks.services.k8s.aws/v1alpha1
-        kind: PodIdentityAssociation
-        metadata:
-          name: ${schema.spec.name}-adot-collector
-          namespace: ${schema.spec.name}
-        spec:
-          clusterName: ${schema.spec.name}
-          namespace: ${schema.spec.addons.adot_collector_namespace}
-          roleARN: ${adotCollectorRole.status.ackResourceMetadata.arn}
-          serviceAccount: ${schema.spec.addons.adot_collector_serviceaccount}
-          tags:
-            environment: ${schema.spec.environment}
-            managedBy: ACK
-            application: adot-collector
+  - id: adotCollectorPodIdentityAssociation
+    template:
+      apiVersion: eks.services.k8s.aws/v1alpha1
+      kind: PodIdentityAssociation
+      metadata:
+        name: ${schema.spec.name}-adot-collector
+        namespace: ${schema.spec.name}
+      spec:
+        clusterName: ${schema.spec.name}
+        namespace: ${schema.spec.addons.adot_collector_namespace}
+        roleARN: ${adotCollectorRole.status.ackResourceMetadata.arn}
+        serviceAccount: ${schema.spec.addons.adot_collector_serviceaccount}
+        tags:
+          environment: ${schema.spec.environment}
+          managedBy: ACK
+          application: adot-collector
