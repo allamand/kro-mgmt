@@ -275,7 +275,7 @@ spec:
             aws_load_balancer_controller_service_account: $(schema.spec.addons.aws_load_balancer_controller_service_account)
 
             adot_collector_namespace: $(schema.spec.addons.adot_collector_namespace)
-            adot_collector_serviceaccount: $(schema.spec.addons.adot_collector_serviceaccount)
+            adot_collector_service_account: $(schema.spec.addons.adot_collector_service_account)
             amp_endpoint_url: $(schema.spec.addons.amp_endpoint_url)
 
             # amp_endpoint_url=https://aps-workspaces.eu-west-1.amazonaws.com/workspaces/ws-2ca820a0-a732-4c4b-8f76-3b84e38f8f44/
@@ -372,7 +372,7 @@ spec:
                 "aws_load_balancer_controller_namespace": "$(schema.spec.addons.aws_load_balancer_controller_namespace)",
                 "aws_load_balancer_controller_service_account": "$(schema.spec.addons.aws_load_balancer_controller_service_account)",
                 "adot_collector_namespace": "$(schema.spec.addons.adot_collector_namespace)",
-                "adot_collector_serviceaccount": "$(schema.spec.addons.adot_collector_serviceaccount)",
+                "adot_collector_service_account": "$(schema.spec.addons.adot_collector_service_account)",
                 "amp_endpoint_url": "$(schema.spec.addons.amp_endpoint_url)",
 
                 "karpenter_namespace": "$(schema.spec.addons.karpenter_namespace)",
@@ -922,7 +922,7 @@ spec:
           clusterName: ${schema.spec.name}
           namespace: ${schema.spec.addons.adot_collector_namespace}
           roleARN: ${adotCollectorRole.status.ackResourceMetadata.arn}
-          serviceAccount: ${schema.spec.addons.adot_collector_serviceaccount}
+          serviceAccount: ${schema.spec.addons.adot_collector_service_account}
           tags:
             environment: ${schema.spec.environment}
             managedBy: ACK
