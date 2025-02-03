@@ -15,7 +15,7 @@ spec:
     managementAccountId: '382076407153'
     adminRoleName: Admin
     nodesCount: 6
-    fleetSecretManagerSecretNameSuffix: argocd-secret-name
+    fleetSecretManagerSecretNameSuffix: argocd-secret-name2
     domainName: workload-cluster3.rosa.allamand.com
     cidr:
       vpcCidr: "10.0.0.0/16"
@@ -28,7 +28,7 @@ spec:
       addonsRepoPath: "bootstrap"
       addonsRepoRevision: "seb"
       #addonsRepoRevision: "HEAD"
-      addonsRepoSecretKey: "eks-fleet-workshop-gitops-addons2"
+      addonsRepoSecretKey: "eks-fleet-workshop-gitops-addons"
       addonsRepoUrl: "https://github.com/aws-samples/fleet-management-on-amazon-eks-worksho"
       fleetRepoBasePath: "gitops/fleet/"
       fleetRepoPath: "bootstrap"
