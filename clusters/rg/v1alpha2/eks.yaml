@@ -53,6 +53,89 @@ spec:
         workloadRepoRevision: string
         workloadRepoSecretKey: string
         workloadRepoUrl: string
+      addons:
+          adot_collector_namespace: string | default="adot-collector-kubeprometheus"
+          adot_collector_service_account: string | default="adot-collector-kubeprometheus"
+
+          external_dns_namespace: string | default="external-dns"
+          external_dns_service_account: string | default="external-dns-sa"
+          external_dns_policy: string | default="sync"
+
+          external_secrets_namespace: string | default="external-secrets"
+          external_secrets_service_account: string | default="external-secrets-sa"
+          external_secrets_namespace_fleet: string | default="external-secrets"
+          external_secrets_service_account: string | default="external-secrets-sa"
+
+          aws_load_balancer_controller_namespace: string | default="kube-system"
+          aws_load_balancer_controller_serviceaccount: string | default="aws-load-balancer-controller-sa"
+
+          amp_endpoint_url: string | default=""
+
+          karpenter_namespace: string | default="karpenter"
+          karpenter_service_account: string | default="karpenter-sa"
+          #karpenter_sqs_queue_name: string | default="sync"
+
+          # kubeprometheus_stack_namespace: string | default="kubeprometheus-stack"
+          # kubeprometheus_stack_serviceaccount: string | default="kubeprometheus-stack-sa"
+          # kubeprometheus_stack_policy: string | default="sync"
+
+          # prometheus_namespace: string | default="prometheus"
+          # prometheus_serviceaccount: string | default="prometheus-sa"
+          # prometheus_policy: string | default="sync"
+
+          # grafana_namespace: string | default="grafana"
+          # grafana_serviceaccount: string | default="grafana-sa"
+          # grafana_policy: string | default="sync"
+
+          # cert_manager_namespace: string | default="cert-manager"
+          # cert_manager_serviceaccount: string | default="cert-manager-sa"
+          # cert_manager_policy: string | default="sync"
+
+          # ebs_csi_driver_namespace: string | default="kube-system"
+          # ebs_csi_driver_serviceaccount: string | default="ebs-csi-controller-sa"
+
+          # cluster_autoscaler_namespace: string | default="kube-system"
+          # cluster_autoscaler_serviceaccount: string | default="cluster-autoscaler-aws-cluster-autoscaler-chart"
+          # cluster_autoscaler_policy: string | default="sync"
+
+          # aws_node_termination_handler_namespace: string | default="kube-system"
+          # aws_node_termination_handler_serviceaccount: string | default="aws-node-termination-handler-sa"
+          # aws_node_termination_handler_policy: string | default="sync"
+
+          # aws_efs_csi_driver_namespace: string | default="kube-system"
+          # aws_efs_csi_driver_serviceaccount: string | default="aws-efs-csi-driver-sa"
+          # aws_efs_csi_driver_policy: string | default="sync"
+
+          # aws_fsx_csi_driver_namespace: string | default="kube-system"
+          # aws_fsx_csi_driver_serviceaccount: string | default="aws-fsx-csi-driver-sa"
+          # aws_fsx_csi_driver_policy: string | default="sync"
+
+          # velero_namespace: string | default="velero"
+          # velero_serviceaccount: string | default="velero-sa"
+          # velero_policy: string | default="sync"
+
+          # velero_backup_bucket: string | default=""
+
+          # aws_cloudwatch_metrics_namespace: string | default="aws-cloudwatch-metrics"
+          # aws_cloudwatch_metrics_serviceaccount: string | default="aws-cloudwatch-metrics-sa"
+          # aws_cloudwatch_metrics_policy: string | default="sync"
+
+          # aws_xray_sa_namespace: string | default="kube-system"
+          # aws_xray_sa_serviceaccount: string | default="aws-xray-sa"
+
+          # aws_observability_namespace: string | default="aws-observability"
+          # aws_observability_serviceaccount: string | default="aws-observability-sa"
+
+          # aws_otel_collector_namespace: string | default="aws-otel-collector"
+          # aws_otel_collector_serviceaccount: string | default="aws-otel-collector-sa"
+
+
+          # aws_fluentbit_namespace: string | default="aws-fluentbit-eks"
+          # aws_fluentbit_serviceaccount: string | default="aws-fluentbit-eks-sa"
+
+
+
+
 
   resources:
 
@@ -236,20 +319,21 @@ spec:
             workload_repo_url: ${schema.spec.gitops.workloadRepoUrl}
             # Specific for External-DNS
             external_dns_domain_filters: ${schema.spec.domainName}
-            external_dns_namespace: external-dns
-            external_dns_policy: sync
+            external_dns_namespace: ${schema.spec.addons.external_dns_namespace}
+            external_dns_policy: ${schema.spec.addons.external_dns_policy}
+            external_dns_service_account: ${schema.spec.addons.external_dns_service_account}
 
             # Generic
-            external_dns_service_account: external-dns-sa
-            external_secrets_namespace: external-secrets
-            external_secrets_namespace_fleet: argocd
-            external_secrets_service_account: external-secrets-sa
-            external_secrets_service_account_fleet: external-secrets-sa
-            aws_load_balancer_controller_namespace: kube-system
-            aws_load_balancer_controller_service_account: aws-load-balancer-controller-sa
-            adot_collector_namespace: adot-collector-kubeprometheus
-            adot_collector_serviceaccount: adot-collector-kubeprometheus
-            amp_endpoint_url: ""
+            external_secrets_namespace: $(schema.spec.addons.external_secrets_namespace)
+            external_secrets_service_account: $(schema.spec.addons.external_secrets_service_account)
+
+            aws_load_balancer_controller_namespace: $(schema.spec.addons.aws_load_balancer_controller_namespace)
+            aws_load_balancer_controller_service_account: $(schema.spec.addons.aws_load_balancer_controller_service_account)
+
+            adot_collector_namespace: $(schema.spec.addons.adot_collector_namespace)
+            adot_collector_serviceaccount: $(schema.spec.addons.adot_collector_serviceaccount)
+            amp_endpoint_url: $(schema.spec.addons.amp_endpoint_url)
+
             # amp_endpoint_url=https://aps-workspaces.eu-west-1.amazonaws.com/workspaces/ws-2ca820a0-a732-4c4b-8f76-3b84e38f8f44/
 
             fleet_secret_manager_secret_name: ${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}
@@ -335,18 +419,22 @@ spec:
                 "workload_repo_secret_key": "${schema.spec.gitops.workloadRepoSecretKey}",
                 "workload_repo_url": "${schema.spec.gitops.workloadRepoUrl}",
                 "external_dns_domain_filters": "${schema.spec.domainName}",
-                "external_dns_namespace": "external-dns",
-                "external_dns_policy": "sync",
-                "external_dns_service_account": "external-dns-sa",
-                "external_secrets_namespace": "external-secrets",
-                "external_secrets_namespace_fleet": "argocd",
-                "external_secrets_service_account": "external-secrets-sa",
-                "external_secrets_service_account_fleet": "external-secrets-sa",
-                "aws_load_balancer_controller_namespace": "kube-system",
-                "aws_load_balancer_controller_service_account": "aws-load-balancer-controller-sa",
-                "adot_collector_namespace": "adot-collector-kubeprometheus",
-                "adot_collector_serviceaccount": "adot-collector-kubeprometheus",
-                "amp_endpoint_url": "",
+                "external_dns_namespace": "$(schema.spec.addons.external_dns_namespace)",
+                "external_dns_policy": "$(schema.spec.addons.external_dns_policy)",
+                "external_dns_service_account": "$(schema.spec.addons.external_dns_service_account)", 
+                "external_secrets_namespace": "$(schema.spec.addons.external_secrets_namespace)",
+                "external_secrets_service_account": "$(schema.spec.addons.external_secrets_service_account)",
+
+                "aws_load_balancer_controller_namespace": "$(schema.spec.addons.aws_load_balancer_controller_namespace)",
+                "aws_load_balancer_controller_service_account": "$(schema.spec.addons.aws_load_balancer_controller_service_account)",
+                "adot_collector_namespace": "$(schema.spec.addons.adot_collector_namespace)",
+                "adot_collector_serviceaccount": "$(schema.spec.addons.adot_collector_serviceaccount)",
+                "amp_endpoint_url": "$(schema.spec.addons.amp_endpoint_url)",
+
+                "karpenter_namespace": "$(schema.spec.addons.karpenter_namespace)",
+                "karpenter_service_account": "$(schema.spec.addons.karpenter_service_account)",
+                #"karpenter_sqs_queue_name": #TODO create SQS queuek
+
                 "fleet_secret_manager_secret_name": "${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}"
               },
               "server": "${ekscluster.status.endpoint}"
@@ -846,3 +934,52 @@ spec:
           namespace: external-dns
           roleARN: ${externalDnsRole.status.ackResourceMetadata.arn}
           serviceAccount: external-dns
+
+
+  ###########################################################
+  # ADOT Collector
+  ###########################################################
+  - id: adotCollectorRole
+    template:
+      apiVersion: iam.services.k8s.aws/v1alpha1
+      kind: Role
+      metadata:
+        namespace: ${schema.spec.name}
+        name: ${schema.spec.name}-adot-collector-role
+      spec:
+        name: ${schema.spec.name}-adot-collector-role
+        policies:
+          - arn:aws:iam::aws:policy/AmazonPrometheusRemoteWriteAccess
+        assumeRolePolicyDocument: |
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "pods.eks.amazonaws.com"
+                },
+                "Action": [
+                  "sts:AssumeRole",
+                  "sts:TagSession"
+                ]
+              }
+            ]
+          }
+
+  - id: adotCollectorPodIdentityAssociation
+    template:
+      apiVersion: eks.services.k8s.aws/v1alpha1
+      kind: PodIdentityAssociation
+      metadata:
+        name: ${schema.spec.name}-adot-collector
+        namespace: ${schema.spec.name}
+      spec:
+        clusterName: ${schema.spec.name}
+        namespace: ${schema.spec.addons.adot_collector_namespace}
+        roleARN: ${adotCollectorRole.status.ackResourceMetadata.arn}
+        serviceAccount: ${schema.spec.addons.adot_collector_serviceaccount}
+        tags:
+          environment: ${schema.spec.environment}
+          managedBy: ACK
+          application: adot-collector
