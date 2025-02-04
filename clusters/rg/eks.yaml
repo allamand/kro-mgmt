@@ -291,20 +291,20 @@ spec:
 
         type: Opaque
         # TODO bug in KRO, it always see some drifts..
-        # stringData:
-        #   name: ${schema.spec.name}
-        #   server: "${ekscluster.status.endpoint}"
-        #   config: |
-        #     {
-        #       "awsAuthConfig": {
-        #         "clusterName": "${schema.spec.name}",
-        #         "roleARN": "${argocdRole.status.ackResourceMetadata.arn}"
-        #       },
-        #       "tlsClientConfig": {
-        #         "caData": "${ekscluster.status.certificateAuthority.data}",
-        #         "insecure": false
-        #       }
-        #     }
+        stringData:
+          name: ${schema.spec.name}
+          server: "${ekscluster.status.endpoint}"
+          config: |
+            {
+              "awsAuthConfig": {
+                "clusterName": "${schema.spec.name}",
+                "roleARN": "${argocdRole.status.ackResourceMetadata.arn}"
+              },
+              "tlsClientConfig": {
+                "caData": "${ekscluster.status.certificateAuthority.data}",
+                "insecure": false
+              }
+            }
 
     - id: argocdSecretForACK
       template:
@@ -396,7 +396,7 @@ spec:
           name: ${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}
           namespace: ${schema.spec.name}
           annotations:
-            secretRef: ${argocdSecretForACK.metadata.name} 
+            secretRef: ${argocdSecretForACK.metadata.name}
         spec:
           name: ${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}
           description: "ArgoCD cluster configuration secret for ${schema.spec.name}"
@@ -921,19 +921,19 @@ spec:
 
     
     #comment due to https://github.com/kro-run/kro/issues/271
-    # - id: adotCollectorPodIdentityAssociation
-    #   template:
-    #     apiVersion: eks.services.k8s.aws/v1alpha1
-    #     kind: PodIdentityAssociation
-    #     metadata:
-    #       name: ${schema.spec.name}-adot-collector
-    #       namespace: ${schema.spec.name}
-    #     spec:
-    #       clusterName: ${schema.spec.name}
-    #       namespace: ${schema.spec.addons.adot_collector_namespace}
-    #       roleARN: ${adotCollectorRole.status.ackResourceMetadata.arn}
-    #       serviceAccount: ${schema.spec.addons.adot_collector_service_account}
-    #       tags:
-    #         environment: ${schema.spec.environment}
-    #         managedBy: ACK
-    #         application: adot-collector
+    - id: adotCollectorPodIdentityAssociation
+      template:
+        apiVersion: eks.services.k8s.aws/v1alpha1
+        kind: PodIdentityAssociation
+        metadata:
+          name: ${schema.spec.name}-adot-collector
+          namespace: ${schema.spec.name}
+        spec:
+          clusterName: ${schema.spec.name}
+          namespace: ${schema.spec.addons.adot_collector_namespace}
+          roleARN: ${adotCollectorRole.status.ackResourceMetadata.arn}
+          serviceAccount: ${schema.spec.addons.adot_collector_service_account}
+          tags:
+            environment: ${schema.spec.environment}
+            managedBy: ACK
+            application: adot-collector
