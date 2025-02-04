@@ -385,7 +385,7 @@ spec:
         #         "fleet_secret_manager_secret_name": "${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}"
         #       },
         #       "server": "${ekscluster.status.endpoint}"
-        #     }
+        # 
 
     #Copy argocdSecretForACK into secretManager
     - id: argocdAWSSecret
@@ -395,8 +395,8 @@ spec:
         metadata:
           name: ${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}
           namespace: ${schema.spec.name}
-          annotations:
-            secretRef: ${argocdSecretForACK} # Fox this is not working, expect string..   
+          #annotations:
+          #  secretRef: ${argocdSecretForACK}  
         spec:
           name: ${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}
           description: "ArgoCD cluster configuration secret for ${schema.spec.name}"
