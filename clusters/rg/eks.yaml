@@ -232,7 +232,7 @@ spec:
             aws_cluster_name: ${schema.spec.name}
             workloads: "true"
           annotations:
-            GitOps Bridge
+            #GitOps Bridge
             accountId: ${schema.spec.accountId}
             aws_account_id: ${schema.spec.accountId}
             region: ${schema.spec.region}
