@@ -60,7 +60,7 @@ spec:
         external_secrets_service_account: string
 
         aws_load_balancer_controller_namespace: string
-        aws_load_balancer_controller_serviceaccount: string
+        aws_load_balancer_controller_service_account: string
 
         amp_endpoint_url: string
 
@@ -146,7 +146,7 @@ spec:
             external_secrets_namespace: ${schema.spec.addons.external_secrets_namespace}
             external_secrets_service_account: ${schema.spec.addons.external_secrets_service_account}
             aws_load_balancer_controller_namespace: ${schema.spec.addons.aws_load_balancer_controller_namespace}
-            aws_load_balancer_controller_serviceaccount: ${schema.spec.addons.aws_load_balancer_controller_serviceaccount}
+            aws_load_balancer_controller_service_account: ${schema.spec.addons.aws_load_balancer_controller_service_account}
             amp_endpoint_url: ${schema.spec.addons.amp_endpoint_url}
             karpenter_namespace: ${schema.spec.addons.karpenter_namespace}
             karpenter_service_account: ${schema.spec.addons.karpenter_service_account}

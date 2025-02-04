@@ -65,7 +65,7 @@ spec:
         external_secrets_service_account: string | default="external-secrets-sa"
 
         aws_load_balancer_controller_namespace: string | default="kube-system"
-        aws_load_balancer_controller_serviceaccount: string | default="aws-load-balancer-controller-sa"
+        aws_load_balancer_controller_service_account: string | default="aws-load-balancer-controller-sa"
 
         amp_endpoint_url: string | default=""
 
