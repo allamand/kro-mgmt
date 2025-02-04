@@ -517,6 +517,8 @@ spec:
         metadata:
           namespace: ${schema.spec.name}
           name: ${schema.spec.name}-aws-load-balancer-controller-role
+        annotations:
+          policy: $(awsLoadBalancerControllerPolicy)
         spec:
           name: ${schema.spec.name}-aws-load-balancer-controller-role
           policyRefs:
@@ -845,6 +847,8 @@ spec:
         metadata:
           namespace: ${schema.spec.name}
           name: ${schema.spec.name}-external-dns-role
+        annotations:
+          policy: ${externalDnsPolicy}
         spec:
           name: ${schema.spec.name}-external-dns-role
           policyRefs:
@@ -868,8 +872,6 @@ spec:
             }
 
     - id: externalDnsPodIdentity
-      # dependsOn:
-      #   - externalDnsRole    
       template:
         apiVersion: eks.services.k8s.aws/v1alpha1
         kind: PodIdentityAssociation
