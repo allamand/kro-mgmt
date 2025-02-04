@@ -510,36 +510,6 @@ spec:
     ###########################################################
     # load balancer controller
     ###########################################################
-    - id: awsLoadBalancerControllerRole
-      template:
-        apiVersion: iam.services.k8s.aws/v1alpha1
-        kind: Role
-        metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-aws-load-balancer-controller-role
-          annotations:
-            policy: $(awsLoadBalancerControllerPolicy)
-        spec:
-          name: ${schema.spec.name}-aws-load-balancer-controller-role
-          policyRefs:
-            - from:
-                name: ${schema.spec.name}-aws-load-balancer-controller-policy
-          assumeRolePolicyDocument: |
-            {
-                "Version": "2012-10-17",
-                "Statement": [
-                    {
-                        "Effect": "Allow",
-                        "Principal": {
-                            "Service": "pods.eks.amazonaws.com"
-                        },
-                        "Action": [
-                            "sts:TagSession",
-                            "sts:AssumeRole"
-                        ]
-                    }
-                ]
-            }
 
     - id: awsLoadBalancerControllerPolicy
       template:
@@ -780,6 +750,37 @@ spec:
                     }
                 ],
                 "Version": "2012-10-17"
+            }
+
+    - id: awsLoadBalancerControllerRole
+      template:
+        apiVersion: iam.services.k8s.aws/v1alpha1
+        kind: Role
+        metadata:
+          namespace: ${schema.spec.name}
+          name: ${schema.spec.name}-aws-load-balancer-controller-role
+          annotations:
+            policy: ${awsLoadBalancerControllerPolicy.status.ackResourceMetadata.arn}
+        spec:
+          name: ${schema.spec.name}-aws-load-balancer-controller-role
+          policyRefs:
+            - from:
+                name: ${schema.spec.name}-aws-load-balancer-controller-policy
+          assumeRolePolicyDocument: |
+            {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Principal": {
+                            "Service": "pods.eks.amazonaws.com"
+                        },
+                        "Action": [
+                            "sts:TagSession",
+                            "sts:AssumeRole"
+                        ]
+                    }
+                ]
             }
 
     - id: awsLoadBalancerControllerPodIdentityAssociation
