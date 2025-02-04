@@ -291,26 +291,19 @@ spec:
 
         type: Opaque
         stringData:
-          api-key: my-api-key
-          config.json: |
+          name: ${schema.spec.name}
+          server: "${ekscluster.status.endpoint}"
+          config: |
             {
-              "endpoint": "api.example.com",
-              "timeout": 30
-            }        
-        # stringData:
-        #   name: ${schema.spec.name}
-          # server: "${ekscluster.status.endpoint}"
-          # config: |
-          #   {
-          #     "awsAuthConfig": {
-          #       "clusterName": "${schema.spec.name}",
-          #       "roleARN": "${argocdRole.status.ackResourceMetadata.arn}"
-          #     },
-          #     "tlsClientConfig": {
-          #       "caData": "${ekscluster.status.certificateAuthority.data}",
-          #       "insecure": false
-          #     }
-          #   }
+              "awsAuthConfig": {
+                "clusterName": "${schema.spec.name}",
+                "roleARN": "${argocdRole.status.ackResourceMetadata.arn}"
+              },
+              "tlsClientConfig": {
+                "caData": "${ekscluster.status.certificateAuthority.data}",
+                "insecure": false
+              }
+            }
 
     # - id: argocdSecretForACK
     #   template:
