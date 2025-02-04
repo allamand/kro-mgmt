@@ -1,5 +1,96 @@
 #!/bin/bash
 
+create_external_secret_role() {
+    local CLUSTER_NAME="$1"
+
+    if [ -z "$CLUSTER_NAME" ]; then
+        echo "Usage: create_external_secret_role <cluster_name>"
+        return 1
+    fi
+
+    echo ">>>>>>>>>Creating External Secrets Role"
+
+    # 1. Create the IAM role for pod identity
+    local TRUST_RELATIONSHIP='{
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Sid": "AllowEksAuthToAssumeRoleForPodIdentity",
+                "Effect": "Allow",
+                "Principal": {
+                    "Service": "pods.eks.amazonaws.com"
+                },
+                "Action": [
+                    "sts:AssumeRole",
+                    "sts:TagSession"
+                ]
+            }
+        ]
+    }'
+
+    echo "${TRUST_RELATIONSHIP}" > trust.json
+
+    aws iam create-role \
+        --role-name external-secrets \
+        --assume-role-policy-document file://trust.json
+
+    # 2. Create IAM policy for External Secrets access
+    local POLICY_DOCUMENT='{
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "ssm:GetParameter*",
+                    "ssm:DescribeParameters"
+                ],
+                "Resource": "arn:aws:ssm:*:*:parameter/*"
+            },
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "secretsmanager:GetSecretValue",
+                    "secretsmanager:DescribeSecret"
+                ],
+                "Resource": "arn:aws:secretsmanager:*:*:secret:*"
+            },
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "kms:Decrypt",
+                    "kms:DescribeKey"
+                ],
+                "Resource": "arn:aws:kms:*:*:key/*"
+            }
+        ]
+    }'
+
+    aws iam create-policy \
+        --policy-name external-secrets-policy \
+        --policy-document "$POLICY_DOCUMENT"
+
+    # 3. Attach the policy to the role
+    local POLICY_ARN
+    POLICY_ARN=$(aws iam list-policies --query 'Policies[?PolicyName==`external-secrets-policy`].Arn' --output text)
+    
+    aws iam attach-role-policy \
+        --role-name external-secrets \
+        --policy-arn "$POLICY_ARN"
+
+    # 4. Create the pod identity association
+    local ROLE_ARN
+    ROLE_ARN=$(aws iam get-role --role-name external-secrets --query 'Role.Arn' --output text)
+
+    aws eks create-pod-identity-association \
+        --cluster-name "$CLUSTER_NAME" \
+        --namespace "external-secrets" \
+        --service-account "external-secrets" \
+        --role-arn "$ROLE_ARN"
+
+    echo "<<<<<<<<<< External Secrets Role Created"
+    return 0
+}
+
 create_ack_roles() {
     local CLUSTER_NAME="$1"
     local ACCOUNT_IDS="$2"
@@ -40,7 +131,7 @@ create_ack_roles() {
 EOF
     }
 
-    for SERVICE in iam ec2 eks secretsmanager; do
+    for SERVICE in iam ec2 eks; do
         echo ">>>>>>>>>SERVICE:$SERVICE"
         local ACK_CONTROLLER_IAM_ROLE="ack-${SERVICE}-controller"
         
@@ -135,12 +226,14 @@ EOF
 }
 
 if [[ ! -z "$CLUSTER_NAME" && ! -z "$ACCOUNT_IDS" ]]; then
-  echo "CLUSTER_NAME: $CLUSTER_NAME"
-  echo "ACCOUNT_IDS: $ACCOUNT_IDS"
-  create_ack_roles "$CLUSTER_NAME" "$ACCOUNT_IDS"
+    echo "CLUSTER_NAME: $CLUSTER_NAME"
+    echo "ACCOUNT_IDS: $ACCOUNT_IDS"
+    #create_ack_roles "$CLUSTER_NAME" "$ACCOUNT_IDS"
+    echo "proute"
+    create_external_secret_role "$CLUSTER_NAME"
 else
-  echo "You must configure the environments variables first"
-  echo "CLUSTER_NAME: $CLUSTER_NAME"
-  echo "ACCOUNT_IDS: $ACCOUNT_IDS"
-  exit -1
+    echo "You must configure the environments variables first"
+    echo "CLUSTER_NAME: $CLUSTER_NAME"
+    echo "ACCOUNT_IDS: $ACCOUNT_IDS"
+    exit -1
 fi
