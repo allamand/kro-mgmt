@@ -136,6 +136,10 @@ spec:
         metadata:
           namespace: ${schema.spec.name}
           name: ${schema.spec.name}
+          #implicit dependencies with roles
+          annotations:
+            clusterRoleArn: ${clusterRole.status.ackResourceMetadata.arn}
+            nodeRoleArn: ${nodeRole.status.ackResourceMetadata.arn}
         spec:
           name: ${schema.spec.name}
           roleARN: ${clusterRole.status.ackResourceMetadata.arn}
@@ -155,6 +159,8 @@ spec:
         metadata:
           namespace: ${schema.spec.name}
           name: ${schema.spec.name}-nodegroup
+          annotations:
+            clusterArn: ${ekscluster.status.ackResourceMetadata.arn}
         spec:
           name: ${schema.spec.name}-nodegroup
           clusterName: ${schema.spec.name}
@@ -175,6 +181,8 @@ spec:
         metadata:
           name: eks-pod-identity-agent
           namespace: ${schema.spec.name}
+          annotations:
+            clusterArn: ${ekscluster.status.ackResourceMetadata.arn}          
         spec:
           name: eks-pod-identity-agent
           addonVersion: v1.3.4-eksbuild.1
@@ -384,6 +392,8 @@ spec:
         metadata:
           name: ${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}
           namespace: ${schema.spec.name}
+          annotations:
+            secretRef: ${argocdSecretForACK.spec.name} # TODO seb      
         spec:
           name: ${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}
           description: "ArgoCD cluster configuration secret for ${schema.spec.name}"
