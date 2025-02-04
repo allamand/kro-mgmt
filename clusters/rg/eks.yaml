@@ -223,15 +223,15 @@ spec:
         metadata:
           name: ${schema.spec.name}
           namespace: argocd
-          labels:
-            argocd.argoproj.io/secret-type: cluster
-            # compatible fleet-management
-            fleet_member: spoke
-            tenant: ${schema.spec.tenant}
-            environment: ${schema.spec.environment}
-            aws_cluster_name: ${schema.spec.name}
-            workloads: "true"
-          annotations:
+          # labels:
+          #   argocd.argoproj.io/secret-type: cluster
+          #   # compatible fleet-management
+          #   fleet_member: spoke
+          #   tenant: ${schema.spec.tenant}
+          #   environment: ${schema.spec.environment}
+          #   aws_cluster_name: ${schema.spec.name}
+          #   workloads: "true"
+          # annotations:
             # GitOps Bridge
             # accountId: ${schema.spec.accountId}
             # aws_account_id: ${schema.spec.accountId}
@@ -290,8 +290,8 @@ spec:
             # # karpenter_sqs_queue_name=Karpenter-fleet-spoke-prod
 
         type: Opaque
-        stringData:
-          name: ${schema.spec.name}
+        # stringData:
+        #   name: ${schema.spec.name}
           # server: "${ekscluster.status.endpoint}"
           # config: |
           #   {
