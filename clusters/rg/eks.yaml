@@ -392,8 +392,8 @@ spec:
         metadata:
           name: ${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}
           namespace: ${schema.spec.name}
-          #annotations:
-          #  secretRef: ${argocdSecretForACK.spec.name} # TODO seb      
+          annotations:
+            secretRef: ${argocdSecretForACK.name} # TODO seb      
         spec:
           name: ${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}
           description: "ArgoCD cluster configuration secret for ${schema.spec.name}"
