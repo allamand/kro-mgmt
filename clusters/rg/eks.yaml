@@ -405,21 +405,21 @@ spec:
             name: ${schema.spec.name}-for-ack
             namespace: ${schema.spec.name}
 
-    - id: accessEntry
-      template:
-        apiVersion: eks.services.k8s.aws/v1alpha1
-        kind: AccessEntry
-        metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-access-entry
-        spec:
-          clusterName: ${schema.spec.name}
-          accessPolicies:
-            - accessScope:
-                type: "cluster"
-              policyARN: "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-          principalARN: "${argocdRole.status.ackResourceMetadata.arn}"
-          type: STANDARD
+    # - id: accessEntry
+    #   template:
+    #     apiVersion: eks.services.k8s.aws/v1alpha1
+    #     kind: AccessEntry
+    #     metadata:
+    #       namespace: ${schema.spec.name}
+    #       name: ${schema.spec.name}-access-entry
+    #     spec:
+    #       clusterName: ${schema.spec.name}
+    #       accessPolicies:
+    #         - accessScope:
+    #             type: "cluster"
+    #           policyARN: "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+    #       principalARN: "${argocdRole.status.ackResourceMetadata.arn}"
+    #       type: STANDARD
     # - id: accessEntryAdmin
     #   template:
     #     apiVersion: eks.services.k8s.aws/v1alpha1
