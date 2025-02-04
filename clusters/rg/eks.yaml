@@ -919,19 +919,21 @@ spec:
               ]
             }
 
-    - id: adotCollectorPodIdentityAssociation
-      template:
-        apiVersion: eks.services.k8s.aws/v1alpha1
-        kind: PodIdentityAssociation
-        metadata:
-          name: ${schema.spec.name}-adot-collector
-          namespace: ${schema.spec.name}
-        spec:
-          clusterName: ${schema.spec.name}
-          namespace: ${schema.spec.addons.adot_collector_namespace}
-          roleARN: ${adotCollectorRole.status.ackResourceMetadata.arn}
-          serviceAccount: ${schema.spec.addons.adot_collector_service_account}
-          tags:
-            environment: ${schema.spec.environment}
-            managedBy: ACK
-            application: adot-collector
+    
+    #comment due to https://github.com/kro-run/kro/issues/271
+    # - id: adotCollectorPodIdentityAssociation
+    #   template:
+    #     apiVersion: eks.services.k8s.aws/v1alpha1
+    #     kind: PodIdentityAssociation
+    #     metadata:
+    #       name: ${schema.spec.name}-adot-collector
+    #       namespace: ${schema.spec.name}
+    #     spec:
+    #       clusterName: ${schema.spec.name}
+    #       namespace: ${schema.spec.addons.adot_collector_namespace}
+    #       roleARN: ${adotCollectorRole.status.ackResourceMetadata.arn}
+    #       serviceAccount: ${schema.spec.addons.adot_collector_service_account}
+    #       tags:
+    #         environment: ${schema.spec.environment}
+    #         managedBy: ACK
+    #         application: adot-collector
