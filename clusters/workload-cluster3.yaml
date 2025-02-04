@@ -8,7 +8,7 @@ metadata:
 spec:
     name: workload-cluster3
     tenant: tenant1
-    environment: staging
+    environment: krodev
     region: us-west-2
     k8sVersion: '1.30'
     accountId: '798082067117'
