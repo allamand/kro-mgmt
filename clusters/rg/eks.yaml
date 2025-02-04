@@ -376,6 +376,7 @@ spec:
               "server": "${ekscluster.status.endpoint}"
             }
 
+    #Copy argocdSecretForACK into secretManager
     - id: argocdAWSSecret
       template:
         apiVersion: secretsmanager.services.k8s.aws/v1alpha1
@@ -419,21 +420,21 @@ spec:
               policyARN: "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
           principalARN: "${argocdRole.status.ackResourceMetadata.arn}"
           type: STANDARD
-    - id: accessEntryAdmin
-      template:
-        apiVersion: eks.services.k8s.aws/v1alpha1
-        kind: AccessEntry
-        metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-access-entry-admin
-        spec:
-          clusterName: ${schema.spec.name}
-          accessPolicies:
-            - accessScope:
-                type: "cluster"
-              policyARN: "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-          principalARN: "arn:aws:iam::${schema.spec.accountId}:role/${schema.spec.adminRoleName}"
-          type: STANDARD
+    # - id: accessEntryAdmin
+    #   template:
+    #     apiVersion: eks.services.k8s.aws/v1alpha1
+    #     kind: AccessEntry
+    #     metadata:
+    #       namespace: ${schema.spec.name}
+    #       name: ${schema.spec.name}-access-entry-admin
+    #     spec:
+    #       clusterName: ${schema.spec.name}
+    #       accessPolicies:
+    #         - accessScope:
+    #             type: "cluster"
+    #           policyARN: "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+    #       principalARN: "arn:aws:iam::${schema.spec.accountId}:role/${schema.spec.adminRoleName}"
+    #       type: STANDARD
     - id: oidcProvider
       template:
         apiVersion: iam.services.k8s.aws/v1alpha1
