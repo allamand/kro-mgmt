@@ -840,8 +840,6 @@ spec:
             }
 
     - id: externalDnsRole
-      # dependsOn:
-      #   - externalDnsPolicy    
       template:
         apiVersion: iam.services.k8s.aws/v1alpha1
         kind: Role
@@ -849,7 +847,7 @@ spec:
           namespace: ${schema.spec.name}
           name: ${schema.spec.name}-external-dns-role
           annotations:
-            policy: ${externalDnsPolicy}
+            policy: ${externalDnsPolicy.status.ackResourceMetadata.arn}
         spec:
           name: ${schema.spec.name}-external-dns-role
           policyRefs:
