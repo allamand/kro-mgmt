@@ -215,94 +215,95 @@ spec:
                 }
               ]
             }
-    # - id: argocdSecret
-    #   template:
-    #     apiVersion: v1
-    #     kind: Secret
-    #     metadata:
-    #       name: ${schema.spec.name}
-    #       namespace: argocd
-    #       labels:
-    #         argocd.argoproj.io/secret-type: cluster
-    #         # compatible fleet-management
-    #         fleet_member: spoke
-    #         tenant: ${schema.spec.tenant}
-    #         environment: ${schema.spec.environment}
-    #         aws_cluster_name: ${schema.spec.name}
-    #         workloads: "true"
-    #       annotations:
-    #         # GitOps Bridge
-    #         accountId: ${schema.spec.accountId}
-    #         aws_account_id: ${schema.spec.accountId}
-    #         region: ${schema.spec.region}
-    #         aws_region: ${schema.spec.region}
-    #         aws_central_region: ${schema.spec.region}   # used in fleet-management gitops
-    #         oidcProvider: ${ekscluster.status.identity.oidc.issuer}
-    #         aws_cluster_name: ${schema.spec.name}
-    #         aws_vpc_id: ${schema.spec.network.vpcID}
-    #         # GitOps Configuration
-    #         addons_repo_basepath: ${schema.spec.gitops.addonsRepoBasePath}
-    #         addons_repo_path: ${schema.spec.gitops.addonsRepoPath}
-    #         addons_repo_revision: ${schema.spec.gitops.addonsRepoRevision}
-    #         addons_repo_secret_key: ${schema.spec.gitops.addonsRepoSecretKey}
-    #         addons_repo_url: ${schema.spec.gitops.addonsRepoUrl}
-    #         fleet_repo_basepath: ${schema.spec.gitops.fleetRepoBasePath}
-    #         fleet_repo_path: ${schema.spec.gitops.fleetRepoPath}
-    #         fleet_repo_revision: ${schema.spec.gitops.fleetRepoRevision}
-    #         fleet_repo_secret_key: ${schema.spec.gitops.fleetRepoSecretKey}
-    #         fleet_repo_url: ${schema.spec.gitops.fleetRepoUrl}
-    #         platform_repo_basepath: ${schema.spec.gitops.platformRepoBasePath}
-    #         platform_repo_path: ${schema.spec.gitops.platformRepoPath}
-    #         platform_repo_revision: ${schema.spec.gitops.platformRepoRevision}
-    #         platform_repo_secret_key: ${schema.spec.gitops.platformRepoSecretKey}
-    #         platform_repo_url: ${schema.spec.gitops.platformRepoUrl}
-    #         workload_repo_basepath: ${schema.spec.gitops.workloadRepoBasePath}
-    #         workload_repo_path: ${schema.spec.gitops.workloadRepoPath}
-    #         workload_repo_revision: ${schema.spec.gitops.workloadRepoRevision}
-    #         workload_repo_secret_key: ${schema.spec.gitops.workloadRepoSecretKey}
-    #         workload_repo_url: ${schema.spec.gitops.workloadRepoUrl}
-    #         # Specific for External-DNS
-    #         external_dns_domain_filters: ${schema.spec.domainName}
-    #         external_dns_namespace: ${schema.spec.addons.external_dns_namespace}
-    #         external_dns_policy: ${schema.spec.addons.external_dns_policy}
-    #         external_dns_service_account: ${schema.spec.addons.external_dns_service_account}
 
-    #         # Generic
-    #         external_secrets_namespace: $(schema.spec.addons.external_secrets_namespace)
-    #         external_secrets_service_account: $(schema.spec.addons.external_secrets_service_account)
+    - id: argocdSecret
+      template:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: ${schema.spec.name}
+          namespace: argocd
+          labels:
+            argocd.argoproj.io/secret-type: cluster
+            # compatible fleet-management
+            fleet_member: spoke
+            tenant: ${schema.spec.tenant}
+            environment: ${schema.spec.environment}
+            aws_cluster_name: ${schema.spec.name}
+            workloads: "true"
+          annotations:
+            # GitOps Bridge
+            accountId: ${schema.spec.accountId}
+            aws_account_id: ${schema.spec.accountId}
+            region: ${schema.spec.region}
+            aws_region: ${schema.spec.region}
+            aws_central_region: ${schema.spec.region}   # used in fleet-management gitops
+            oidcProvider: ${ekscluster.status.identity.oidc.issuer}
+            aws_cluster_name: ${schema.spec.name}
+            aws_vpc_id: ${schema.spec.network.vpcID}
+            # GitOps Configuration
+            addons_repo_basepath: ${schema.spec.gitops.addonsRepoBasePath}
+            addons_repo_path: ${schema.spec.gitops.addonsRepoPath}
+            addons_repo_revision: ${schema.spec.gitops.addonsRepoRevision}
+            addons_repo_secret_key: ${schema.spec.gitops.addonsRepoSecretKey}
+            addons_repo_url: ${schema.spec.gitops.addonsRepoUrl}
+            fleet_repo_basepath: ${schema.spec.gitops.fleetRepoBasePath}
+            fleet_repo_path: ${schema.spec.gitops.fleetRepoPath}
+            fleet_repo_revision: ${schema.spec.gitops.fleetRepoRevision}
+            fleet_repo_secret_key: ${schema.spec.gitops.fleetRepoSecretKey}
+            fleet_repo_url: ${schema.spec.gitops.fleetRepoUrl}
+            platform_repo_basepath: ${schema.spec.gitops.platformRepoBasePath}
+            platform_repo_path: ${schema.spec.gitops.platformRepoPath}
+            platform_repo_revision: ${schema.spec.gitops.platformRepoRevision}
+            platform_repo_secret_key: ${schema.spec.gitops.platformRepoSecretKey}
+            platform_repo_url: ${schema.spec.gitops.platformRepoUrl}
+            workload_repo_basepath: ${schema.spec.gitops.workloadRepoBasePath}
+            workload_repo_path: ${schema.spec.gitops.workloadRepoPath}
+            workload_repo_revision: ${schema.spec.gitops.workloadRepoRevision}
+            workload_repo_secret_key: ${schema.spec.gitops.workloadRepoSecretKey}
+            workload_repo_url: ${schema.spec.gitops.workloadRepoUrl}
+            # Specific for External-DNS
+            external_dns_domain_filters: ${schema.spec.domainName}
+            external_dns_namespace: ${schema.spec.addons.external_dns_namespace}
+            external_dns_policy: ${schema.spec.addons.external_dns_policy}
+            external_dns_service_account: ${schema.spec.addons.external_dns_service_account}
 
-    #         aws_load_balancer_controller_namespace: $(schema.spec.addons.aws_load_balancer_controller_namespace)
-    #         aws_load_balancer_controller_service_account: $(schema.spec.addons.aws_load_balancer_controller_service_account)
+            # Generic
+            external_secrets_namespace: $(schema.spec.addons.external_secrets_namespace)
+            external_secrets_service_account: $(schema.spec.addons.external_secrets_service_account)
 
-    #         adot_collector_namespace: $(schema.spec.addons.adot_collector_namespace)
-    #         adot_collector_service_account: $(schema.spec.addons.adot_collector_service_account)
-    #         amp_endpoint_url: $(schema.spec.addons.amp_endpoint_url)
+            aws_load_balancer_controller_namespace: $(schema.spec.addons.aws_load_balancer_controller_namespace)
+            aws_load_balancer_controller_service_account: $(schema.spec.addons.aws_load_balancer_controller_service_account)
 
-    #         # amp_endpoint_url=https://aps-workspaces.eu-west-1.amazonaws.com/workspaces/ws-2ca820a0-a732-4c4b-8f76-3b84e38f8f44/
+            adot_collector_namespace: $(schema.spec.addons.adot_collector_namespace)
+            adot_collector_service_account: $(schema.spec.addons.adot_collector_service_account)
+            amp_endpoint_url: $(schema.spec.addons.amp_endpoint_url)
 
-    #         fleet_secret_manager_secret_name: ${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}
-    #         #fleet_secret_manager_secret_name: "workload-cluster3-argocd-secret5"
+            # amp_endpoint_url=https://aps-workspaces.eu-west-1.amazonaws.com/workspaces/ws-2ca820a0-a732-4c4b-8f76-3b84e38f8f44/
 
-    #         # karpenter_namespace=kube-system
-    #         # karpenter_node_iam_role_name=Karpenter-fleet-spoke-prod-20241108160545410700000034
-    #         # karpenter_service_account=karpenter
-    #         # karpenter_sqs_queue_name=Karpenter-fleet-spoke-prod
+            fleet_secret_manager_secret_name: ${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}
+            #fleet_secret_manager_secret_name: "workload-cluster3-argocd-secret5"
 
-    #     type: Opaque
-    #     stringData:
-    #       name: ${schema.spec.name}
-    #       server: "${ekscluster.status.endpoint}"
-    #       config: |
-    #         {
-    #           "awsAuthConfig": {
-    #             "clusterName": "${schema.spec.name}",
-    #             "roleARN": "${argocdRole.status.ackResourceMetadata.arn}"
-    #           },
-    #           "tlsClientConfig": {
-    #             "caData": "${ekscluster.status.certificateAuthority.data}",
-    #             "insecure": false
-    #           }
-    #         }
+            # karpenter_namespace=kube-system
+            # karpenter_node_iam_role_name=Karpenter-fleet-spoke-prod-20241108160545410700000034
+            # karpenter_service_account=karpenter
+            # karpenter_sqs_queue_name=Karpenter-fleet-spoke-prod
+
+        type: Opaque
+        stringData:
+          name: ${schema.spec.name}
+          server: "${ekscluster.status.endpoint}"
+          config: |
+            {
+              "awsAuthConfig": {
+                "clusterName": "${schema.spec.name}",
+                "roleARN": "${argocdRole.status.ackResourceMetadata.arn}"
+              },
+              "tlsClientConfig": {
+                "caData": "${ekscluster.status.certificateAuthority.data}",
+                "insecure": false
+              }
+            }
 
     # - id: argocdSecretForACK
     #   template:
@@ -393,7 +394,7 @@ spec:
     #       name: ${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}
     #       namespace: ${schema.spec.name}
     #       annotations:
-    #         secretRef: ${argocdSecretForACK}    
+    #         secretRef: ${argocdSecretForACK} # Fox this is not working, expect string..   
     #     spec:
     #       name: ${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}
     #       description: "ArgoCD cluster configuration secret for ${schema.spec.name}"
