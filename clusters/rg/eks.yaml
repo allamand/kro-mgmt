@@ -290,20 +290,21 @@ spec:
             # karpenter_sqs_queue_name=Karpenter-fleet-spoke-prod
 
         type: Opaque
-        stringData:
-          name: ${schema.spec.name}
-          server: "${ekscluster.status.endpoint}"
-          config: |
-            {
-              "awsAuthConfig": {
-                "clusterName": "${schema.spec.name}",
-                "roleARN": "${argocdRole.status.ackResourceMetadata.arn}"
-              },
-              "tlsClientConfig": {
-                "caData": "${ekscluster.status.certificateAuthority.data}",
-                "insecure": false
-              }
-            }
+        # TODO bug in KRO, it always see some drifts..
+        # stringData:
+        #   name: ${schema.spec.name}
+        #   server: "${ekscluster.status.endpoint}"
+        #   config: |
+        #     {
+        #       "awsAuthConfig": {
+        #         "clusterName": "${schema.spec.name}",
+        #         "roleARN": "${argocdRole.status.ackResourceMetadata.arn}"
+        #       },
+        #       "tlsClientConfig": {
+        #         "caData": "${ekscluster.status.certificateAuthority.data}",
+        #         "insecure": false
+        #       }
+        #     }
 
     - id: argocdSecretForACK
       template:
