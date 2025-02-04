@@ -24,7 +24,7 @@ spec:
       privateSubnet1Cidr: "10.0.11.0/24"
       privateSubnet2Cidr: "10.0.12.0/24"
     gitops:
-      addonsRepoBasePath: "gitops/addons"
+      addonsRepoBasePath: "gitops/addons/"
       addonsRepoPath: "bootstrap"
       addonsRepoRevision: "seb"
       #addonsRepoRevision: "HEAD"
