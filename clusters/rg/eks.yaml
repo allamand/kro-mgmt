@@ -290,6 +290,13 @@ spec:
             # karpenter_sqs_queue_name=Karpenter-fleet-spoke-prod
 
         type: Opaque
+        stringData:
+          api-key: my-api-key
+          config.json: |
+            {
+              "endpoint": "api.example.com",
+              "timeout": 30
+            }        
         # stringData:
         #   name: ${schema.spec.name}
           # server: "${ekscluster.status.endpoint}"
