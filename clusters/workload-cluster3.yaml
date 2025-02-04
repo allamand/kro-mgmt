@@ -29,7 +29,7 @@ spec:
       addonsRepoRevision: "seb"
       #addonsRepoRevision: "HEAD"
       addonsRepoSecretKey: "eks-fleet-workshop-gitops-addons"
-      addonsRepoUrl: "https://github.com/aws-samples/fleet-management-on-amazon-eks-worksho"
+      addonsRepoUrl: "https://github.com/aws-samples/fleet-management-on-amazon-eks-workshop"
       fleetRepoBasePath: "gitops/fleet/"
       fleetRepoPath: "bootstrap"
       fleetRepoRevision: "HEAD"
