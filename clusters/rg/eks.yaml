@@ -938,3 +938,52 @@ spec:
             environment: ${schema.spec.environment}
             managedBy: ACK
             application: adot-collector
+
+
+    ###########################################################
+    # Kyverno Reporter
+    ###########################################################
+    - id: kyvernoPolicyReporterRole
+      template:
+        apiVersion: iam.services.k8s.aws/v1alpha1
+        kind: Role
+        metadata:
+          namespace: ${schema.spec.name}
+          name: ${schema.spec.name}-kyverno-policy-reporter-role
+        spec:
+          name: ${schema.spec.name}-kyverno-policy-reporter-role
+          policies:
+            - arn:aws:iam::aws:policy/AWSSecurityHubFullAccess
+          assumeRolePolicyDocument: |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": "pods.eks.amazonaws.com"
+                  },
+                  "Action": [
+                    "sts:AssumeRole",
+                    "sts:TagSession"
+                  ]
+                }
+              ]
+            }
+
+    - id: kyvernoPolicyReporterPodIdentityAssociation
+      template:
+        apiVersion: eks.services.k8s.aws/v1alpha1
+        kind: PodIdentityAssociation
+        metadata:
+          name: ${schema.spec.name}-kyverno-policy-reporter
+          namespace: ${schema.spec.name}
+        spec:
+          clusterName: ${schema.spec.name}
+          namespace: kyverno
+          roleARN: ${kyvernoPolicyReporterRole.status.ackResourceMetadata.arn}
+          serviceAccount: policy-reporter
+          tags:
+            environment: ${schema.spec.environment}
+            managedBy: ACK
+            application: kyverno-policy-reporter
