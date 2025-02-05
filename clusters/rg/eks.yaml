@@ -466,7 +466,7 @@ spec:
 
 
     ###########################################################
-    # External Secrets AddOn
+    # External Secrets AddOn Pod Identity
     ###########################################################
     - id: externalSecretsRole
       template:
@@ -513,7 +513,7 @@ spec:
             application: external-secrets
 
     ###########################################################
-    # load balancer controller
+    # load balancer controller Pod Identity
     ###########################################################
 
     - id: awsLoadBalancerControllerPolicy
@@ -807,7 +807,7 @@ spec:
 
 
     ###########################################################
-    # External DNS AddOn
+    # External DNS AddOn Pod Identity
     ###########################################################
     - id: externalDnsPolicy
       template:
@@ -890,7 +890,7 @@ spec:
 
 
     ###########################################################
-    # ADOT Collector
+    # ADOT Collector Pod Identity
     ###########################################################
     - id: adotCollectorRole
       template:
@@ -941,7 +941,7 @@ spec:
 
 
     ###########################################################
-    # Kyverno Reporter
+    # Kyverno Reporter Pod Identity
     ###########################################################
     - id: kyvernoPolicyReporterRole
       template:
@@ -987,3 +987,176 @@ spec:
             environment: ${schema.spec.environment}
             managedBy: ACK
             application: kyverno-policy-reporter
+
+    ###########################################################
+    # CNI Metrics Helper Pod Identity
+    ###########################################################
+    - id: cniMetricsHelperPolicy
+      template:
+        apiVersion: iam.services.k8s.aws/v1alpha1
+        kind: Policy
+        metadata:
+          namespace: ${schema.spec.name}
+          name: ${schema.spec.name}-cni-metrics-helper-policy
+        spec:
+          name: ${schema.spec.name}-cni-metrics-helper-policy
+          description: "Policy to allow cni metrics helper put metrics to CloudWatch"
+          policyDocument: |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "cloudwatch:PutMetricData"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+
+    - id: cniMetricsHelperRole
+      template:
+        apiVersion: iam.services.k8s.aws/v1alpha1
+        kind: Role
+        metadata:
+          namespace: ${schema.spec.name}
+          name: ${schema.spec.name}-cni-metrics-helper-role
+        spec:
+          name: ${schema.spec.name}-cni-metrics-helper-role
+          policies:
+            - arn: ${cniMetricsHelperPolicy.status.ackResourceMetadata.arn}
+          assumeRolePolicyDocument: |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": "pods.eks.amazonaws.com"
+                  },
+                  "Action": [
+                    "sts:AssumeRole",
+                    "sts:TagSession"
+                  ]
+                }
+              ]
+            }
+
+    - id: cniMetricsHelperPodIdentityAssociation
+      template:
+        apiVersion: eks.services.k8s.aws/v1alpha1
+        kind: PodIdentityAssociation
+        metadata:
+          name: ${schema.spec.name}-cni-metrics-helper
+          namespace: ${schema.spec.name}
+        spec:
+          clusterName: ${schema.spec.name}
+          namespace: kube-system
+          roleARN: ${cniMetricsHelperRole.status.ackResourceMetadata.arn}
+          serviceAccount: cni-metrics-helper
+          tags:
+            environment: ${schema.spec.environment}
+            managedBy: ACK
+            application: cni-metrics-helper
+
+    ###########################################################
+    # EBS CSI Controller Pod Identity
+    ###########################################################
+    - id: ebsCsiControllerRole
+      template:
+        apiVersion: iam.services.k8s.aws/v1alpha1
+        kind: Role
+        metadata:
+          namespace: ${schema.spec.name}
+          name: ${schema.spec.name}-ebs-csi-controller-role
+        spec:
+          name: ${schema.spec.name}-ebs-csi-controller-role
+          policies:
+            - arn: arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy
+          assumeRolePolicyDocument: |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": "pods.eks.amazonaws.com"
+                  },
+                  "Action": [
+                    "sts:AssumeRole",
+                    "sts:TagSession"
+                  ]
+                }
+              ]
+            }
+
+    - id: ebsCsiControllerPodIdentityAssociation
+      template:
+        apiVersion: eks.services.k8s.aws/v1alpha1
+        kind: PodIdentityAssociation
+        metadata:
+          name: ${schema.spec.name}-ebs-csi-controller
+          namespace: ${schema.spec.name}
+        spec:
+          clusterName: ${schema.spec.name}
+          namespace: kube-system
+          roleARN: ${ebsCsiControllerRole.status.ackResourceMetadata.arn}
+          serviceAccount: ebs-csi-controller-sa
+          tags:
+            environment: ${schema.spec.environment}
+            managedBy: ACK
+            application: ebs-csi-controller
+
+
+    ###########################################################
+    # CloudWatch Observability Pod Identity
+    ###########################################################
+    - id: cloudwatchObservabilityRole
+      template:
+        apiVersion: iam.services.k8s.aws/v1alpha1
+        kind: Role
+        metadata:
+          namespace: ${schema.spec.name}
+          name: ${schema.spec.name}-cloudwatch-observability-role
+        spec:
+          name: ${schema.spec.name}-cloudwatch-observability-role
+          policies:
+            - arn: arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+          assumeRolePolicyDocument: |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": "pods.eks.amazonaws.com"
+                  },
+                  "Action": [
+                    "sts:AssumeRole",
+                    "sts:TagSession"
+                  ]
+                }
+              ]
+            }
+
+    - id: cloudwatchObservabilityPodIdentityAssociation
+      template:
+        apiVersion: eks.services.k8s.aws/v1alpha1
+        kind: PodIdentityAssociation
+        metadata:
+          name: ${schema.spec.name}-cloudwatch-observability
+          namespace: ${schema.spec.name}
+        spec:
+          clusterName: ${schema.spec.name}
+          namespace: amazon-cloudwatch
+          roleARN: ${cloudwatchObservabilityRole.status.ackResourceMetadata.arn}
+          serviceAccount: cloudwatch-agent
+          tags:
+            environment: ${schema.spec.environment}
+            managedBy: ACK
+            application: cloudwatch-observability
+
+    ###########################################################
+    # XXX Pod Identity
+    ###########################################################
