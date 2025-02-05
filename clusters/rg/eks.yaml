@@ -1025,7 +1025,7 @@ spec:
         spec:
           name: ${schema.spec.name}-cni-metrics-helper-role
           policies:
-            - arn: ${cniMetricsHelperPolicy.status.ackResourceMetadata.arn}
+            - ${cniMetricsHelperPolicy.status.ackResourceMetadata.arn}
           assumeRolePolicyDocument: |
             {
               "Version": "2012-10-17",
