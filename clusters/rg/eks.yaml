@@ -1073,7 +1073,7 @@ spec:
         spec:
           name: ${schema.spec.name}-ebs-csi-controller-role
           policies:
-            - arn: arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy
+            - arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy
           assumeRolePolicyDocument: |
             {
               "Version": "2012-10-17",
@@ -1122,7 +1122,7 @@ spec:
         spec:
           name: ${schema.spec.name}-cloudwatch-observability-role
           policies:
-            - arn: arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+            - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
           assumeRolePolicyDocument: |
             {
               "Version": "2012-10-17",
