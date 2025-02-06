@@ -73,6 +73,7 @@ spec:
 
         karpenter_namespace: string | default="karpenter"
         karpenter_service_account: string | default="karpenter-sa"
+        karpenter_sqs_queue_name: string | default=""
 
 
   resources:
@@ -291,7 +292,7 @@ spec:
             karpenter_namespace: ${schema.spec.addons.karpenter_namespace}"
             karpenter_node_iam_role_name: ${nodeRole.metadata.name}
             karpenter_service_account: ${schema.spec.addons.karpenter_service_account}
-            karpenter_sqs_queue_name: ""
+            karpenter_sqs_queue_name: ${schema.spec.addons.karpenter_sqs_queue_name}
 
         type: Opaque
         # TODO bug in KRO, it always see some drifts..
