@@ -1506,9 +1506,9 @@ spec:
           namespace: ${schema.spec.name}
         spec:
           clusterName: ${schema.spec.name}
-          namespace: ${schema.specs.karpenter_namespace}
+          namespace: ${schema.specs.addons.karpenter_namespace}
           roleARN: ${karpenterRole.status.ackResourceMetadata.arn}
-          serviceAccount: ${schema.specs.karpenter_service_account}
+          serviceAccount: ${schema.specs.addons.karpenter_service_account}
           tags:
             environment: ${schema.spec.environment}
             managedBy: ACK
