@@ -140,7 +140,7 @@ spec:
         metadata:
           namespace: ${schema.spec.name}
           name: ${schema.spec.name}
-          #implicit dependencies with roles
+          # implicit dependencies with roles
           annotations:
             clusterRoleArn: ${clusterRole.status.ackResourceMetadata.arn}
             nodeRoleArn: ${nodeRole.status.ackResourceMetadata.arn}
@@ -186,7 +186,7 @@ spec:
           name: eks-pod-identity-agent
           namespace: ${schema.spec.name}
           annotations:
-            clusterArn: ${ekscluster.status.ackResourceMetadata.arn}          
+            clusterArn: ${ekscluster.status.ackResourceMetadata.arn}
         spec:
           name: eks-pod-identity-agent
           addonVersion: v1.3.4-eksbuild.1
@@ -229,14 +229,14 @@ spec:
           namespace: argocd
           labels:
             argocd.argoproj.io/secret-type: cluster
-            # compatible fleet-management
+            # Compatible fleet-management
             fleet_member: spoke
             tenant: ${schema.spec.tenant}
             environment: ${schema.spec.environment}
             aws_cluster_name: ${schema.spec.name}
             workloads: "true"
           annotations:
-            #GitOps Bridge
+            # GitOps Bridge
             accountId: ${schema.spec.accountId}
             aws_accountId: ${schema.spec.accountId}
             region: ${schema.spec.region}
@@ -288,10 +288,10 @@ spec:
             fleet_secret_manager_secret_name: ${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}
             #fleet_secret_manager_secret_name: "workload-cluster3-argocd-secret5"
 
-            karpenter_namespace=${schema.spec.addons.karpenter_namespace}",
-            karpenter_node_iam_role_name=${nodeRole.metadata.name}
-            karpenter_service_account=${schema.spec.addons.karpenter_service_account}
-            #karpenter_sqs_queue_name="#TODO create SQS queue"
+            karpenter_namespace: ${schema.spec.addons.karpenter_namespace}"
+            karpenter_node_iam_role_name: ${nodeRole.metadata.name}
+            karpenter_service_account: ${schema.spec.addons.karpenter_service_account}
+            #karpenter_sqs_queue_name: "#TODO create SQS queue"
 
         type: Opaque
         # TODO bug in KRO, it always see some drifts..
@@ -925,8 +925,6 @@ spec:
               ]
             }
 
-    
-    #comment due to https://github.com/kro-run/kro/issues/271
     - id: adotCollectorPodIdentityAssociation
       template:
         apiVersion: eks.services.k8s.aws/v1alpha1
@@ -1874,7 +1872,7 @@ spec:
     #             type: "cluster"
     #           policyARN: "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
     #       principalARN: ${karpenterNodeRole.status.ackResourceMetadata.arn}
-    #       type: EC2_LINUX            
+    #       type: EC2_LINUX
 
     # - id: karpenterNodeInstanceProfile
     #   template:
@@ -1892,4 +1890,3 @@ spec:
     ###########################################################
     # XXX Pod Identity
     ###########################################################
-
