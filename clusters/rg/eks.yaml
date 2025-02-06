@@ -1256,7 +1256,7 @@ spec:
                   ],
                   "Condition": {
                     "StringEquals": {
-                      "aws:RequestTag/kubernetes.io/cluster/${var.cluster_name}": "owned"
+                      "aws:RequestTag/kubernetes.io/cluster/${schema.spec.name}": "owned"
                     },
                     "StringLike": {
                       "aws:RequestTag/karpenter.sh/nodepool": "*"
@@ -1278,7 +1278,7 @@ spec:
                   ],
                   "Condition": {
                     "StringEquals": {
-                      "aws:RequestTag/kubernetes.io/cluster/${var.cluster_name}": "owned",
+                      "aws:RequestTag/kubernetes.io/cluster/${schema.spec.name}": "owned",
                       "ec2:CreateAction": [
                         "RunInstances",
                         "CreateFleet",
@@ -1298,7 +1298,7 @@ spec:
                   "Resource": "arn:${schema.spec.aws_partition}:ec2:*:*:instance/*",
                   "Condition": {
                     "StringEquals": {
-                      "aws:ResourceTag/kubernetes.io/cluster/${var.cluster_name}": "owned"
+                      "aws:ResourceTag/kubernetes.io/cluster/${schema.spec.name}": "owned"
                     },
                     "StringLike": {
                       "aws:ResourceTag/karpenter.sh/nodepool": "*"
@@ -1323,7 +1323,7 @@ spec:
                   ],
                   "Condition": {
                     "StringEquals": {
-                      "aws:ResourceTag/kubernetes.io/cluster/${var.cluster_name}": "owned"
+                      "aws:ResourceTag/kubernetes.io/cluster/${schema.spec.name}": "owned"
                     },
                     "StringLike": {
                       "aws:ResourceTag/karpenter.sh/nodepool": "*"
@@ -1401,7 +1401,7 @@ spec:
                   ],
                   "Condition": {
                     "StringEquals": {
-                      "aws:RequestTag/kubernetes.io/cluster/${var.cluster_name}": "owned",
+                      "aws:RequestTag/kubernetes.io/cluster/${schema.spec.name}": "owned",
                       "aws:RequestTag/topology.kubernetes.io/region": "${schema.specs.region}"
                     },
                     "StringLike": {
@@ -1419,7 +1419,7 @@ spec:
                   ],
                   "Condition": {
                     "StringEquals": {
-                      "aws:ResourceTag/kubernetes.io/cluster/${var.cluster_name}": "owned",
+                      "aws:ResourceTag/kubernetes.io/cluster/${schema.spec.name}": "owned",
                       "aws:ResourceTag/topology.kubernetes.io/region": "${schema.specs.region}"
                     },
                     "StringLike": {
@@ -1440,7 +1440,7 @@ spec:
                   ],
                   "Condition": {
                     "StringEquals": {
-                      "aws:ResourceTag/kubernetes.io/cluster/${var.cluster_name}": "owned",
+                      "aws:ResourceTag/kubernetes.io/cluster/${schema.spec.name}": "owned",
                       "aws:ResourceTag/topology.kubernetes.io/region": "${schema.specs.region}"
                     },
                     "StringLike": {
@@ -1463,7 +1463,7 @@ spec:
                     "eks:DescribeCluster"
                   ],
                   "Resource": [
-                    "arn:${schema.spec.aws_partition}:eks:${schema.specs.region}:${schema.specs.accountId}:cluster/${var.cluster_name}"
+                    "arn:${schema.spec.aws_partition}:eks:${schema.specs.region}:${schema.specs.accountId}:cluster/${schema.spec.name}"
                   ]
                 }
               ]
