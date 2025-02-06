@@ -1346,7 +1346,7 @@ spec:
                   "Resource": "*",
                   "Condition": {
                     "StringEquals": {
-                      "aws:RequestedRegion": "${schema.specs.region}"
+                      "aws:RequestedRegion": "${schema.spec.region}"
                     }
                   }
                 },
@@ -1356,7 +1356,7 @@ spec:
                     "ssm:GetParameter"
                   ],
                   "Resource": [
-                    "arn:${schema.spec.aws_partition}:ssm:${schema.specs.region}::parameter/aws/service/*"
+                    "arn:${schema.spec.aws_partition}:ssm:${schema.spec.region}::parameter/aws/service/*"
                   ]
                 },
                 {
@@ -1374,7 +1374,7 @@ spec:
                     "sqs:ReceiveMessage"
                   ],
                   "Resource": [
-                    "arn:${schema.spec.aws_partition}:sqs:${schema.specs.region}:${schema.specs.accountId}:*"
+                    "arn:${schema.spec.aws_partition}:sqs:${schema.spec.region}:${schema.spec.accountId}:*"
                   ]
                 },
                 {
@@ -1383,11 +1383,11 @@ spec:
                     "iam:PassRole"
                   ],
                   "Resource": [
-                    "arn:${schema.spec.aws_partition}:iam::${schema.specs.accountId}:role/*"
+                    "arn:${schema.spec.aws_partition}:iam::${schema.spec.accountId}:role/*"
                   ],
                   "Condition": {
                     "StringEquals": {
-                      "iam:PassedToService": "ec2.${schema.specs.aws_dns_suffix}"
+                      "iam:PassedToService": "ec2.${schema.spec.aws_dns_suffix}"
                     }
                   }
                 },
@@ -1397,12 +1397,12 @@ spec:
                     "iam:CreateInstanceProfile"
                   ],
                   "Resource": [
-                    "arn:${schema.spec.aws_partition}:iam::${schema.specs.accountId}:instance-profile/*"
+                    "arn:${schema.spec.aws_partition}:iam::${schema.spec.accountId}:instance-profile/*"
                   ],
                   "Condition": {
                     "StringEquals": {
                       "aws:RequestTag/kubernetes.io/cluster/${schema.spec.name}": "owned",
-                      "aws:RequestTag/topology.kubernetes.io/region": "${schema.specs.region}"
+                      "aws:RequestTag/topology.kubernetes.io/region": "${schema.spec.region}"
                     },
                     "StringLike": {
                       "aws:RequestTag/karpenter.k8s.aws/ec2nodeclass": "*"
@@ -1415,12 +1415,12 @@ spec:
                     "iam:TagInstanceProfile"
                   ],
                   "Resource": [
-                    "arn:${schema.spec.aws_partition}:iam::${schema.specs.accountId}:instance-profile/*"
+                    "arn:${schema.spec.aws_partition}:iam::${schema.spec.accountId}:instance-profile/*"
                   ],
                   "Condition": {
                     "StringEquals": {
                       "aws:ResourceTag/kubernetes.io/cluster/${schema.spec.name}": "owned",
-                      "aws:ResourceTag/topology.kubernetes.io/region": "${schema.specs.region}"
+                      "aws:ResourceTag/topology.kubernetes.io/region": "${schema.spec.region}"
                     },
                     "StringLike": {
                       "aws:ResourceTag/karpenter.k8s.aws/ec2nodeclass": "*",
@@ -1436,12 +1436,12 @@ spec:
                     "iam:DeleteInstanceProfile"
                   ],
                   "Resource": [
-                    "arn:${schema.spec.aws_partition}:iam::${schema.specs.accountId}:instance-profile/*"
+                    "arn:${schema.spec.aws_partition}:iam::${schema.spec.accountId}:instance-profile/*"
                   ],
                   "Condition": {
                     "StringEquals": {
                       "aws:ResourceTag/kubernetes.io/cluster/${schema.spec.name}": "owned",
-                      "aws:ResourceTag/topology.kubernetes.io/region": "${schema.specs.region}"
+                      "aws:ResourceTag/topology.kubernetes.io/region": "${schema.spec.region}"
                     },
                     "StringLike": {
                       "aws:ResourceTag/karpenter.k8s.aws/ec2nodeclass": "*"
@@ -1454,7 +1454,7 @@ spec:
                     "iam:GetInstanceProfile"
                   ],
                   "Resource": [
-                    "arn:${schema.spec.aws_partition}:iam::${schema.specs.accountId}:instance-profile/*"
+                    "arn:${schema.spec.aws_partition}:iam::${schema.spec.accountId}:instance-profile/*"
                   ]
                 },
                 {
@@ -1463,7 +1463,7 @@ spec:
                     "eks:DescribeCluster"
                   ],
                   "Resource": [
-                    "arn:${schema.spec.aws_partition}:eks:${schema.specs.region}:${schema.specs.accountId}:cluster/${schema.spec.name}"
+                    "arn:${schema.spec.aws_partition}:eks:${schema.spec.region}:${schema.spec.accountId}:cluster/${schema.spec.name}"
                   ]
                 }
               ]
@@ -1506,9 +1506,9 @@ spec:
           namespace: ${schema.spec.name}
         spec:
           clusterName: ${schema.spec.name}
-          namespace: ${schema.specs.addons.karpenter_namespace}
+          namespace: ${schema.spec.addons.karpenter_namespace}
           roleARN: ${karpenterRole.status.ackResourceMetadata.arn}
-          serviceAccount: ${schema.specs.addons.karpenter_service_account}
+          serviceAccount: ${schema.spec.addons.karpenter_service_account}
           tags:
             environment: ${schema.spec.environment}
             managedBy: ACK
