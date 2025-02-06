@@ -1863,23 +1863,6 @@ spec:
           roles:
             - ${karpenterNodeRole.status.ackResourceMetadata.arn}
 
-    - id: karpenterPodIdentityAssociation
-      template:
-        apiVersion: eks.services.k8s.aws/v1alpha1
-        kind: PodIdentityAssociation
-        metadata:
-          name: ${schema.spec.name}-karpenter
-          namespace: ${schema.spec.name}
-        spec:
-          clusterName: ${schema.spec.name}
-          namespace: ${schema.spec.addons.karpenter_namespace}
-          roleARN: ${karpenterRole.status.ackResourceMetadata.arn}
-          serviceAccount: ${schema.spec.addons.karpenter_service_account}
-          tags:
-            environment: ${schema.spec.environment}
-            managedBy: ACK
-            application: karpenter
-
     ###########################################################
     # XXX Pod Identity
     ###########################################################
