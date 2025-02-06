@@ -59,9 +59,6 @@ spec:
         adot_collector_namespace: string | default="adot-collector-kubeprometheus"
         adot_collector_service_account: string | default="adot-collector-kubeprometheus"
 
-        karpenter_namespace: string | default="karpenter"
-        karpenter_service_account: string | default="karpenter"
-
         external_dns_namespace: string | default="external-dns"
         external_dns_service_account: string | default="external-dns-sa"
         external_dns_policy: string | default="sync"
