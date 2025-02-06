@@ -117,6 +117,8 @@ spec:
             - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
             - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
             - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+            - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+            - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
           assumeRolePolicyDocument: |
             {
               "Version": "2012-10-17",
@@ -286,10 +288,10 @@ spec:
             fleet_secret_manager_secret_name: ${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}
             #fleet_secret_manager_secret_name: "workload-cluster3-argocd-secret5"
 
-            # karpenter_namespace=kube-system
-            # karpenter_node_iam_role_name=Karpenter-fleet-spoke-prod-20241108160545410700000034
-            # karpenter_service_account=karpenter
-            # karpenter_sqs_queue_name=Karpenter-fleet-spoke-prod
+            karpenter_namespace=${schema.spec.addons.karpenter_namespace}",
+            karpenter_node_iam_role_name=${nodeRole.metadata.name}
+            karpenter_service_account=${schema.spec.addons.karpenter_service_account}
+            #karpenter_sqs_queue_name="#TODO create SQS queue"
 
         type: Opaque
         # TODO bug in KRO, it always see some drifts..
@@ -318,76 +320,77 @@ spec:
 
         type: Opaque
         #TODO bug in KRO, it always see some drifts..
-        # stringData:
-        #   name: ${schema.spec.name}
-        #   server: "${ekscluster.status.endpoint}"
-        #   # use k8sVersion need to fix bug, use 1.30 for now
-        #   config: |
-        #     {
-        #       "addons": {
-        #         "aws_cluster_name": "${schema.spec.name}",
-        #         "kubernetes_version": "1.30"
-        #       },
-        #       "config": {
-        #         "awsAuthConfig": {
-        #           "clusterName": "${schema.spec.name}",
-        #           "roleARN": "${argocdRole.status.ackResourceMetadata.arn}"
-        #         },
-        #         "tlsClientConfig": {
-        #           "caData": "${ekscluster.status.certificateAuthority.data}",
-        #           "insecure": false
-        #         }
-        #       },
-        #       "metadata": {
-        #         "accountId": "${schema.spec.accountId}",
-        #         "aws_accountId": "${schema.spec.accountId}",
-        #         "region": "${schema.spec.region}",
-        #         "aws_region": "${schema.spec.region}",
-        #         "aws_central_region": "${schema.spec.region}",
-        #         "oidcProvider": "${ekscluster.status.identity.oidc.issuer}",
-        #         "aws_cluster_name": "${schema.spec.name}",
-        #         "aws_vpc_id": "${schema.spec.network.vpcID}",
-        #         "addons_repo_basepath": "",
-        #         "addons_repo_path": "${schema.spec.gitops.addonsRepoPath}",
-        #         "addons_repo_revision": "${schema.spec.gitops.addonsRepoRevision}",
-        #         "addons_repo_secret_key": "${schema.spec.gitops.addonsRepoSecretKey}",
-        #         "addons_repo_url": "${schema.spec.gitops.addonsRepoUrl}",
-        #         "fleet_repo_basepath": "",
-        #         "fleet_repo_path": "${schema.spec.gitops.fleetRepoPath}",
-        #         "fleet_repo_revision": "${schema.spec.gitops.fleetRepoRevision}",
-        #         "fleet_repo_secret_key": "${schema.spec.gitops.fleetRepoSecretKey}",
-        #         "fleet_repo_url": "${schema.spec.gitops.fleetRepoUrl}",
-        #         "platform_repo_basepath": "",
-        #         "platform_repo_path": "${schema.spec.gitops.platformRepoPath}",
-        #         "platform_repo_revision": "${schema.spec.gitops.platformRepoRevision}",
-        #         "platform_repo_secret_key": "${schema.spec.gitops.platformRepoSecretKey}",
-        #         "platform_repo_url": "${schema.spec.gitops.platformRepoUrl}",
-        #         "workload_repo_basepath": "",
-        #         "workload_repo_path": "${schema.spec.gitops.workloadRepoPath}",
-        #         "workload_repo_revision": "${schema.spec.gitops.workloadRepoRevision}",
-        #         "workload_repo_secret_key": "${schema.spec.gitops.workloadRepoSecretKey}",
-        #         "workload_repo_url": "${schema.spec.gitops.workloadRepoUrl}",
-        #         "external_dns_domain_filters": "${schema.spec.domainName}",
-        #         "external_dns_namespace": "${schema.spec.addons.external_dns_namespace}",
-        #         "external_dns_policy": "${schema.spec.addons.external_dns_policy}",
-        #         "external_dns_service_account": "${schema.spec.addons.external_dns_service_account}", 
-        #         "external_secrets_namespace": "${schema.spec.addons.external_secrets_namespace}",
-        #         "external_secrets_service_account": "${schema.spec.addons.external_secrets_service_account}",
+        stringData:
+          name: ${schema.spec.name}
+          server: "${ekscluster.status.endpoint}"
+          # use k8sVersion need to fix bug, use 1.30 for now
+          config: |
+            {
+              "addons": {
+                "aws_cluster_name": "${schema.spec.name}",
+                "kubernetes_version": "1.30"
+              },
+              "config": {
+                "awsAuthConfig": {
+                  "clusterName": "${schema.spec.name}",
+                  "roleARN": "${argocdRole.status.ackResourceMetadata.arn}"
+                },
+                "tlsClientConfig": {
+                  "caData": "${ekscluster.status.certificateAuthority.data}",
+                  "insecure": false
+                }
+              },
+              "metadata": {
+                "accountId": "${schema.spec.accountId}",
+                "aws_accountId": "${schema.spec.accountId}",
+                "region": "${schema.spec.region}",
+                "aws_region": "${schema.spec.region}",
+                "aws_central_region": "${schema.spec.region}",
+                "oidcProvider": "${ekscluster.status.identity.oidc.issuer}",
+                "aws_cluster_name": "${schema.spec.name}",
+                "aws_vpc_id": "${schema.spec.network.vpcID}",
+                "addons_repo_basepath": "",
+                "addons_repo_path": "${schema.spec.gitops.addonsRepoPath}",
+                "addons_repo_revision": "${schema.spec.gitops.addonsRepoRevision}",
+                "addons_repo_secret_key": "${schema.spec.gitops.addonsRepoSecretKey}",
+                "addons_repo_url": "${schema.spec.gitops.addonsRepoUrl}",
+                "fleet_repo_basepath": "",
+                "fleet_repo_path": "${schema.spec.gitops.fleetRepoPath}",
+                "fleet_repo_revision": "${schema.spec.gitops.fleetRepoRevision}",
+                "fleet_repo_secret_key": "${schema.spec.gitops.fleetRepoSecretKey}",
+                "fleet_repo_url": "${schema.spec.gitops.fleetRepoUrl}",
+                "platform_repo_basepath": "",
+                "platform_repo_path": "${schema.spec.gitops.platformRepoPath}",
+                "platform_repo_revision": "${schema.spec.gitops.platformRepoRevision}",
+                "platform_repo_secret_key": "${schema.spec.gitops.platformRepoSecretKey}",
+                "platform_repo_url": "${schema.spec.gitops.platformRepoUrl}",
+                "workload_repo_basepath": "",
+                "workload_repo_path": "${schema.spec.gitops.workloadRepoPath}",
+                "workload_repo_revision": "${schema.spec.gitops.workloadRepoRevision}",
+                "workload_repo_secret_key": "${schema.spec.gitops.workloadRepoSecretKey}",
+                "workload_repo_url": "${schema.spec.gitops.workloadRepoUrl}",
+                "external_dns_domain_filters": "${schema.spec.domainName}",
+                "external_dns_namespace": "${schema.spec.addons.external_dns_namespace}",
+                "external_dns_policy": "${schema.spec.addons.external_dns_policy}",
+                "external_dns_service_account": "${schema.spec.addons.external_dns_service_account}", 
+                "external_secrets_namespace": "${schema.spec.addons.external_secrets_namespace}",
+                "external_secrets_service_account": "${schema.spec.addons.external_secrets_service_account}",
 
-        #         "aws_load_balancer_controller_namespace": "${schema.spec.addons.aws_load_balancer_controller_namespace}",
-        #         "aws_load_balancer_controller_service_account": "${schema.spec.addons.aws_load_balancer_controller_service_account}",
-        #         "adot_collector_namespace": "${schema.spec.addons.adot_collector_namespace}",
-        #         "adot_collector_service_account": "${schema.spec.addons.adot_collector_service_account}",
-        #         "amp_endpoint_url": "${schema.spec.addons.amp_endpoint_url}",
+                "aws_load_balancer_controller_namespace": "${schema.spec.addons.aws_load_balancer_controller_namespace}",
+                "aws_load_balancer_controller_service_account": "${schema.spec.addons.aws_load_balancer_controller_service_account}",
+                "adot_collector_namespace": "${schema.spec.addons.adot_collector_namespace}",
+                "adot_collector_service_account": "${schema.spec.addons.adot_collector_service_account}",
+                "amp_endpoint_url": "${schema.spec.addons.amp_endpoint_url}",
 
-        #         "karpenter_namespace": "${schema.spec.addons.karpenter_namespace}",
-        #         "karpenter_service_account": "${schema.spec.addons.karpenter_service_account}",
-        #         "karpenter_sqs_queue_name": "#TODO create SQS queuek",
+                "karpenter_namespace": "${schema.spec.addons.karpenter_namespace}",
+                "karpenter_service_account": "${schema.spec.addons.karpenter_service_account}",
+                "karpenter_node_iam_role_name": "${nodeRole.metadata.name}",
+                "disabled-karpenter_sqs_queue_name": "#TODO create SQS queue",
 
-        #         "fleet_secret_manager_secret_name": "${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}"
-        #       },
-        #       "server": "${ekscluster.status.endpoint}"
-        #     }
+                "fleet_secret_manager_secret_name": "${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}"
+              },
+              "server": "${ekscluster.status.endpoint}"
+            }
 
 
     #Copy argocdSecretForACK into secretManager
@@ -1517,351 +1520,374 @@ spec:
     ###########################################################
     # Karpenter Node Role
     ###########################################################
-    - id: karpenterNodePolicy
-      template:
-        apiVersion: iam.services.k8s.aws/v1alpha1
-        kind: Policy
-        metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-karpenter-node-policy
-        spec:
-          name: ${schema.spec.name}-karpenter-node-policy
-          description: "Policy for Karpenter Node"
-          policyDocument: |
-            {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "ec2:CreateLaunchTemplate",
-                    "ec2:DeleteLaunchTemplate",
-                    "ec2:CreateFleet",
-                    "ec2:RunInstances",
-                    "ec2:CreateTags",
-                    "ec2:TerminateInstances",
-                    "ec2:DescribeLaunchTemplates",
-                    "ec2:DescribeInstances",
-                    "ec2:DescribeSecurityGroups",
-                    "ec2:DescribeSubnets",
-                    "ec2:DescribeInstanceTypes",
-                    "ec2:DescribeInstanceTypeOfferings",
-                    "ec2:DescribeAvailabilityZones",
-                    "ssm:GetParameter",
-                    "pricing:GetProducts",
-                    "pricing:DescribeServices",
-                    "pricing:GetAttributeValues",
-                    "iam:PassRole"
-                  ],
-                  "Resource": "*"
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "ec2:RunInstances",
-                    "ec2:CreateFleet"
-                  ],
-                  "Resource": [
-                    "arn:${schema.spec.aws_partition}:ec2:*::image/*",
-                    "arn:${schema.spec.aws_partition}:ec2:*::snapshot/*",
-                    "arn:${schema.spec.aws_partition}:ec2:*:*:spot-instances-request/*",
-                    "arn:${schema.spec.aws_partition}:ec2:*:*:security-group/*",
-                    "arn:${schema.spec.aws_partition}:ec2:*:*:subnet/*",
-                    "arn:${schema.spec.aws_partition}:ec2:*:*:launch-template/*"
-                  ]
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "ec2:DescribeImages"
-                  ],
-                  "Resource": "*"
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "ssm:GetParameter"
-                  ],
-                  "Resource": [
-                    "arn:${schema.spec.aws_partition}:ssm:*:*:parameter/aws/service/eks/optimized-ami/*",
-                    "arn:${schema.spec.aws_partition}:ssm:*:*:parameter/aws/service/ami-amazon-linux-latest/*"
-                  ]
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "iam:PassRole"
-                  ],
-                  "Resource": "*"
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "ec2:RunInstances",
-                    "ec2:CreateFleet",
-                    "ec2:CreateLaunchTemplate"
-                  ],
-                  "Resource": [
-                    "arn:${schema.spec.aws_partition}:ec2:*:*:fleet/*",
-                    "arn:${schema.spec.aws_partition}:ec2:*:*:instance/*",
-                    "arn:${schema.spec.aws_partition}:ec2:*:*:volume/*",
-                    "arn:${schema.spec.aws_partition}:ec2:*:*:network-interface/*",
-                    "arn:${schema.spec.aws_partition}:ec2:*:*:launch-template/*",
-                    "arn:${schema.spec.aws_partition}:ec2:*:*:spot-instances-request/*"
-                  ],
-                  "Condition": {
-                    "StringEquals": {
-                      "aws:RequestTag/kubernetes.io/cluster/${schema.spec.name}": "owned"
-                    },
-                    "StringLike": {
-                      "aws:RequestTag/karpenter.sh/nodepool": "*"
-                    }
-                  }
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "ec2:CreateTags"
-                  ],
-                  "Resource": [
-                    "arn:${schema.spec.aws_partition}:ec2:*:*:fleet/*",
-                    "arn:${schema.spec.aws_partition}:ec2:*:*:instance/*",
-                    "arn:${schema.spec.aws_partition}:ec2:*:*:volume/*",
-                    "arn:${schema.spec.aws_partition}:ec2:*:*:network-interface/*",
-                    "arn:${schema.spec.aws_partition}:ec2:*:*:launch-template/*",
-                    "arn:${schema.spec.aws_partition}:ec2:*:*:spot-instances-request/*"
-                  ],
-                  "Condition": {
-                    "StringEquals": {
-                      "aws:RequestTag/kubernetes.io/cluster/${schema.spec.name}": "owned",
-                      "ec2:CreateAction": [
-                        "RunInstances",
-                        "CreateFleet",
-                        "CreateLaunchTemplate"
-                      ]
-                    },
-                    "StringLike": {
-                      "aws:RequestTag/karpenter.sh/nodepool": "*"
-                    }
-                  }
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "ec2:CreateTags"
-                  ],
-                  "Resource": "arn:${schema.spec.aws_partition}:ec2:*:*:instance/*",
-                  "Condition": {
-                    "StringEquals": {
-                      "aws:ResourceTag/kubernetes.io/cluster/${schema.spec.name}": "owned"
-                    },
-                    "StringLike": {
-                      "aws:ResourceTag/karpenter.sh/nodepool": "*"
-                    },
-                    "ForAllValues:StringEquals": {
-                      "aws:TagKeys": [
-                        "karpenter.sh/nodeclaim",
-                        "Name"
-                      ]
-                    }
-                  }
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "ec2:TerminateInstances",
-                    "ec2:DeleteLaunchTemplate"
-                  ],
-                  "Resource": [
-                    "arn:${schema.spec.aws_partition}:ec2:*:*:instance/*",
-                    "arn:${schema.spec.aws_partition}:ec2:*:*:launch-template/*"
-                  ],
-                  "Condition": {
-                    "StringEquals": {
-                      "aws:ResourceTag/kubernetes.io/cluster/${schema.spec.name}": "owned"
-                    },
-                    "StringLike": {
-                      "aws:ResourceTag/karpenter.sh/nodepool": "*"
-                    }
-                  }
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "ec2:DescribeAvailabilityZones",
-                    "ec2:DescribeImages",
-                    "ec2:DescribeInstances",
-                    "ec2:DescribeInstanceTypeOfferings",
-                    "ec2:DescribeInstanceTypes",
-                    "ec2:DescribeLaunchTemplates",
-                    "ec2:DescribeSecurityGroups",
-                    "ec2:DescribeSpotPriceHistory",
-                    "ec2:DescribeSubnets"
-                  ],
-                  "Resource": "*",
-                  "Condition": {
-                    "StringEquals": {
-                      "aws:RequestedRegion": "${schema.spec.region}"
-                    }
-                  }
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "ssm:GetParameter"
-                  ],
-                  "Resource": [
-                    "arn:${schema.spec.aws_partition}:ssm:${schema.spec.region}::parameter/aws/service/*"
-                  ]
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "pricing:GetProducts"
-                  ],
-                  "Resource": "*"
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "sqs:DeleteMessage",
-                    "sqs:GetQueueUrl",
-                    "sqs:ReceiveMessage"
-                  ],
-                  "Resource": [
-                    "arn:${schema.spec.aws_partition}:sqs:${schema.spec.region}:${schema.spec.account_id}:*"
-                  ]
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "iam:PassRole"
-                  ],
-                  "Resource": [
-                    "arn:${schema.spec.aws_partition}:iam::${schema.spec.account_id}:role/*"
-                  ],
-                  "Condition": {
-                    "StringEquals": {
-                      "iam:PassedToService": "ec2.${schema.spec.dns_suffix}"
-                    }
-                  }
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "iam:CreateInstanceProfile"
-                  ],
-                  "Resource": [
-                    "arn:${schema.spec.aws_partition}:iam::${schema.spec.account_id}:instance-profile/*"
-                  ],
-                  "Condition": {
-                    "StringEquals": {
-                      "aws:RequestTag/kubernetes.io/cluster/${schema.spec.name}": "owned",
-                      "aws:RequestTag/topology.kubernetes.io/region": "${schema.spec.region}"
-                    },
-                    "StringLike": {
-                      "aws:RequestTag/karpenter.k8s.aws/ec2nodeclass": "*"
-                    }
-                  }
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "iam:TagInstanceProfile"
-                  ],
-                  "Resource": [
-                    "arn:${schema.spec.aws_partition}:iam::${schema.spec.account_id}:instance-profile/*"
-                  ],
-                  "Condition": {
-                    "StringEquals": {
-                      "aws:ResourceTag/kubernetes.io/cluster/${schema.spec.name}": "owned",
-                      "aws:ResourceTag/topology.kubernetes.io/region": "${schema.spec.region}"
-                    },
-                    "StringLike": {
-                      "aws:ResourceTag/karpenter.k8s.aws/ec2nodeclass": "*",
-                      "aws:RequestTag/karpenter.k8s.aws/ec2nodeclass": "*"
-                    }
-                  }
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "iam:AddRoleToInstanceProfile",
-                    "iam:RemoveRoleFromInstanceProfile",
-                    "iam:DeleteInstanceProfile"
-                  ],
-                  "Resource": [
-                    "arn:${schema.spec.aws_partition}:iam::${schema.spec.account_id}:instance-profile/*"
-                  ],
-                  "Condition": {
-                    "StringEquals": {
-                      "aws:ResourceTag/kubernetes.io/cluster/${schema.spec.name}": "owned",
-                      "aws:ResourceTag/topology.kubernetes.io/region": "${schema.spec.region}"
-                    },
-                    "StringLike": {
-                      "aws:ResourceTag/karpenter.k8s.aws/ec2nodeclass": "*"
-                    }
-                  }
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "iam:GetInstanceProfile"
-                  ],
-                  "Resource": [
-                    "arn:${schema.spec.aws_partition}:iam::${schema.spec.account_id}:instance-profile/*"
-                  ]
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "eks:DescribeCluster"
-                  ],
-                  "Resource": [
-                    "arn:${schema.spec.aws_partition}:eks:${schema.spec.region}:${schema.spec.account_id}:cluster/${schema.spec.name}"
-                  ]
-                }
-              ]
-            }
+    # - id: karpenterNodePolicy
+    #   template:
+    #     apiVersion: iam.services.k8s.aws/v1alpha1
+    #     kind: Policy
+    #     metadata:
+    #       namespace: ${schema.spec.name}
+    #       name: ${schema.spec.name}-karpenter-node-policy
+    #     spec:
+    #       name: ${schema.spec.name}-karpenter-node-policy
+    #       description: "Policy for Karpenter Node"
+    #       policyDocument: |
+    #         {
+    #           "Version": "2012-10-17",
+    #           "Statement": [
+    #             {
+    #               "Effect": "Allow",
+    #               "Action": [
+    #                 "ec2:CreateLaunchTemplate",
+    #                 "ec2:DeleteLaunchTemplate",
+    #                 "ec2:CreateFleet",
+    #                 "ec2:RunInstances",
+    #                 "ec2:CreateTags",
+    #                 "ec2:TerminateInstances",
+    #                 "ec2:DescribeLaunchTemplates",
+    #                 "ec2:DescribeInstances",
+    #                 "ec2:DescribeSecurityGroups",
+    #                 "ec2:DescribeSubnets",
+    #                 "ec2:DescribeInstanceTypes",
+    #                 "ec2:DescribeInstanceTypeOfferings",
+    #                 "ec2:DescribeAvailabilityZones",
+    #                 "ssm:GetParameter",
+    #                 "pricing:GetProducts",
+    #                 "pricing:DescribeServices",
+    #                 "pricing:GetAttributeValues",
+    #                 "iam:PassRole"
+    #               ],
+    #               "Resource": "*"
+    #             },
+    #             {
+    #               "Effect": "Allow",
+    #               "Action": [
+    #                 "ec2:RunInstances",
+    #                 "ec2:CreateFleet"
+    #               ],
+    #               "Resource": [
+    #                 "arn:${schema.spec.aws_partition}:ec2:*::image/*",
+    #                 "arn:${schema.spec.aws_partition}:ec2:*::snapshot/*",
+    #                 "arn:${schema.spec.aws_partition}:ec2:*:*:spot-instances-request/*",
+    #                 "arn:${schema.spec.aws_partition}:ec2:*:*:security-group/*",
+    #                 "arn:${schema.spec.aws_partition}:ec2:*:*:subnet/*",
+    #                 "arn:${schema.spec.aws_partition}:ec2:*:*:launch-template/*"
+    #               ]
+    #             },
+    #             {
+    #               "Effect": "Allow",
+    #               "Action": [
+    #                 "ec2:DescribeImages"
+    #               ],
+    #               "Resource": "*"
+    #             },
+    #             {
+    #               "Effect": "Allow",
+    #               "Action": [
+    #                 "ssm:GetParameter"
+    #               ],
+    #               "Resource": [
+    #                 "arn:${schema.spec.aws_partition}:ssm:*:*:parameter/aws/service/eks/optimized-ami/*",
+    #                 "arn:${schema.spec.aws_partition}:ssm:*:*:parameter/aws/service/ami-amazon-linux-latest/*"
+    #               ]
+    #             },
+    #             {
+    #               "Effect": "Allow",
+    #               "Action": [
+    #                 "iam:PassRole"
+    #               ],
+    #               "Resource": "*"
+    #             },
+    #             {
+    #               "Effect": "Allow",
+    #               "Action": [
+    #                 "ec2:RunInstances",
+    #                 "ec2:CreateFleet",
+    #                 "ec2:CreateLaunchTemplate"
+    #               ],
+    #               "Resource": [
+    #                 "arn:${schema.spec.aws_partition}:ec2:*:*:fleet/*",
+    #                 "arn:${schema.spec.aws_partition}:ec2:*:*:instance/*",
+    #                 "arn:${schema.spec.aws_partition}:ec2:*:*:volume/*",
+    #                 "arn:${schema.spec.aws_partition}:ec2:*:*:network-interface/*",
+    #                 "arn:${schema.spec.aws_partition}:ec2:*:*:launch-template/*",
+    #                 "arn:${schema.spec.aws_partition}:ec2:*:*:spot-instances-request/*"
+    #               ],
+    #               "Condition": {
+    #                 "StringEquals": {
+    #                   "aws:RequestTag/kubernetes.io/cluster/${schema.spec.name}": "owned"
+    #                 },
+    #                 "StringLike": {
+    #                   "aws:RequestTag/karpenter.sh/nodepool": "*"
+    #                 }
+    #               }
+    #             },
+    #             {
+    #               "Effect": "Allow",
+    #               "Action": [
+    #                 "ec2:CreateTags"
+    #               ],
+    #               "Resource": [
+    #                 "arn:${schema.spec.aws_partition}:ec2:*:*:fleet/*",
+    #                 "arn:${schema.spec.aws_partition}:ec2:*:*:instance/*",
+    #                 "arn:${schema.spec.aws_partition}:ec2:*:*:volume/*",
+    #                 "arn:${schema.spec.aws_partition}:ec2:*:*:network-interface/*",
+    #                 "arn:${schema.spec.aws_partition}:ec2:*:*:launch-template/*",
+    #                 "arn:${schema.spec.aws_partition}:ec2:*:*:spot-instances-request/*"
+    #               ],
+    #               "Condition": {
+    #                 "StringEquals": {
+    #                   "aws:RequestTag/kubernetes.io/cluster/${schema.spec.name}": "owned",
+    #                   "ec2:CreateAction": [
+    #                     "RunInstances",
+    #                     "CreateFleet",
+    #                     "CreateLaunchTemplate"
+    #                   ]
+    #                 },
+    #                 "StringLike": {
+    #                   "aws:RequestTag/karpenter.sh/nodepool": "*"
+    #                 }
+    #               }
+    #             },
+    #             {
+    #               "Effect": "Allow",
+    #               "Action": [
+    #                 "ec2:CreateTags"
+    #               ],
+    #               "Resource": "arn:${schema.spec.aws_partition}:ec2:*:*:instance/*",
+    #               "Condition": {
+    #                 "StringEquals": {
+    #                   "aws:ResourceTag/kubernetes.io/cluster/${schema.spec.name}": "owned"
+    #                 },
+    #                 "StringLike": {
+    #                   "aws:ResourceTag/karpenter.sh/nodepool": "*"
+    #                 },
+    #                 "ForAllValues:StringEquals": {
+    #                   "aws:TagKeys": [
+    #                     "karpenter.sh/nodeclaim",
+    #                     "Name"
+    #                   ]
+    #                 }
+    #               }
+    #             },
+    #             {
+    #               "Effect": "Allow",
+    #               "Action": [
+    #                 "ec2:TerminateInstances",
+    #                 "ec2:DeleteLaunchTemplate"
+    #               ],
+    #               "Resource": [
+    #                 "arn:${schema.spec.aws_partition}:ec2:*:*:instance/*",
+    #                 "arn:${schema.spec.aws_partition}:ec2:*:*:launch-template/*"
+    #               ],
+    #               "Condition": {
+    #                 "StringEquals": {
+    #                   "aws:ResourceTag/kubernetes.io/cluster/${schema.spec.name}": "owned"
+    #                 },
+    #                 "StringLike": {
+    #                   "aws:ResourceTag/karpenter.sh/nodepool": "*"
+    #                 }
+    #               }
+    #             },
+    #             {
+    #               "Effect": "Allow",
+    #               "Action": [
+    #                 "ec2:DescribeAvailabilityZones",
+    #                 "ec2:DescribeImages",
+    #                 "ec2:DescribeInstances",
+    #                 "ec2:DescribeInstanceTypeOfferings",
+    #                 "ec2:DescribeInstanceTypes",
+    #                 "ec2:DescribeLaunchTemplates",
+    #                 "ec2:DescribeSecurityGroups",
+    #                 "ec2:DescribeSpotPriceHistory",
+    #                 "ec2:DescribeSubnets"
+    #               ],
+    #               "Resource": "*",
+    #               "Condition": {
+    #                 "StringEquals": {
+    #                   "aws:RequestedRegion": "${schema.spec.region}"
+    #                 }
+    #               }
+    #             },
+    #             {
+    #               "Effect": "Allow",
+    #               "Action": [
+    #                 "ssm:GetParameter"
+    #               ],
+    #               "Resource": [
+    #                 "arn:${schema.spec.aws_partition}:ssm:${schema.spec.region}::parameter/aws/service/*"
+    #               ]
+    #             },
+    #             {
+    #               "Effect": "Allow",
+    #               "Action": [
+    #                 "pricing:GetProducts"
+    #               ],
+    #               "Resource": "*"
+    #             },
+    #             {
+    #               "Effect": "Allow",
+    #               "Action": [
+    #                 "sqs:DeleteMessage",
+    #                 "sqs:GetQueueUrl",
+    #                 "sqs:ReceiveMessage"
+    #               ],
+    #               "Resource": [
+    #                 "arn:${schema.spec.aws_partition}:sqs:${schema.spec.region}:${schema.spec.account_id}:*"
+    #               ]
+    #             },
+    #             {
+    #               "Effect": "Allow",
+    #               "Action": [
+    #                 "iam:PassRole"
+    #               ],
+    #               "Resource": [
+    #                 "arn:${schema.spec.aws_partition}:iam::${schema.spec.account_id}:role/*"
+    #               ],
+    #               "Condition": {
+    #                 "StringEquals": {
+    #                   "iam:PassedToService": "ec2.${schema.spec.dns_suffix}"
+    #                 }
+    #               }
+    #             },
+    #             {
+    #               "Effect": "Allow",
+    #               "Action": [
+    #                 "iam:CreateInstanceProfile"
+    #               ],
+    #               "Resource": [
+    #                 "arn:${schema.spec.aws_partition}:iam::${schema.spec.account_id}:instance-profile/*"
+    #               ],
+    #               "Condition": {
+    #                 "StringEquals": {
+    #                   "aws:RequestTag/kubernetes.io/cluster/${schema.spec.name}": "owned",
+    #                   "aws:RequestTag/topology.kubernetes.io/region": "${schema.spec.region}"
+    #                 },
+    #                 "StringLike": {
+    #                   "aws:RequestTag/karpenter.k8s.aws/ec2nodeclass": "*"
+    #                 }
+    #               }
+    #             },
+    #             {
+    #               "Effect": "Allow",
+    #               "Action": [
+    #                 "iam:TagInstanceProfile"
+    #               ],
+    #               "Resource": [
+    #                 "arn:${schema.spec.aws_partition}:iam::${schema.spec.account_id}:instance-profile/*"
+    #               ],
+    #               "Condition": {
+    #                 "StringEquals": {
+    #                   "aws:ResourceTag/kubernetes.io/cluster/${schema.spec.name}": "owned",
+    #                   "aws:ResourceTag/topology.kubernetes.io/region": "${schema.spec.region}"
+    #                 },
+    #                 "StringLike": {
+    #                   "aws:ResourceTag/karpenter.k8s.aws/ec2nodeclass": "*",
+    #                   "aws:RequestTag/karpenter.k8s.aws/ec2nodeclass": "*"
+    #                 }
+    #               }
+    #             },
+    #             {
+    #               "Effect": "Allow",
+    #               "Action": [
+    #                 "iam:AddRoleToInstanceProfile",
+    #                 "iam:RemoveRoleFromInstanceProfile",
+    #                 "iam:DeleteInstanceProfile"
+    #               ],
+    #               "Resource": [
+    #                 "arn:${schema.spec.aws_partition}:iam::${schema.spec.account_id}:instance-profile/*"
+    #               ],
+    #               "Condition": {
+    #                 "StringEquals": {
+    #                   "aws:ResourceTag/kubernetes.io/cluster/${schema.spec.name}": "owned",
+    #                   "aws:ResourceTag/topology.kubernetes.io/region": "${schema.spec.region}"
+    #                 },
+    #                 "StringLike": {
+    #                   "aws:ResourceTag/karpenter.k8s.aws/ec2nodeclass": "*"
+    #                 }
+    #               }
+    #             },
+    #             {
+    #               "Effect": "Allow",
+    #               "Action": [
+    #                 "iam:GetInstanceProfile"
+    #               ],
+    #               "Resource": [
+    #                 "arn:${schema.spec.aws_partition}:iam::${schema.spec.account_id}:instance-profile/*"
+    #               ]
+    #             },
+    #             {
+    #               "Effect": "Allow",
+    #               "Action": [
+    #                 "eks:DescribeCluster"
+    #               ],
+    #               "Resource": [
+    #                 "arn:${schema.spec.aws_partition}:eks:${schema.spec.region}:${schema.spec.account_id}:cluster/${schema.spec.name}"
+    #               ]
+    #             }
+    #           ]
+    #         }
 
-    - id: karpenterNodeRole
-      template:
-        apiVersion: iam.services.k8s.aws/v1alpha1
-        kind: Role
-        metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-karpenter-node-role
-        spec:
-          name: ${schema.spec.name}-karpenter-node-role
-          policies:
-            - ${karpenterNodePolicy.status.ackResourceMetadata.arn}
-          assumeRolePolicyDocument: |
-            {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Effect": "Allow",
-                  "Principal": {
-                    "Service": "ec2.amazonaws.com"
-                  },
-                  "Action": [
-                    "sts:AssumeRole"
-                  ]
-                }
-              ]
-            }
+    # - id: karpenterNodeRole
+    #   template:
+    #     apiVersion: iam.services.k8s.aws/v1alpha1
+    #     kind: Role
+    #     metadata:
+    #       namespace: ${schema.spec.name}
+    #       name: ${schema.spec.name}-karpenter-node-role
+    #     spec:
+    #       name: ${schema.spec.name}-karpenter-node-role
+    #       policies:
+    #         - ${karpenterNodePolicy.status.ackResourceMetadata.arn}
+    #       assumeRolePolicyDocument: |
+    #         {
+    #           "Version": "2012-10-17",
+    #           "Statement": [
+    #             {
+    #               "Effect": "Allow",
+    #               "Principal": {
+    #                 "Service": "ec2.amazonaws.com"
+    #               },
+    #               "Action": [
+    #                 "sts:AssumeRole"
+    #               ]
+    #             }
+    #           ]
+    #         }
 
-    - id: karpenterNodeInstanceProfile
-      template:
-        apiVersion: iam.services.k8s.aws/v1alpha1
-        kind: InstanceProfile
-        metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-karpenter-node-instance-profile
-        spec:
-          name: ${schema.spec.name}-karpenter-node-instance-profile
-          roles:
-            - ${karpenterNodeRole.status.ackResourceMetadata.arn}
+    # - id: karpenterNodeAccessEntry
+    #   template:
+    #     apiVersion: eks.services.k8s.aws/v1alpha1
+    #     kind: AccessEntry
+    #     metadata:
+    #       namespace: ${schema.spec.name}
+    #       name: ${schema.spec.name}-karpenter-node-access-entry
+    #     spec:
+    #       clusterName: ${schema.spec.name}
+    #       accessPolicies:
+    #         - accessScope:
+    #             type: "cluster"
+    #           policyARN: "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+    #         - accessScope:
+    #             type: "cluster"
+    #           policyARN: "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+    #         - accessScope:
+    #             type: "cluster"
+    #           policyARN: "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+    #       principalARN: ${karpenterNodeRole.status.ackResourceMetadata.arn}
+    #       type: EC2_LINUX            
+
+    # - id: karpenterNodeInstanceProfile
+    #   template:
+    #     apiVersion: iam.services.k8s.aws/v1alpha1
+    #     kind: InstanceProfile
+    #     metadata:
+    #       namespace: ${schema.spec.name}
+    #       name: ${schema.spec.name}-karpenter-node-instance-profile
+    #     spec:
+    #       name: ${schema.spec.name}-karpenter-node-instance-profile
+    #       roles:
+    #         - ${karpenterNodeRole.status.ackResourceMetadata.arn}
+
 
     ###########################################################
     # XXX Pod Identity
