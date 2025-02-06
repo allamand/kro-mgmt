@@ -86,10 +86,10 @@ spec:
         apiVersion: iam.services.k8s.aws/v1alpha1
         kind: Role
         metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-cluster-role
+          namespace: "${schema.spec.name}"
+          name: "${schema.spec.name}-cluster-role"
         spec:
-          name: ${schema.spec.name}-cluster-role
+          name: "${schema.spec.name}-cluster-role"
           policies:
             - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
           assumeRolePolicyDocument: |
@@ -110,10 +110,10 @@ spec:
         apiVersion: iam.services.k8s.aws/v1alpha1
         kind: Role
         metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-cluster-node-role
+          namespace: "${schema.spec.name}"
+          name: "${schema.spec.name}-cluster-node-role"
         spec:
-          name: ${schema.spec.name}-cluster-node-role
+          name: "${schema.spec.name}-cluster-node-role"
           policies:
             - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
             - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
@@ -139,16 +139,16 @@ spec:
         apiVersion: eks.services.k8s.aws/v1alpha1
         kind: Cluster
         metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}
+          namespace: "${schema.spec.name}"
+          name: "${schema.spec.name}"
           # implicit dependencies with roles
           annotations:
-            clusterRoleArn: ${clusterRole.status.ackResourceMetadata.arn}
-            nodeRoleArn: ${nodeRole.status.ackResourceMetadata.arn}
+            clusterRoleArn: "${clusterRole.status.ackResourceMetadata.arn}"
+            nodeRoleArn: "${nodeRole.status.ackResourceMetadata.arn}"
         spec:
-          name: ${schema.spec.name}
-          roleARN: ${clusterRole.status.ackResourceMetadata.arn}
-          # version: ${schema.spec.k8sVersion} a bug needs to be fixed for this to work
+          name: "${schema.spec.name}"
+          roleARN: "${clusterRole.status.ackResourceMetadata.arn}"
+          # version: "${schema.spec.k8sVersion} a bug needs to be fixed for this to work
           accessConfig:
             authenticationMode: "API_AND_CONFIG_MAP"
           resourcesVPCConfig:
@@ -162,17 +162,17 @@ spec:
         apiVersion: eks.services.k8s.aws/v1alpha1
         kind: Nodegroup
         metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-nodegroup
+          namespace: "${schema.spec.name}"
+          name: "${schema.spec.name}-nodegroup"
           annotations:
-            clusterArn: ${ekscluster.status.ackResourceMetadata.arn}
+            clusterArn: "${ekscluster.status.ackResourceMetadata.arn}"
         spec:
-          name: ${schema.spec.name}-nodegroup
-          clusterName: ${schema.spec.name}
+          name: "${schema.spec.name}-nodegroup"
+          clusterName: "${schema.spec.name}"
           subnets:
             - ${schema.spec.network.subnets.workers.subnet1ID}
             - ${schema.spec.network.subnets.workers.subnet2ID}
-          nodeRole: ${nodeRole.status.ackResourceMetadata.arn}
+          nodeRole: "${nodeRole.status.ackResourceMetadata.arn}"
           updateConfig:
             maxUnavailable: 1
           scalingConfig:
@@ -185,13 +185,13 @@ spec:
         kind: Addon
         metadata:
           name: eks-pod-identity-agent
-          namespace: ${schema.spec.name}
+          namespace: "${schema.spec.name}"
           annotations:
-            clusterArn: ${ekscluster.status.ackResourceMetadata.arn}
+            clusterArn: "${ekscluster.status.ackResourceMetadata.arn}"
         spec:
           name: eks-pod-identity-agent
           addonVersion: v1.3.4-eksbuild.1
-          clusterName: ${schema.spec.name}
+          clusterName: "${schema.spec.name}"
 
     ###########################################################
     # ArgoCD Integration
@@ -201,9 +201,9 @@ spec:
         apiVersion: iam.services.k8s.aws/v1alpha1
         kind: Role
         metadata:
-          name: ${schema.spec.name}-argocd-role
+          name: "${schema.spec.name}-argocd-role"
         spec:
-          name: ${schema.spec.name}-argocd-role
+          name: "${schema.spec.name}-argocd-role"
           assumeRolePolicyDocument: |
             {
               "Version": "2012-10-17",
@@ -226,78 +226,75 @@ spec:
         apiVersion: v1
         kind: Secret
         metadata:
-          name: ${schema.spec.name}
+          name: "${schema.spec.name}"
           namespace: argocd
           labels:
             argocd.argoproj.io/secret-type: cluster
             # Compatible fleet-management
             fleet_member: spoke
-            tenant: ${schema.spec.tenant}
-            environment: ${schema.spec.environment}
-            aws_cluster_name: ${schema.spec.name}
+            tenant: "${schema.spec.tenant}"
+            environment: "${schema.spec.environment}"
+            aws_cluster_name: "${schema.spec.name}"
             workloads: "true"
           annotations:
             # GitOps Bridge
-            accountId: ${schema.spec.accountId}
-            aws_account_id: ${schema.spec.accountId}
-            region: ${schema.spec.region}
-            aws_region: ${schema.spec.region}
-            aws_central_region: ${schema.spec.region}   # used in fleet-management gitops
-            oidcProvider: ${ekscluster.status.identity.oidc.issuer}
-            aws_cluster_name: ${schema.spec.name}
-            aws_vpc_id: ${schema.spec.network.vpcID}
+            accountId: "${schema.spec.accountId}"
+            aws_account_id: "${schema.spec.accountId}"
+            region: "${schema.spec.region}"
+            aws_region: "${schema.spec.region}"
+            aws_central_region: "${schema.spec.region}"   # used in fleet-management gitops
+            oidcProvider: "${ekscluster.status.identity.oidc.issuer}"
+            aws_cluster_name: "${schema.spec.name}"
+            aws_vpc_id: "${schema.spec.network.vpcID}"
             # GitOps Configuration
-            addons_repo_basepath: ${schema.spec.gitops.addonsRepoBasePath}
-            addons_repo_path: ${schema.spec.gitops.addonsRepoPath}
-            addons_repo_revision: ${schema.spec.gitops.addonsRepoRevision}
-            addons_repo_secret_key: ${schema.spec.gitops.addonsRepoSecretKey}
-            addons_repo_url: ${schema.spec.gitops.addonsRepoUrl}
-            fleet_repo_basepath: ${schema.spec.gitops.fleetRepoBasePath}
-            fleet_repo_path: ${schema.spec.gitops.fleetRepoPath}
-            fleet_repo_revision: ${schema.spec.gitops.fleetRepoRevision}
-            fleet_repo_secret_key: ${schema.spec.gitops.fleetRepoSecretKey}
-            fleet_repo_url: ${schema.spec.gitops.fleetRepoUrl}
-            platform_repo_basepath: ${schema.spec.gitops.platformRepoBasePath}
-            platform_repo_path: ${schema.spec.gitops.platformRepoPath}
-            platform_repo_revision: ${schema.spec.gitops.platformRepoRevision}
-            platform_repo_secret_key: ${schema.spec.gitops.platformRepoSecretKey}
-            platform_repo_url: ${schema.spec.gitops.platformRepoUrl}
-            workload_repo_basepath: ${schema.spec.gitops.workloadRepoBasePath}
-            workload_repo_path: ${schema.spec.gitops.workloadRepoPath}
-            workload_repo_revision: ${schema.spec.gitops.workloadRepoRevision}
-            workload_repo_secret_key: ${schema.spec.gitops.workloadRepoSecretKey}
-            workload_repo_url: ${schema.spec.gitops.workloadRepoUrl}
+            addons_repo_basepath: "${schema.spec.gitops.addonsRepoBasePath}"
+            addons_repo_path: "${schema.spec.gitops.addonsRepoPath}"
+            addons_repo_revision: "${schema.spec.gitops.addonsRepoRevision}"
+            addons_repo_secret_key: "${schema.spec.gitops.addonsRepoSecretKey}"
+            addons_repo_url: "${schema.spec.gitops.addonsRepoUrl}"
+            fleet_repo_basepath: "${schema.spec.gitops.fleetRepoBasePath}"
+            fleet_repo_path: "${schema.spec.gitops.fleetRepoPath}"
+            fleet_repo_revision: "${schema.spec.gitops.fleetRepoRevision}"
+            fleet_repo_secret_key: "${schema.spec.gitops.fleetRepoSecretKey}"
+            fleet_repo_url: "${schema.spec.gitops.fleetRepoUrl}"
+            platform_repo_basepath: "${schema.spec.gitops.platformRepoBasePath}"
+            platform_repo_path: "${schema.spec.gitops.platformRepoPath}"
+            platform_repo_revision: "${schema.spec.gitops.platformRepoRevision}"
+            platform_repo_secret_key: "${schema.spec.gitops.platformRepoSecretKey}"
+            platform_repo_url: "${schema.spec.gitops.platformRepoUrl}"
+            workload_repo_basepath: "${schema.spec.gitops.workloadRepoBasePath}"
+            workload_repo_path: "${schema.spec.gitops.workloadRepoPath}"
+            workload_repo_revision: "${schema.spec.gitops.workloadRepoRevision}"
+            workload_repo_secret_key: "${schema.spec.gitops.workloadRepoSecretKey}"
+            workload_repo_url: "${schema.spec.gitops.workloadRepoUrl}"
             # Specific for External-DNS
-            external_dns_domain_filters: ${schema.spec.domainName}
-            external_dns_namespace: ${schema.spec.addons.external_dns_namespace}
-            external_dns_policy: ${schema.spec.addons.external_dns_policy}
-            external_dns_service_account: ${schema.spec.addons.external_dns_service_account}
+            external_dns_domain_filters: "${schema.spec.domainName}"
+            external_dns_namespace: "${schema.spec.addons.external_dns_namespace}"
+            external_dns_policy: "${schema.spec.addons.external_dns_policy}"
+            external_dns_service_account: "${schema.spec.addons.external_dns_service_account}"
 
             # Generic
-            external_secrets_namespace: ${schema.spec.addons.external_secrets_namespace}
-            external_secrets_service_account: ${schema.spec.addons.external_secrets_service_account}
+            external_secrets_namespace: "${schema.spec.addons.external_secrets_namespace}"
+            external_secrets_service_account: "${schema.spec.addons.external_secrets_service_account}"
 
-            aws_load_balancer_controller_namespace: ${schema.spec.addons.aws_load_balancer_controller_namespace}
-            aws_load_balancer_controller_service_account: ${schema.spec.addons.aws_load_balancer_controller_service_account}
+            aws_load_balancer_controller_namespace: "${schema.spec.addons.aws_load_balancer_controller_namespace}"
+            aws_load_balancer_controller_service_account: "${schema.spec.addons.aws_load_balancer_controller_service_account}"
 
-            adot_collector_namespace: ${schema.spec.addons.adot_collector_namespace}
-            adot_collector_service_account: ${schema.spec.addons.adot_collector_service_account}
-            amp_endpoint_url: ${schema.spec.addons.amp_endpoint_url}
+            adot_collector_namespace: "${schema.spec.addons.adot_collector_namespace}"
+            adot_collector_service_account: "${schema.spec.addons.adot_collector_service_account}"
+            amp_endpoint_url: "${schema.spec.addons.amp_endpoint_url}"
 
-            # amp_endpoint_url=https://aps-workspaces.eu-west-1.amazonaws.com/workspaces/ws-2ca820a0-a732-4c4b-8f76-3b84e38f8f44/
+            fleet_secret_manager_secret_name: "${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}"
 
-            fleet_secret_manager_secret_name: ${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}
-            #fleet_secret_manager_secret_name: "workload-cluster3-argocd-secret5"
-
-            karpenter_namespace: ${schema.spec.addons.karpenter_namespace}"
-            karpenter_node_iam_role_name: ${nodeRole.metadata.name}
-            karpenter_service_account: ${schema.spec.addons.karpenter_service_account}
-            karpenter_sqs_queue_name: ${schema.spec.addons.karpenter_sqs_queue_name}
+            karpenter_namespace: "${schema.spec.addons.karpenter_namespace}"
+            karpenter_node_iam_role_name: "${nodeRole.metadata.name}"
+            karpenter_service_account: "${schema.spec.addons.karpenter_service_account}"
+            karpenter_sqs_queue_name: "${schema.spec.addons.karpenter_sqs_queue_name}"
 
         type: Opaque
         # TODO bug in KRO, it always see some drifts..
         # stringData:
-        #   name: ${schema.spec.name}
+        #   name: "${schema.spec.name}
         #   server: "${ekscluster.status.endpoint}"
         #   config: |
         #     {
@@ -316,13 +313,13 @@ spec:
         apiVersion: v1
         kind: Secret
         metadata:
-          name: ${schema.spec.name}-for-ack
-          namespace: ${schema.spec.name}
+          name: "${schema.spec.name}-for-ack"
+          namespace: "${schema.spec.name}"
 
         type: Opaque
         # TODO bug in KRO, it always see some drifts.. need to comment stringData section once it has been created
         # stringData:
-        #   name: ${schema.spec.name}
+        #   name: "${schema.spec.name}"
         #   server: "${ekscluster.status.endpoint}"
         #   # use k8sVersion need to fix bug, use 1.30 for now
         #   config: |
@@ -373,7 +370,7 @@ spec:
         #         "external_dns_domain_filters": "${schema.spec.domainName}",
         #         "external_dns_namespace": "${schema.spec.addons.external_dns_namespace}",
         #         "external_dns_policy": "${schema.spec.addons.external_dns_policy}",
-        #         "external_dns_service_account": "${schema.spec.addons.external_dns_service_account}", 
+        #         "external_dns_service_account": "${schema.spec.addons.external_dns_service_account}",
         #         "external_secrets_namespace": "${schema.spec.addons.external_secrets_namespace}",
         #         "external_secrets_service_account": "${schema.spec.addons.external_secrets_service_account}",
 
@@ -386,7 +383,7 @@ spec:
         #         "karpenter_namespace": "${schema.spec.addons.karpenter_namespace}",
         #         "karpenter_service_account": "${schema.spec.addons.karpenter_service_account}",
         #         "karpenter_node_iam_role_name": "${nodeRole.metadata.name}",
-        #         "karpenter_sqs_queue_name": ${schema.spec.addons.karpenter_sqs_queue_name},
+        #         "karpenter_sqs_queue_name": "${schema.spec.addons.karpenter_sqs_queue_name}",
 
         #         "fleet_secret_manager_secret_name": "${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}"
         #       },
@@ -394,47 +391,46 @@ spec:
         #     }
 
 
-    #Copy argocdSecretForACK into secretManager
+    # Copy argocdSecretForACK into secretManager
     - id: argocdAWSSecret
       template:
         apiVersion: secretsmanager.services.k8s.aws/v1alpha1
         kind: Secret
         metadata:
-          name: ${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}
-          namespace: ${schema.spec.name}
+          name: "${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}"
+          namespace: "${schema.spec.name}"
           annotations:
-            secretRef: ${argocdSecretForACK.metadata.name}
+            secretRef: "${argocdSecretForACK.metadata.name}"
         spec:
-          name: ${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}
+          name: "${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}"
           description: "ArgoCD cluster configuration secret for ${schema.spec.name}"
           tags:
             - key: fleet_member
               value: spoke
             - key: tenant
-              value: ${schema.spec.tenant}
+              value: "${schema.spec.tenant}"
             - key: environment
-              value: ${schema.spec.environment}
+              value: "${schema.spec.environment}"
             - key: aws_cluster_name
-              value: ${schema.spec.name}
+              value: "${schema.spec.name}"
             - key: workloads
               value: "true"
             - key: argocd.argoproj.io/secret-type
               value: cluster
           secretString:
             key: "config"
-            name: ${schema.spec.name}-for-ack
-            namespace: ${schema.spec.name}
+            name: "${schema.spec.name}-for-ack"
+            namespace: "${schema.spec.name}"
 
-    #comment due to https://github.com/kro-run/kro/issues/271
     - id: accessEntry
       template:
         apiVersion: eks.services.k8s.aws/v1alpha1
         kind: AccessEntry
         metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-access-entry
+          namespace: "${schema.spec.name}"
+          name: "${schema.spec.name}-access-entry"
         spec:
-          clusterName: ${schema.spec.name}
+          clusterName: "${schema.spec.name}"
           accessPolicies:
             - accessScope:
                 type: "cluster"
@@ -446,10 +442,10 @@ spec:
         apiVersion: eks.services.k8s.aws/v1alpha1
         kind: AccessEntry
         metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-access-entry-admin
+          namespace: "${schema.spec.name}"
+          name: "${schema.spec.name}-access-entry-admin"
         spec:
-          clusterName: ${schema.spec.name}
+          clusterName: "${schema.spec.name}"
           accessPolicies:
             - accessScope:
                 type: "cluster"
@@ -461,10 +457,10 @@ spec:
         apiVersion: iam.services.k8s.aws/v1alpha1
         kind: OpenIDConnectProvider
         metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-oidc
+          namespace: "${schema.spec.name}"
+          name: "${schema.spec.name}-oidc"
         spec:
-          url: ${ekscluster.status.identity.oidc.issuer}
+          url: "${ekscluster.status.identity.oidc.issuer}"
           clientIDs:
             - sts.amazonaws.com
           thumbprints:
@@ -479,10 +475,10 @@ spec:
         apiVersion: iam.services.k8s.aws/v1alpha1
         kind: Role
         metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-external-secrets-role
+          namespace: "${schema.spec.name}"
+          name: "${schema.spec.name}-external-secrets-role"
         spec:
-          name: ${schema.spec.name}-external-secrets-role
+          name: "${schema.spec.name}-external-secrets-role"
           policies:
             - arn:aws:iam::aws:policy/SecretsManagerReadWrite
           assumeRolePolicyDocument: |
@@ -506,15 +502,15 @@ spec:
         apiVersion: eks.services.k8s.aws/v1alpha1
         kind: PodIdentityAssociation
         metadata:
-          name: ${schema.spec.name}-external-secrets
-          namespace: ${schema.spec.name}
+          name: "${schema.spec.name}-external-secrets"
+          namespace: "${schema.spec.name}"
         spec:
-          clusterName: ${schema.spec.name}
+          clusterName: "${schema.spec.name}"
           namespace: argocd
-          roleARN: ${externalSecretsRole.status.ackResourceMetadata.arn}
+          roleARN: "${externalSecretsRole.status.ackResourceMetadata.arn}"
           serviceAccount: external-secrets-sa
           tags:
-            environment: ${schema.spec.environment}
+            environment: "${schema.spec.environment}"
             managedBy: ACK
             application: external-secrets
 
@@ -527,10 +523,10 @@ spec:
         apiVersion: iam.services.k8s.aws/v1alpha1
         kind: Policy
         metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-aws-load-balancer-controller-policy
+          namespace: "${schema.spec.name}"
+          name: "${schema.spec.name}-aws-load-balancer-controller-policy"
         spec:
-          name: ${schema.spec.name}-aws-load-balancer-controller-policy
+          name: "${schema.spec.name}-aws-load-balancer-controller-policy"
           policyDocument: |
             {
                 "Statement": [
@@ -768,15 +764,15 @@ spec:
         apiVersion: iam.services.k8s.aws/v1alpha1
         kind: Role
         metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-aws-load-balancer-controller-role
+          namespace: "${schema.spec.name}"
+          name: "${schema.spec.name}-aws-load-balancer-controller-role"
           annotations:
-            policy: ${awsLoadBalancerControllerPolicy.status.ackResourceMetadata.arn}
+            policy: "${awsLoadBalancerControllerPolicy.status.ackResourceMetadata.arn}"
         spec:
-          name: ${schema.spec.name}-aws-load-balancer-controller-role
+          name: "${schema.spec.name}-aws-load-balancer-controller-role"
           policyRefs:
             - from:
-                name: ${schema.spec.name}-aws-load-balancer-controller-policy
+                name: "${schema.spec.name}-aws-load-balancer-controller-policy"
           assumeRolePolicyDocument: |
             {
                 "Version": "2012-10-17",
@@ -799,15 +795,15 @@ spec:
         apiVersion: eks.services.k8s.aws/v1alpha1
         kind: PodIdentityAssociation
         metadata:
-          name: ${schema.spec.name}-aws-load-balancer-controller
-          namespace: ${schema.spec.name}
+          name: "${schema.spec.name}-aws-load-balancer-controller"
+          namespace: "${schema.spec.name}"
         spec:
-          clusterName: ${schema.spec.name}
+          clusterName: "${schema.spec.name}"
           namespace: kube-system
-          roleARN: ${awsLoadBalancerControllerRole.status.ackResourceMetadata.arn}
+          roleARN: "${awsLoadBalancerControllerRole.status.ackResourceMetadata.arn}"
           serviceAccount: aws-load-balancer-controller-sa
           tags:
-            environment: ${schema.spec.environment}
+            environment: "${schema.spec.environment}"
             managedBy: ACK
             application: aws-load-balancer-controller
 
@@ -820,10 +816,10 @@ spec:
         apiVersion: iam.services.k8s.aws/v1alpha1
         kind: Policy
         metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-external-dns-policy
+          namespace: "${schema.spec.name}"
+          name: "${schema.spec.name}-external-dns-policy"
         spec:
-          name: ${schema.spec.name}-external-dns-policy
+          name: "${schema.spec.name}-external-dns-policy"
           policyDocument: |
             {
               "Version": "2012-10-17",
@@ -855,15 +851,15 @@ spec:
         apiVersion: iam.services.k8s.aws/v1alpha1
         kind: Role
         metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-external-dns-role
+          namespace: "${schema.spec.name}"
+          name: "${schema.spec.name}-external-dns-role"
           annotations:
-            policy: ${externalDnsPolicy.status.ackResourceMetadata.arn}
+            policy: "${externalDnsPolicy.status.ackResourceMetadata.arn}"
         spec:
-          name: ${schema.spec.name}-external-dns-role
+          name: "${schema.spec.name}-external-dns-role"
           policyRefs:
             - from:
-                name: ${schema.spec.name}-external-dns-policy
+                name: "${schema.spec.name}-external-dns-policy"
           assumeRolePolicyDocument: |
             {
               "Version": "2012-10-17",
@@ -886,12 +882,12 @@ spec:
         apiVersion: eks.services.k8s.aws/v1alpha1
         kind: PodIdentityAssociation
         metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-external-dns
+          namespace: "${schema.spec.name}"
+          name: "${schema.spec.name}-external-dns"
         spec:
-          clusterName: ${schema.spec.name}
+          clusterName: "${schema.spec.name}"
           namespace: external-dns
-          roleARN: ${externalDnsRole.status.ackResourceMetadata.arn}
+          roleARN: "${externalDnsRole.status.ackResourceMetadata.arn}"
           serviceAccount: external-dns
 
 
@@ -903,10 +899,10 @@ spec:
         apiVersion: iam.services.k8s.aws/v1alpha1
         kind: Role
         metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-adot-collector-role
+          namespace: "${schema.spec.name}"
+          name: "${schema.spec.name}-adot-collector-role"
         spec:
-          name: ${schema.spec.name}-adot-collector-role
+          name: "${schema.spec.name}-adot-collector-role"
           policies:
             - arn:aws:iam::aws:policy/AmazonPrometheusRemoteWriteAccess
           assumeRolePolicyDocument: |
@@ -931,15 +927,15 @@ spec:
         apiVersion: eks.services.k8s.aws/v1alpha1
         kind: PodIdentityAssociation
         metadata:
-          name: ${schema.spec.name}-adot-collector
-          namespace: ${schema.spec.name}
+          name: "${schema.spec.name}-adot-collector"
+          namespace: "${schema.spec.name}"
         spec:
-          clusterName: ${schema.spec.name}
-          namespace: ${schema.spec.addons.adot_collector_namespace}
-          roleARN: ${adotCollectorRole.status.ackResourceMetadata.arn}
-          serviceAccount: ${schema.spec.addons.adot_collector_service_account}
+          clusterName: "${schema.spec.name}"
+          namespace: "${schema.spec.addons.adot_collector_namespace}"
+          roleARN: "${adotCollectorRole.status.ackResourceMetadata.arn}"
+          serviceAccount: "${schema.spec.addons.adot_collector_service_account}"
           tags:
-            environment: ${schema.spec.environment}
+            environment: "${schema.spec.environment}"
             managedBy: ACK
             application: adot-collector
 
@@ -952,10 +948,10 @@ spec:
         apiVersion: iam.services.k8s.aws/v1alpha1
         kind: Role
         metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-kyverno-policy-reporter-role
+          namespace: "${schema.spec.name}"
+          name: "${schema.spec.name}-kyverno-policy-reporter-role"
         spec:
-          name: ${schema.spec.name}-kyverno-policy-reporter-role
+          name: "${schema.spec.name}-kyverno-policy-reporter-role"
           policies:
             - arn:aws:iam::aws:policy/AWSSecurityHubFullAccess
           assumeRolePolicyDocument: |
@@ -980,15 +976,15 @@ spec:
         apiVersion: eks.services.k8s.aws/v1alpha1
         kind: PodIdentityAssociation
         metadata:
-          name: ${schema.spec.name}-kyverno-policy-reporter
-          namespace: ${schema.spec.name}
+          name: "${schema.spec.name}-kyverno-policy-reporter"
+          namespace: "${schema.spec.name}"
         spec:
-          clusterName: ${schema.spec.name}
+          clusterName: "${schema.spec.name}"
           namespace: kyverno
-          roleARN: ${kyvernoPolicyReporterRole.status.ackResourceMetadata.arn}
+          roleARN: "${kyvernoPolicyReporterRole.status.ackResourceMetadata.arn}"
           serviceAccount: policy-reporter
           tags:
-            environment: ${schema.spec.environment}
+            environment: "${schema.spec.environment}"
             managedBy: ACK
             application: kyverno-policy-reporter
 
@@ -1000,10 +996,10 @@ spec:
         apiVersion: iam.services.k8s.aws/v1alpha1
         kind: Policy
         metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-cni-metrics-helper-policy
+          namespace: "${schema.spec.name}"
+          name: "${schema.spec.name}-cni-metrics-helper-policy"
         spec:
-          name: ${schema.spec.name}-cni-metrics-helper-policy
+          name: "${schema.spec.name}-cni-metrics-helper-policy"
           description: "Policy to allow cni metrics helper put metrics to CloudWatch"
           policyDocument: |
             {
@@ -1024,10 +1020,10 @@ spec:
         apiVersion: iam.services.k8s.aws/v1alpha1
         kind: Role
         metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-cni-metrics-helper-role
+          namespace: "${schema.spec.name}"
+          name: "${schema.spec.name}-cni-metrics-helper-role"
         spec:
-          name: ${schema.spec.name}-cni-metrics-helper-role
+          name: "${schema.spec.name}-cni-metrics-helper-role"
           policies:
             - ${cniMetricsHelperPolicy.status.ackResourceMetadata.arn}
           assumeRolePolicyDocument: |
@@ -1052,15 +1048,15 @@ spec:
         apiVersion: eks.services.k8s.aws/v1alpha1
         kind: PodIdentityAssociation
         metadata:
-          name: ${schema.spec.name}-cni-metrics-helper
-          namespace: ${schema.spec.name}
+          name: "${schema.spec.name}-cni-metrics-helper"
+          namespace: "${schema.spec.name}"
         spec:
-          clusterName: ${schema.spec.name}
+          clusterName: "${schema.spec.name}"
           namespace: kube-system
-          roleARN: ${cniMetricsHelperRole.status.ackResourceMetadata.arn}
+          roleARN: "${cniMetricsHelperRole.status.ackResourceMetadata.arn}"
           serviceAccount: cni-metrics-helper
           tags:
-            environment: ${schema.spec.environment}
+            environment: "${schema.spec.environment}"
             managedBy: ACK
             application: cni-metrics-helper
 
@@ -1072,10 +1068,10 @@ spec:
         apiVersion: iam.services.k8s.aws/v1alpha1
         kind: Role
         metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-ebs-csi-controller-role
+          namespace: "${schema.spec.name}"
+          name: "${schema.spec.name}-ebs-csi-controller-role"
         spec:
-          name: ${schema.spec.name}-ebs-csi-controller-role
+          name: "${schema.spec.name}-ebs-csi-controller-role"
           policies:
             - arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy
           assumeRolePolicyDocument: |
@@ -1100,15 +1096,15 @@ spec:
         apiVersion: eks.services.k8s.aws/v1alpha1
         kind: PodIdentityAssociation
         metadata:
-          name: ${schema.spec.name}-ebs-csi-controller
-          namespace: ${schema.spec.name}
+          name: "${schema.spec.name}-ebs-csi-controller"
+          namespace: "${schema.spec.name}"
         spec:
-          clusterName: ${schema.spec.name}
+          clusterName: "${schema.spec.name}"
           namespace: kube-system
-          roleARN: ${ebsCsiControllerRole.status.ackResourceMetadata.arn}
+          roleARN: "${ebsCsiControllerRole.status.ackResourceMetadata.arn}"
           serviceAccount: ebs-csi-controller-sa
           tags:
-            environment: ${schema.spec.environment}
+            environment: "${schema.spec.environment}"
             managedBy: ACK
             application: ebs-csi-controller
 
@@ -1121,10 +1117,10 @@ spec:
         apiVersion: iam.services.k8s.aws/v1alpha1
         kind: Role
         metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-cloudwatch-observability-role
+          namespace: "${schema.spec.name}"
+          name: "${schema.spec.name}-cloudwatch-observability-role"
         spec:
-          name: ${schema.spec.name}-cloudwatch-observability-role
+          name: "${schema.spec.name}-cloudwatch-observability-role"
           policies:
             - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
           assumeRolePolicyDocument: |
@@ -1149,15 +1145,15 @@ spec:
         apiVersion: eks.services.k8s.aws/v1alpha1
         kind: PodIdentityAssociation
         metadata:
-          name: ${schema.spec.name}-cloudwatch-observability
-          namespace: ${schema.spec.name}
+          name: "${schema.spec.name}-cloudwatch-observability"
+          namespace: "${schema.spec.name}"
         spec:
-          clusterName: ${schema.spec.name}
+          clusterName: "${schema.spec.name}"
           namespace: amazon-cloudwatch
-          roleARN: ${cloudwatchObservabilityRole.status.ackResourceMetadata.arn}
+          roleARN: "${cloudwatchObservabilityRole.status.ackResourceMetadata.arn}"
           serviceAccount: cloudwatch-agent
           tags:
-            environment: ${schema.spec.environment}
+            environment: "${schema.spec.environment}"
             managedBy: ACK
             application: cloudwatch-observability
 
@@ -1169,10 +1165,10 @@ spec:
         apiVersion: iam.services.k8s.aws/v1alpha1
         kind: Policy
         metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-karpenter-policy
+          namespace: "${schema.spec.name}"
+          name: "${schema.spec.name}-karpenter-policy"
         spec:
-          name: ${schema.spec.name}-karpenter-policy
+          name: "${schema.spec.name}-karpenter-policy"
           description: "Policy for Karpenter"
           policyDocument: |
             {
@@ -1476,10 +1472,10 @@ spec:
         apiVersion: iam.services.k8s.aws/v1alpha1
         kind: Role
         metadata:
-          namespace: ${schema.spec.name}
-          name: ${schema.spec.name}-karpenter-role
+          namespace: "${schema.spec.name}"
+          name: "${schema.spec.name}-karpenter-role"
         spec:
-          name: ${schema.spec.name}-karpenter-role
+          name: "${schema.spec.name}-karpenter-role"
           policies:
             - ${karpenterPolicy.status.ackResourceMetadata.arn}
           assumeRolePolicyDocument: |
@@ -1504,15 +1500,15 @@ spec:
         apiVersion: eks.services.k8s.aws/v1alpha1
         kind: PodIdentityAssociation
         metadata:
-          name: ${schema.spec.name}-karpenter
-          namespace: ${schema.spec.name}
+          name: "${schema.spec.name}-karpenter"
+          namespace: "${schema.spec.name}"
         spec:
-          clusterName: ${schema.spec.name}
-          namespace: ${schema.spec.addons.karpenter_namespace}
-          roleARN: ${karpenterRole.status.ackResourceMetadata.arn}
-          serviceAccount: ${schema.spec.addons.karpenter_service_account}
+          clusterName: "${schema.spec.name}"
+          namespace: "${schema.spec.addons.karpenter_namespace}"
+          roleARN: "${karpenterRole.status.ackResourceMetadata.arn}"
+          serviceAccount: "${schema.spec.addons.karpenter_service_account}"
           tags:
-            environment: ${schema.spec.environment}
+            environment: "${schema.spec.environment}"
             managedBy: ACK
             application: karpenter
 
@@ -1524,10 +1520,10 @@ spec:
     #     apiVersion: iam.services.k8s.aws/v1alpha1
     #     kind: Policy
     #     metadata:
-    #       namespace: ${schema.spec.name}
-    #       name: ${schema.spec.name}-karpenter-node-policy
+    #       namespace: "${schema.spec.name}
+    #       name: "${schema.spec.name}-karpenter-node-policy
     #     spec:
-    #       name: ${schema.spec.name}-karpenter-node-policy
+    #       name: "${schema.spec.name}-karpenter-node-policy
     #       description: "Policy for Karpenter Node"
     #       policyDocument: |
     #         {
@@ -1831,10 +1827,10 @@ spec:
     #     apiVersion: iam.services.k8s.aws/v1alpha1
     #     kind: Role
     #     metadata:
-    #       namespace: ${schema.spec.name}
-    #       name: ${schema.spec.name}-karpenter-node-role
+    #       namespace: "${schema.spec.name}
+    #       name: "${schema.spec.name}-karpenter-node-role
     #     spec:
-    #       name: ${schema.spec.name}-karpenter-node-role
+    #       name: "${schema.spec.name}-karpenter-node-role
     #       policies:
     #         - ${karpenterNodePolicy.status.ackResourceMetadata.arn}
     #       assumeRolePolicyDocument: |
@@ -1858,10 +1854,10 @@ spec:
     #     apiVersion: eks.services.k8s.aws/v1alpha1
     #     kind: AccessEntry
     #     metadata:
-    #       namespace: ${schema.spec.name}
-    #       name: ${schema.spec.name}-karpenter-node-access-entry
+    #       namespace: "${schema.spec.name}
+    #       name: "${schema.spec.name}-karpenter-node-access-entry
     #     spec:
-    #       clusterName: ${schema.spec.name}
+    #       clusterName: "${schema.spec.name}
     #       accessPolicies:
     #         - accessScope:
     #             type: "cluster"
@@ -1872,7 +1868,7 @@ spec:
     #         - accessScope:
     #             type: "cluster"
     #           policyARN: "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-    #       principalARN: ${karpenterNodeRole.status.ackResourceMetadata.arn}
+    #       principalARN: "${karpenterNodeRole.status.ackResourceMetadata.arn}
     #       type: EC2_LINUX
 
     # - id: karpenterNodeInstanceProfile
@@ -1880,10 +1876,10 @@ spec:
     #     apiVersion: iam.services.k8s.aws/v1alpha1
     #     kind: InstanceProfile
     #     metadata:
-    #       namespace: ${schema.spec.name}
-    #       name: ${schema.spec.name}-karpenter-node-instance-profile
+    #       namespace: "${schema.spec.name}
+    #       name: "${schema.spec.name}-karpenter-node-instance-profile
     #     spec:
-    #       name: ${schema.spec.name}-karpenter-node-instance-profile
+    #       name: "${schema.spec.name}-karpenter-node-instance-profile
     #       roles:
     #         - ${karpenterNodeRole.status.ackResourceMetadata.arn}
 
