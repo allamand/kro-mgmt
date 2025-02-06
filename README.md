@@ -236,6 +236,7 @@ export ACCOUNT_IDS="111222333444 222333444555" # list of aws accounts you want t
     aws iam create-role --role-name "${ROLE_NAME}" --assume-role-policy-document file://argocd-trust-relationship.json --description ""
     aws iam attach-role-policy --role-name "${ROLE_NAME}" --policy-arn=arn:aws:iam::$ACCOUNT_ID:policy/$POLICY_NAME
 
+    aws eks create-pod-identity-association --cluster-name $CLUSTER_NAME --role-arn arn:aws:iam::${ACCOUNT_ID}:role/"${ROLE_NAME}" --namespace argocd --service-account argocd-server
     aws eks create-pod-identity-association --cluster-name $CLUSTER_NAME --role-arn arn:aws:iam::${ACCOUNT_ID}:role/"${ROLE_NAME}" --namespace argocd --service-account argocd-application-controller
     ```
 
