@@ -23,6 +23,8 @@ spec:
       nodesCount: integer
       fleetSecretManagerSecretNameSuffix: string
       domainName: string
+      aws_partition: string | default="aws"
+      aws_dns_suffix: string | default="amazonaws.com"
       network:
         vpcID: string
         subnets:
@@ -56,6 +58,9 @@ spec:
       addons:
         adot_collector_namespace: string | default="adot-collector-kubeprometheus"
         adot_collector_service_account: string | default="adot-collector-kubeprometheus"
+
+        karpenter_namespace: string | default="karpenter"
+        karpenter_service_account: string | default="karpenter"
 
         external_dns_namespace: string | default="external-dns"
         external_dns_service_account: string | default="external-dns-sa"
@@ -234,7 +239,7 @@ spec:
           annotations:
             #GitOps Bridge
             accountId: ${schema.spec.accountId}
-            aws_account_id: ${schema.spec.accountId}
+            aws_accountId: ${schema.spec.accountId}
             region: ${schema.spec.region}
             aws_region: ${schema.spec.region}
             aws_central_region: ${schema.spec.region}   # used in fleet-management gitops
@@ -338,7 +343,7 @@ spec:
         #       },
         #       "metadata": {
         #         "accountId": "${schema.spec.accountId}",
-        #         "aws_account_id": "${schema.spec.accountId}",
+        #         "aws_accountId": "${schema.spec.accountId}",
         #         "region": "${schema.spec.region}",
         #         "aws_region": "${schema.spec.region}",
         #         "aws_central_region": "${schema.spec.region}",
@@ -1205,12 +1210,12 @@ spec:
                     "ec2:CreateFleet"
                   ],
                   "Resource": [
-                    "arn:${local.partition}:ec2:*::image/*",
-                    "arn:${local.partition}:ec2:*::snapshot/*",
-                    "arn:${local.partition}:ec2:*:*:spot-instances-request/*",
-                    "arn:${local.partition}:ec2:*:*:security-group/*",
-                    "arn:${local.partition}:ec2:*:*:subnet/*",
-                    "arn:${local.partition}:ec2:*:*:launch-template/*"
+                    "arn:${schema.spec.partition}:ec2:*::image/*",
+                    "arn:${schema.spec.partition}:ec2:*::snapshot/*",
+                    "arn:${schema.spec.partition}:ec2:*:*:spot-instances-request/*",
+                    "arn:${schema.spec.partition}:ec2:*:*:security-group/*",
+                    "arn:${schema.spec.partition}:ec2:*:*:subnet/*",
+                    "arn:${schema.spec.partition}:ec2:*:*:launch-template/*"
                   ]
                 },
                 {
@@ -1226,8 +1231,8 @@ spec:
                     "ssm:GetParameter"
                   ],
                   "Resource": [
-                    "arn:${local.partition}:ssm:*:*:parameter/aws/service/eks/optimized-ami/*",
-                    "arn:${local.partition}:ssm:*:*:parameter/aws/service/ami-amazon-linux-latest/*"
+                    "arn:${schema.spec.partition}:ssm:*:*:parameter/aws/service/eks/optimized-ami/*",
+                    "arn:${schema.spec.partition}:ssm:*:*:parameter/aws/service/ami-amazon-linux-latest/*"
                   ]
                 },
                 {
@@ -1245,12 +1250,12 @@ spec:
                     "ec2:CreateLaunchTemplate"
                   ],
                   "Resource": [
-                    "arn:${local.partition}:ec2:*:*:fleet/*",
-                    "arn:${local.partition}:ec2:*:*:instance/*",
-                    "arn:${local.partition}:ec2:*:*:volume/*",
-                    "arn:${local.partition}:ec2:*:*:network-interface/*",
-                    "arn:${local.partition}:ec2:*:*:launch-template/*",
-                    "arn:${local.partition}:ec2:*:*:spot-instances-request/*"
+                    "arn:${schema.spec.partition}:ec2:*:*:fleet/*",
+                    "arn:${schema.spec.partition}:ec2:*:*:instance/*",
+                    "arn:${schema.spec.partition}:ec2:*:*:volume/*",
+                    "arn:${schema.spec.partition}:ec2:*:*:network-interface/*",
+                    "arn:${schema.spec.partition}:ec2:*:*:launch-template/*",
+                    "arn:${schema.spec.partition}:ec2:*:*:spot-instances-request/*"
                   ],
                   "Condition": {
                     "StringEquals": {
@@ -1267,12 +1272,12 @@ spec:
                     "ec2:CreateTags"
                   ],
                   "Resource": [
-                    "arn:${local.partition}:ec2:*:*:fleet/*",
-                    "arn:${local.partition}:ec2:*:*:instance/*",
-                    "arn:${local.partition}:ec2:*:*:volume/*",
-                    "arn:${local.partition}:ec2:*:*:network-interface/*",
-                    "arn:${local.partition}:ec2:*:*:launch-template/*",
-                    "arn:${local.partition}:ec2:*:*:spot-instances-request/*"
+                    "arn:${schema.spec.partition}:ec2:*:*:fleet/*",
+                    "arn:${schema.spec.partition}:ec2:*:*:instance/*",
+                    "arn:${schema.spec.partition}:ec2:*:*:volume/*",
+                    "arn:${schema.spec.partition}:ec2:*:*:network-interface/*",
+                    "arn:${schema.spec.partition}:ec2:*:*:launch-template/*",
+                    "arn:${schema.spec.partition}:ec2:*:*:spot-instances-request/*"
                   ],
                   "Condition": {
                     "StringEquals": {
@@ -1293,7 +1298,7 @@ spec:
                   "Action": [
                     "ec2:CreateTags"
                   ],
-                  "Resource": "arn:${local.partition}:ec2:*:*:instance/*",
+                  "Resource": "arn:${schema.spec.partition}:ec2:*:*:instance/*",
                   "Condition": {
                     "StringEquals": {
                       "aws:ResourceTag/kubernetes.io/cluster/${var.cluster_name}": "owned"
@@ -1316,8 +1321,8 @@ spec:
                     "ec2:DeleteLaunchTemplate"
                   ],
                   "Resource": [
-                    "arn:${local.partition}:ec2:*:*:instance/*",
-                    "arn:${local.partition}:ec2:*:*:launch-template/*"
+                    "arn:${schema.spec.partition}:ec2:*:*:instance/*",
+                    "arn:${schema.spec.partition}:ec2:*:*:launch-template/*"
                   ],
                   "Condition": {
                     "StringEquals": {
@@ -1344,7 +1349,7 @@ spec:
                   "Resource": "*",
                   "Condition": {
                     "StringEquals": {
-                      "aws:RequestedRegion": "${local.region}"
+                      "aws:RequestedRegion": "${schema.specs.region}"
                     }
                   }
                 },
@@ -1354,7 +1359,7 @@ spec:
                     "ssm:GetParameter"
                   ],
                   "Resource": [
-                    "arn:${local.partition}:ssm:${local.region}::parameter/aws/service/*"
+                    "arn:${schema.spec.partition}:ssm:${schema.specs.region}::parameter/aws/service/*"
                   ]
                 },
                 {
@@ -1372,7 +1377,7 @@ spec:
                     "sqs:ReceiveMessage"
                   ],
                   "Resource": [
-                    "arn:${local.partition}:sqs:${local.region}:${local.account_id}:*"
+                    "arn:${schema.spec.partition}:sqs:${schema.specs.region}:${schema.specs.accountId}:*"
                   ]
                 },
                 {
@@ -1381,11 +1386,11 @@ spec:
                     "iam:PassRole"
                   ],
                   "Resource": [
-                    "arn:${local.partition}:iam::${local.account_id}:role/*"
+                    "arn:${schema.spec.partition}:iam::${schema.specs.accountId}:role/*"
                   ],
                   "Condition": {
                     "StringEquals": {
-                      "iam:PassedToService": "ec2.${local.dns_suffix}"
+                      "iam:PassedToService": "ec2.${schema.specs.aws_dns_suffix}"
                     }
                   }
                 },
@@ -1395,12 +1400,12 @@ spec:
                     "iam:CreateInstanceProfile"
                   ],
                   "Resource": [
-                    "arn:${local.partition}:iam::${local.account_id}:instance-profile/*"
+                    "arn:${schema.spec.partition}:iam::${schema.specs.accountId}:instance-profile/*"
                   ],
                   "Condition": {
                     "StringEquals": {
                       "aws:RequestTag/kubernetes.io/cluster/${var.cluster_name}": "owned",
-                      "aws:RequestTag/topology.kubernetes.io/region": "${local.region}"
+                      "aws:RequestTag/topology.kubernetes.io/region": "${schema.specs.region}"
                     },
                     "StringLike": {
                       "aws:RequestTag/karpenter.k8s.aws/ec2nodeclass": "*"
@@ -1413,12 +1418,12 @@ spec:
                     "iam:TagInstanceProfile"
                   ],
                   "Resource": [
-                    "arn:${local.partition}:iam::${local.account_id}:instance-profile/*"
+                    "arn:${schema.spec.partition}:iam::${schema.specs.accountId}:instance-profile/*"
                   ],
                   "Condition": {
                     "StringEquals": {
                       "aws:ResourceTag/kubernetes.io/cluster/${var.cluster_name}": "owned",
-                      "aws:ResourceTag/topology.kubernetes.io/region": "${local.region}"
+                      "aws:ResourceTag/topology.kubernetes.io/region": "${schema.specs.region}"
                     },
                     "StringLike": {
                       "aws:ResourceTag/karpenter.k8s.aws/ec2nodeclass": "*",
@@ -1434,12 +1439,12 @@ spec:
                     "iam:DeleteInstanceProfile"
                   ],
                   "Resource": [
-                    "arn:${local.partition}:iam::${local.account_id}:instance-profile/*"
+                    "arn:${schema.spec.partition}:iam::${schema.specs.accountId}:instance-profile/*"
                   ],
                   "Condition": {
                     "StringEquals": {
                       "aws:ResourceTag/kubernetes.io/cluster/${var.cluster_name}": "owned",
-                      "aws:ResourceTag/topology.kubernetes.io/region": "${local.region}"
+                      "aws:ResourceTag/topology.kubernetes.io/region": "${schema.specs.region}"
                     },
                     "StringLike": {
                       "aws:ResourceTag/karpenter.k8s.aws/ec2nodeclass": "*"
@@ -1452,7 +1457,7 @@ spec:
                     "iam:GetInstanceProfile"
                   ],
                   "Resource": [
-                    "arn:${local.partition}:iam::${local.account_id}:instance-profile/*"
+                    "arn:${schema.spec.partition}:iam::${schema.specs.accountId}:instance-profile/*"
                   ]
                 },
                 {
@@ -1461,7 +1466,7 @@ spec:
                     "eks:DescribeCluster"
                   ],
                   "Resource": [
-                    "arn:${local.partition}:eks:${local.region}:${local.account_id}:cluster/${var.cluster_name}"
+                    "arn:${schema.spec.partition}:eks:${schema.specs.region}:${schema.specs.accountId}:cluster/${var.cluster_name}"
                   ]
                 }
               ]
@@ -1504,9 +1509,9 @@ spec:
           namespace: ${schema.spec.name}
         spec:
           clusterName: ${schema.spec.name}
-          namespace: ${local.karpenter.namespace}
+          namespace: ${schema.specs.karpenter_namespace}
           roleARN: ${karpenterRole.status.ackResourceMetadata.arn}
-          serviceAccount: ${local.karpenter.service_account}
+          serviceAccount: ${schema.specs.karpenter_service_account}
           tags:
             environment: ${schema.spec.environment}
             managedBy: ACK
