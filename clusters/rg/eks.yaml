@@ -1207,12 +1207,12 @@ spec:
                     "ec2:CreateFleet"
                   ],
                   "Resource": [
-                    "arn:${schema.spec.partition}:ec2:*::image/*",
-                    "arn:${schema.spec.partition}:ec2:*::snapshot/*",
-                    "arn:${schema.spec.partition}:ec2:*:*:spot-instances-request/*",
-                    "arn:${schema.spec.partition}:ec2:*:*:security-group/*",
-                    "arn:${schema.spec.partition}:ec2:*:*:subnet/*",
-                    "arn:${schema.spec.partition}:ec2:*:*:launch-template/*"
+                    "arn:${schema.spec.aws_partition}:ec2:*::image/*",
+                    "arn:${schema.spec.aws_partition}:ec2:*::snapshot/*",
+                    "arn:${schema.spec.aws_partition}:ec2:*:*:spot-instances-request/*",
+                    "arn:${schema.spec.aws_partition}:ec2:*:*:security-group/*",
+                    "arn:${schema.spec.aws_partition}:ec2:*:*:subnet/*",
+                    "arn:${schema.spec.aws_partition}:ec2:*:*:launch-template/*"
                   ]
                 },
                 {
@@ -1228,8 +1228,8 @@ spec:
                     "ssm:GetParameter"
                   ],
                   "Resource": [
-                    "arn:${schema.spec.partition}:ssm:*:*:parameter/aws/service/eks/optimized-ami/*",
-                    "arn:${schema.spec.partition}:ssm:*:*:parameter/aws/service/ami-amazon-linux-latest/*"
+                    "arn:${schema.spec.aws_partition}:ssm:*:*:parameter/aws/service/eks/optimized-ami/*",
+                    "arn:${schema.spec.aws_partition}:ssm:*:*:parameter/aws/service/ami-amazon-linux-latest/*"
                   ]
                 },
                 {
@@ -1247,12 +1247,12 @@ spec:
                     "ec2:CreateLaunchTemplate"
                   ],
                   "Resource": [
-                    "arn:${schema.spec.partition}:ec2:*:*:fleet/*",
-                    "arn:${schema.spec.partition}:ec2:*:*:instance/*",
-                    "arn:${schema.spec.partition}:ec2:*:*:volume/*",
-                    "arn:${schema.spec.partition}:ec2:*:*:network-interface/*",
-                    "arn:${schema.spec.partition}:ec2:*:*:launch-template/*",
-                    "arn:${schema.spec.partition}:ec2:*:*:spot-instances-request/*"
+                    "arn:${schema.spec.aws_partition}:ec2:*:*:fleet/*",
+                    "arn:${schema.spec.aws_partition}:ec2:*:*:instance/*",
+                    "arn:${schema.spec.aws_partition}:ec2:*:*:volume/*",
+                    "arn:${schema.spec.aws_partition}:ec2:*:*:network-interface/*",
+                    "arn:${schema.spec.aws_partition}:ec2:*:*:launch-template/*",
+                    "arn:${schema.spec.aws_partition}:ec2:*:*:spot-instances-request/*"
                   ],
                   "Condition": {
                     "StringEquals": {
@@ -1269,12 +1269,12 @@ spec:
                     "ec2:CreateTags"
                   ],
                   "Resource": [
-                    "arn:${schema.spec.partition}:ec2:*:*:fleet/*",
-                    "arn:${schema.spec.partition}:ec2:*:*:instance/*",
-                    "arn:${schema.spec.partition}:ec2:*:*:volume/*",
-                    "arn:${schema.spec.partition}:ec2:*:*:network-interface/*",
-                    "arn:${schema.spec.partition}:ec2:*:*:launch-template/*",
-                    "arn:${schema.spec.partition}:ec2:*:*:spot-instances-request/*"
+                    "arn:${schema.spec.aws_partition}:ec2:*:*:fleet/*",
+                    "arn:${schema.spec.aws_partition}:ec2:*:*:instance/*",
+                    "arn:${schema.spec.aws_partition}:ec2:*:*:volume/*",
+                    "arn:${schema.spec.aws_partition}:ec2:*:*:network-interface/*",
+                    "arn:${schema.spec.aws_partition}:ec2:*:*:launch-template/*",
+                    "arn:${schema.spec.aws_partition}:ec2:*:*:spot-instances-request/*"
                   ],
                   "Condition": {
                     "StringEquals": {
@@ -1295,7 +1295,7 @@ spec:
                   "Action": [
                     "ec2:CreateTags"
                   ],
-                  "Resource": "arn:${schema.spec.partition}:ec2:*:*:instance/*",
+                  "Resource": "arn:${schema.spec.aws_partition}:ec2:*:*:instance/*",
                   "Condition": {
                     "StringEquals": {
                       "aws:ResourceTag/kubernetes.io/cluster/${var.cluster_name}": "owned"
@@ -1318,8 +1318,8 @@ spec:
                     "ec2:DeleteLaunchTemplate"
                   ],
                   "Resource": [
-                    "arn:${schema.spec.partition}:ec2:*:*:instance/*",
-                    "arn:${schema.spec.partition}:ec2:*:*:launch-template/*"
+                    "arn:${schema.spec.aws_partition}:ec2:*:*:instance/*",
+                    "arn:${schema.spec.aws_partition}:ec2:*:*:launch-template/*"
                   ],
                   "Condition": {
                     "StringEquals": {
@@ -1356,7 +1356,7 @@ spec:
                     "ssm:GetParameter"
                   ],
                   "Resource": [
-                    "arn:${schema.spec.partition}:ssm:${schema.specs.region}::parameter/aws/service/*"
+                    "arn:${schema.spec.aws_partition}:ssm:${schema.specs.region}::parameter/aws/service/*"
                   ]
                 },
                 {
@@ -1374,7 +1374,7 @@ spec:
                     "sqs:ReceiveMessage"
                   ],
                   "Resource": [
-                    "arn:${schema.spec.partition}:sqs:${schema.specs.region}:${schema.specs.accountId}:*"
+                    "arn:${schema.spec.aws_partition}:sqs:${schema.specs.region}:${schema.specs.accountId}:*"
                   ]
                 },
                 {
@@ -1383,7 +1383,7 @@ spec:
                     "iam:PassRole"
                   ],
                   "Resource": [
-                    "arn:${schema.spec.partition}:iam::${schema.specs.accountId}:role/*"
+                    "arn:${schema.spec.aws_partition}:iam::${schema.specs.accountId}:role/*"
                   ],
                   "Condition": {
                     "StringEquals": {
@@ -1397,7 +1397,7 @@ spec:
                     "iam:CreateInstanceProfile"
                   ],
                   "Resource": [
-                    "arn:${schema.spec.partition}:iam::${schema.specs.accountId}:instance-profile/*"
+                    "arn:${schema.spec.aws_partition}:iam::${schema.specs.accountId}:instance-profile/*"
                   ],
                   "Condition": {
                     "StringEquals": {
@@ -1415,7 +1415,7 @@ spec:
                     "iam:TagInstanceProfile"
                   ],
                   "Resource": [
-                    "arn:${schema.spec.partition}:iam::${schema.specs.accountId}:instance-profile/*"
+                    "arn:${schema.spec.aws_partition}:iam::${schema.specs.accountId}:instance-profile/*"
                   ],
                   "Condition": {
                     "StringEquals": {
@@ -1436,7 +1436,7 @@ spec:
                     "iam:DeleteInstanceProfile"
                   ],
                   "Resource": [
-                    "arn:${schema.spec.partition}:iam::${schema.specs.accountId}:instance-profile/*"
+                    "arn:${schema.spec.aws_partition}:iam::${schema.specs.accountId}:instance-profile/*"
                   ],
                   "Condition": {
                     "StringEquals": {
@@ -1454,7 +1454,7 @@ spec:
                     "iam:GetInstanceProfile"
                   ],
                   "Resource": [
-                    "arn:${schema.spec.partition}:iam::${schema.specs.accountId}:instance-profile/*"
+                    "arn:${schema.spec.aws_partition}:iam::${schema.specs.accountId}:instance-profile/*"
                   ]
                 },
                 {
@@ -1463,7 +1463,7 @@ spec:
                     "eks:DescribeCluster"
                   ],
                   "Resource": [
-                    "arn:${schema.spec.partition}:eks:${schema.specs.region}:${schema.specs.accountId}:cluster/${var.cluster_name}"
+                    "arn:${schema.spec.aws_partition}:eks:${schema.specs.region}:${schema.specs.accountId}:cluster/${var.cluster_name}"
                   ]
                 }
               ]
