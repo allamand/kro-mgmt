@@ -315,7 +315,8 @@ spec:
         metadata:
           name: "${schema.spec.name}-for-ack"
           namespace: "${schema.spec.name}"
-
+          annotations:
+            zzz: yyy
         type: Opaque
         # TODO bug in KRO, it always see some drifts.. need to comment stringData section once it has been created
         stringData:
