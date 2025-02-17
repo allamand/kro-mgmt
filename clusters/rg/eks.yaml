@@ -385,7 +385,8 @@ spec:
                 "karpenter_node_iam_role_name": "${nodeRole.metadata.name}",
                 "karpenter_sqs_queue_name": "${schema.spec.addons.karpenter_sqs_queue_name}",
 
-                "fleet_secret_manager_secret_name": "${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}"
+                "fleet_secret_manager_secret_name": "${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}",
+                "zzz": "yyy"
               },
               "server": "${ekscluster.status.endpoint}"
             }
