@@ -20,7 +20,7 @@ spec:
       managementAccountId: string
       k8sVersion: string
       adminRoleName: string
-      nodesCount: integer
+      #nodesCount: integer
       fleetSecretManagerSecretNameSuffix: string
       domainName: string
       aws_partition: string | default="aws"
@@ -92,6 +92,10 @@ spec:
           name: "${schema.spec.name}-cluster-role"
           policies:
             - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+            - arn:aws:iam::aws:policy/AmazonEKSComputePolicy
+            - arn:aws:iam::aws:policy/AmazonEKSBlockStoragePolicy
+            - arn:aws:iam::aws:policy/AmazonEKSLoadBalancingPolicy
+            - arn:aws:iam::aws:policy/AmazonEKSNetworkingPolicy
           assumeRolePolicyDocument: |
             {
               "Version": "2012-10-17",
@@ -101,7 +105,10 @@ spec:
                   "Principal": {
                     "Service": "eks.amazonaws.com"
                   },
-                  "Action": "sts:AssumeRole"
+                  "Action": [
+                    "sts:AssumeRole",
+                    "sts:TagSession"
+                  ]
                 }
               ]
             }
@@ -115,9 +122,8 @@ spec:
         spec:
           name: "${schema.spec.name}-cluster-node-role"
           policies:
-            - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
-            - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
-            - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+            - arn:aws:iam::aws:policy/AmazonEKSWorkerNodeMinimalPolicy
+            - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPullOnly
             - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
             - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
           assumeRolePolicyDocument: |
@@ -135,6 +141,8 @@ spec:
             }
     # https://aws-controllers-k8s.github.io/community/reference/eks/v1alpha1/cluster/
     - id: ekscluster
+      readyWhen:
+        - ${ekscluster.status.status == "ACTIVE"}
       template:
         apiVersion: eks.services.k8s.aws/v1alpha1
         kind: Cluster
@@ -148,37 +156,51 @@ spec:
         spec:
           name: "${schema.spec.name}"
           roleARN: "${clusterRole.status.ackResourceMetadata.arn}"
-          # version: "${schema.spec.k8sVersion} a bug needs to be fixed for this to work
+          version: "${schema.spec.k8sVersion}" # a bug needs to be fixed for this to work
           accessConfig:
             authenticationMode: "API_AND_CONFIG_MAP"
+            bootstrapClusterCreatorAdminPermissions: true
+          storageConfig:
+            blockStorage:
+              enabled: true
+          kubernetesNetworkConfig:
+            ipFamily: ipv4
+            elasticLoadBalancing:
+              enabled: true
+          computeConfig:
+            enabled: true
+            nodeRoleARN: ${nodeRole.status.ackResourceMetadata.arn}
+            nodePools:
+              - system
+              - general-purpose
           resourcesVPCConfig:
-            endpointPrivateAccess: false
+            endpointPrivateAccess: true
             endpointPublicAccess: true
             subnetIDs:
               - ${schema.spec.network.subnets.controlplane.subnet1ID}
               - ${schema.spec.network.subnets.controlplane.subnet2ID}
-    - id: nodegroup
-      template:
-        apiVersion: eks.services.k8s.aws/v1alpha1
-        kind: Nodegroup
-        metadata:
-          namespace: "${schema.spec.name}"
-          name: "${schema.spec.name}-nodegroup"
-          annotations:
-            clusterArn: "${ekscluster.status.ackResourceMetadata.arn}"
-        spec:
-          name: "${schema.spec.name}-nodegroup"
-          clusterName: "${schema.spec.name}"
-          subnets:
-            - ${schema.spec.network.subnets.workers.subnet1ID}
-            - ${schema.spec.network.subnets.workers.subnet2ID}
-          nodeRole: "${nodeRole.status.ackResourceMetadata.arn}"
-          updateConfig:
-            maxUnavailable: 1
-          scalingConfig:
-            minSize: 6      # ${schema.spec.nodesCount} a bug needs to be fixed for this to work
-            maxSize: 6      # ${schema.spec.nodesCount} a bug needs to be fixed for this to work
-            desiredSize: 6  # ${schema.spec.nodesCount} a bug needs to be fixed for this to work
+    # - id: nodegroup
+    #   template:
+    #     apiVersion: eks.services.k8s.aws/v1alpha1
+    #     kind: Nodegroup
+    #     metadata:
+    #       namespace: "${schema.spec.name}"
+    #       name: "${schema.spec.name}-nodegroup"
+    #       annotations:
+    #         clusterArn: "${ekscluster.status.ackResourceMetadata.arn}"
+    #     spec:
+    #       name: "${schema.spec.name}-nodegroup"
+    #       clusterName: "${schema.spec.name}"
+    #       subnets:
+    #         - ${schema.spec.network.subnets.workers.subnet1ID}
+    #         - ${schema.spec.network.subnets.workers.subnet2ID}
+    #       nodeRole: "${nodeRole.status.ackResourceMetadata.arn}"
+    #       updateConfig:
+    #         maxUnavailable: 1
+    #       scalingConfig:
+    #         minSize: 6      # ${schema.spec.nodesCount} a bug needs to be fixed for this to work
+    #         maxSize: 6      # ${schema.spec.nodesCount} a bug needs to be fixed for this to work
+    #         desiredSize: 6  # ${schema.spec.nodesCount} a bug needs to be fixed for this to work
     - id: podIdentityAddon
       template:
         apiVersion: eks.services.k8s.aws/v1alpha1

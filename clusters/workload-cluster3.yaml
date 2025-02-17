@@ -10,11 +10,11 @@ spec:
     tenant: tenant1
     environment: krodev
     region: us-west-2
-    k8sVersion: '1.30'
+    k8sVersion: '1.31'
     accountId: '798082067117'
     managementAccountId: '382076407153'
     adminRoleName: Admin
-    nodesCount: 6
+    #nodesCount: 6
     fleetSecretManagerSecretNameSuffix: argocd-secret-name2
     domainName: workload-cluster3.rosa.allamand.com
     cidr:

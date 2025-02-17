@@ -18,7 +18,7 @@ spec:
       accountId: string
       managementAccountId: string
       adminRoleName: string | default="Admin"
-      nodesCount: integer
+      #nodesCount: integer
       fleetSecretManagerSecretNameSuffix: string
       domainName: string
       cidr:
@@ -104,7 +104,7 @@ spec:
           managementAccountId: ${schema.spec.managementAccountId}
           k8sVersion: ${schema.spec.k8sVersion}
           adminRoleName: ${schema.spec.adminRoleName}
-          nodesCount: ${schema.spec.nodesCount}
+          #nodesCount: ${schema.spec.nodesCount}
           fleetSecretManagerSecretNameSuffix: ${schema.spec.fleetSecretManagerSecretNameSuffix}
           domainName: ${schema.spec.domainName}
           network:
