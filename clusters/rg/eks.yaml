@@ -387,7 +387,8 @@ spec:
                 "karpenter_sqs_queue_name": "${schema.spec.addons.karpenter_sqs_queue_name}",
 
                 "fleet_secret_manager_secret_name": "${schema.spec.name}-${schema.spec.fleetSecretManagerSecretNameSuffix}",
-                "zzz": "yyy"
+                "zzz": "yyy",
+                "www": "xxx"
               },
               "server": "${ekscluster.status.endpoint}"
             }
