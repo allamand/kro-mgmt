@@ -25,3 +25,8 @@ spec:
       fleetRepoRevision: "seb"
       platformRepoRevision: "seb"
       workloadRepoRevision: "seb"
+
+    addons:
+
+      external_dns_service_account: "external-dns-sa"
+   
