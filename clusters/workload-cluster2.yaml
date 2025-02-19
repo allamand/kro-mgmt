@@ -11,7 +11,7 @@ spec:
     environment: staging
     region: us-west-2
     k8sVersion: '1.31'
-    accountId: '798082067117'
+    accountId: '418272784034'
     managementAccountId: '382076407153'
     adminRoleName: Admin
     #nodesCount: 6
