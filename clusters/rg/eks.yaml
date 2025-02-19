@@ -172,7 +172,7 @@ spec:
               enabled: true
           logging: 
             clusterLogging:
-            - enabled: boolean
+            - enabled: true
               types:
               - api
               - audit
