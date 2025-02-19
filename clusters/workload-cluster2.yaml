@@ -10,7 +10,7 @@ spec:
     tenant: tenant1
     environment: staging
     region: us-west-2
-    k8sVersion: '1.31'
+    k8sVersion: '1.32'
     accountId: '418272784034'
     managementAccountId: '382076407153'
     adminRoleName: Admin
