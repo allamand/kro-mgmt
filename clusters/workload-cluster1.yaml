@@ -2,6 +2,9 @@ apiVersion: kro.run/v1alpha1
 kind: EksclusterWithVpc
 metadata:
   name: workload-cluster1
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "1"  
 spec:
     name: workload-cluster1
     tenant: tenant1
@@ -10,31 +13,15 @@ spec:
     k8sVersion: '1.30'
     accountId: '382076407153'
     managementAccountId: '382076407153'
-    adminRoleName: Admin        
-    nodesCount: 3
-    domainName: workload-cluster1.sallaman.people.aws.dev    
-    cidr:
-      vpcCidr: "10.0.0.0/16"
-      publicSubnet1Cidr: "10.0.1.0/24"
-      publicSubnet2Cidr: "10.0.2.0/24"
-      privateSubnet1Cidr: "10.0.11.0/24"
-      privateSubnet2Cidr: "10.0.12.0/24"
+    adminRoleName: Admin
+    fleetSecretManagerSecretNameSuffix: argocd-secret    
+    domainName: workload-cluster1.sallaman.people.aws.dev
+    #subHostedZone:
+    #  create: true
+    #  domainNameRef: sallaman.people.aws.dev
+
     gitops:
-        addonsRepoPath: "bootstrap"
-        addonsRepoRevision: "HEAD"
-        addonsRepoSecretKey: "eks-fleet-workshop-gitops-addons"
-        addonsRepoUrl: "https://d1t8il14om2k8l.cloudfront.net/gitea/workshop-user/eks-fleet-workshop-gitops-addons"
-        fleetRepoPath: "bootstrap"
-        fleetRepoRevision: "HEAD"
-        fleetRepoSecretKey: "eks-fleet-workshop-gitops-fleet"
-        fleetRepoUrl: "https://d1t8il14om2k8l.cloudfront.net/gitea/workshop-user/eks-fleet-workshop-gitops-fleet"
-        platformRepoBasePath: ""
-        platformRepoPath: "bootstrap"
-        platformRepoRevision: "HEAD"
-        platformRepoSecretKey: "eks-fleet-workshop-gitops-platform"
-        platformRepoUrl: "https://d1t8il14om2k8l.cloudfront.net/gitea/workshop-user/eks-fleet-workshop-gitops-platform"
-        workloadRepoBasePath: ""
-        workloadRepoPath: ""
-        workloadRepoRevision: "HEAD"
-        workloadRepoSecretKey: "eks-fleet-workshop-gitops-workloads"
-        workloadRepoUrl: "https://d1t8il14om2k8l.cloudfront.net/gitea/workshop-user/eks-fleet-workshop-gitops-apps"
+      addonsRepoRevision: "seb"
+      fleetRepoRevision: "seb"
+      platformRepoRevision: "seb"
+      workloadRepoRevision: "seb"
