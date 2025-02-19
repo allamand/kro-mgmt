@@ -19,7 +19,7 @@ spec:
     #subHostedZone:
     #  create: true
     #  domainNameRef: sallaman.people.aws.dev
-
+    cidr:
     gitops:
       addonsRepoRevision: "seb"
       fleetRepoRevision: "seb"
