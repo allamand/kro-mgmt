@@ -160,25 +160,41 @@ spec:
           accessConfig:
             authenticationMode: "API_AND_CONFIG_MAP"
             bootstrapClusterCreatorAdminPermissions: true
-          storageConfig:
-            blockStorage:
-              enabled: true
-          kubernetesNetworkConfig:
-            ipFamily: ipv4
-            elasticLoadBalancing:
-              enabled: true
           computeConfig:
             enabled: true
             nodeRoleARN: ${nodeRole.status.ackResourceMetadata.arn}
             nodePools:
               - system
               - general-purpose
+          kubernetesNetworkConfig:
+            ipFamily: ipv4
+            elasticLoadBalancing:
+              enabled: true
+          logging: 
+            clusterLogging:
+            - enabled: boolean
+              types:
+              - api
+              - audit
+              - authenticator
+              - controllerManager
+              - scheduler
+          storageConfig:
+            blockStorage:
+              enabled: true
           resourcesVPCConfig:
             endpointPrivateAccess: true
             endpointPublicAccess: true
             subnetIDs:
               - ${schema.spec.network.subnets.controlplane.subnet1ID}
               - ${schema.spec.network.subnets.controlplane.subnet2ID}
+          zonalShiftConfig: 
+            enabled: true
+          tags: 
+            kro-management: ${schema.spec.name}
+            tenant: ${schema.spec.tenant}
+            environment: ${schema.spec.environment}
+
     # - id: nodegroup
     #   template:
     #     apiVersion: eks.services.k8s.aws/v1alpha1
