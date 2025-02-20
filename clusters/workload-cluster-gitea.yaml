@@ -1,9 +1,9 @@
 apiVersion: kro.run/v1alpha1
 kind: EksclusterWithVpc
 metadata:
-  name: workload-cluster3
+  name: cluster3
 spec:
-    name: workload-cluster3
+    name: cluster3
     tenant: tenant1
     environment: staging
     region: us-west-2
@@ -12,8 +12,8 @@ spec:
     managementAccountId: '382076407153'
     adminRoleName: Admin
     nodesCount: 6
-    fleetSecretManagerSecretName: workload-cluster3-argocd-secret5
-    domainName: workload-cluster3.rosa.allamand.com
+    fleetSecretManagerSecretName: cluster3-argocd-secret5
+    domainName: cluster3.rosa.allamand.com
     cidr:
       vpcCidr: "10.0.0.0/16"
       publicSubnet1Cidr: "10.0.1.0/24"

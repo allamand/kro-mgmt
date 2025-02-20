@@ -1,19 +1,19 @@
 apiVersion: kro.run/v1alpha1
 kind: EksclusterWithVpc
 metadata:
-  name: workload-cluster1
+  name: cluster1
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "1"  
 spec:
-    name: workload-cluster1
+    name: cluster1
     #tenant: tenant1
     #environment: staging    
     #region: us-west-2
     k8sVersion: '1.30'
     accountId: '382076407153'
     managementAccountId: '382076407153'
-    domainName: workload-cluster1.sallaman.people.aws.dev
+    domainName: cluster1.sallaman.people.aws.dev
     #subHostedZone:
     #  create: true
     #  domainNameRef: sallaman.people.aws.dev

@@ -279,7 +279,7 @@ export ACCOUNT_IDS="111222333444 222333444555" # list of aws accounts you want t
 
 19. Commit/push the changes to Git, then wait for the sync operation to complete by checking ArgoCD UI.
 
-20. Add a workload cluster by adding a manifest for it under `clusters/`. Refer to `clusters/workload-cluster1.yaml` as an example.
+20. Add a workload cluster by adding a manifest for it under `clusters/`. Refer to `clusters/cluster1.yaml` as an example.
 
 21. Include the new cluster manifest in `clusters/kustomization.yaml`.
 

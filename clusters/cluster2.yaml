@@ -1,21 +1,22 @@
 apiVersion: kro.run/v1alpha1
 kind: EksclusterWithVpc
 metadata:
-  name: workload-cluster3
+  name: cluster2
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "1"
 spec:
-    name: workload-cluster3
+    name: cluster2
     tenant: auto1
     environment: staging
     region: us-west-2
-    k8sVersion: '1.31'
-    accountId: '798082067117'
+    k8sVersion: '1.32'
+    accountId: '418272784034'
     managementAccountId: '382076407153'
     adminRoleName: Admin
-    fleetSecretManagerSecretNameSuffix: argocd-secret-name2
-    domainName: workload-cluster3.rosa.allamand.com
+    #nodesCount: 6
+    fleetSecretManagerSecretNameSuffix: argocd-secret-name-cluster2
+    domainName: cluster2.rosa.allamand.com
     cidr:
       vpcCidr: "10.0.0.0/16"
       publicSubnet1Cidr: "10.0.1.0/24"
