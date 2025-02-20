@@ -11,7 +11,7 @@ spec:
     kind: EksclusterWithVpc
     spec:
       name: string
-      tenant: string | default="tenant1"
+      tenant: string | default="kro1"
       environment: string | default="staging"
       region: string | default="us-west-2"
       k8sVersion: string | default="1.32"
