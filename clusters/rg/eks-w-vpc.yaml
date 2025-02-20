@@ -13,13 +13,13 @@ spec:
       name: string
       tenant: string | default="tenant1"
       environment: string | default="staging"
-      region: string
-      k8sVersion: string
+      region: string | default="us-west-2"
+      k8sVersion: string | default="1.32"
       accountId: string
       managementAccountId: string
       adminRoleName: string | default="Admin"
       #nodesCount: integer
-      fleetSecretManagerSecretNameSuffix: string
+      fleetSecretManagerSecretNameSuffix: string | default="argocd-secret"
       domainName: string
       cidr:
         vpcCidr: string | default="10.0.0.0/16"
@@ -32,7 +32,7 @@ spec:
         addonsRepoPath: string | default="bootstrap"
         addonsRepoRevision: string | default="HEAD"
         addonsRepoSecretKey: string | default="eks-fleet-workshop-gitops-addons"
-        addonsRepoUrl: string | default="https://github.com/aws-samples/fleet-management-on-amazon-eks-worksho"
+        addonsRepoUrl: string | default="https://github.com/aws-samples/fleet-management-on-amazon-eks-workshop"
         fleetRepoBasePath: string | default="gitops/fleet/"
         fleetRepoPath: string | default="bootstrap"
         fleetRepoRevision: string | default="HEAD"
