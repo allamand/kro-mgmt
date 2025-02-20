@@ -2,3 +2,6 @@ clusters:
   cluster1: "382076407153"
   cluster2: "418272784034"
   cluster3: "798082067117"
+  workload-cluster1: "382076407153"
+  workload-cluster2: "418272784034"
+  workload-cluster3: "798082067117"
