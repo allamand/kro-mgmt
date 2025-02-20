@@ -59,14 +59,14 @@ spec:
         external_secrets_namespace: string | default="external-secrets"
         external_secrets_service_account: string | default="external-secrets-sa"
 
-        aws_load_balancer_controller_namespace: string | default="kube-system"
-        aws_load_balancer_controller_service_account: string | default="aws-load-balancer-controller-sa"
+        # aws_load_balancer_controller_namespace: string | default="kube-system"
+        # aws_load_balancer_controller_service_account: string | default="aws-load-balancer-controller-sa"
 
         amp_endpoint_url: string | default=""
 
-        karpenter_namespace: string | default="karpenter"
-        karpenter_service_account: string | default="karpenter-sa"
-        karpenter_sqs_queue_name: string | default=""
+        # karpenter_namespace: string | default="karpenter"
+        # karpenter_service_account: string | default="karpenter-sa"
+        # karpenter_sqs_queue_name: string | default=""
 
   resources:
   - id: vpc
@@ -146,9 +146,9 @@ spec:
             external_dns_policy: ${schema.spec.addons.external_dns_policy}
             external_secrets_namespace: ${schema.spec.addons.external_secrets_namespace}
             external_secrets_service_account: ${schema.spec.addons.external_secrets_service_account}
-            aws_load_balancer_controller_namespace: ${schema.spec.addons.aws_load_balancer_controller_namespace}
-            aws_load_balancer_controller_service_account: ${schema.spec.addons.aws_load_balancer_controller_service_account}
+            # aws_load_balancer_controller_namespace: ${schema.spec.addons.aws_load_balancer_controller_namespace}
+            # aws_load_balancer_controller_service_account: ${schema.spec.addons.aws_load_balancer_controller_service_account}
             amp_endpoint_url: ${schema.spec.addons.amp_endpoint_url}
-            karpenter_namespace: ${schema.spec.addons.karpenter_namespace}
-            karpenter_service_account: ${schema.spec.addons.karpenter_service_account}
+            # karpenter_namespace: ${schema.spec.addons.karpenter_namespace}
+            # karpenter_service_account: ${schema.spec.addons.karpenter_service_account}
 
