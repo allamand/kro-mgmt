@@ -17,13 +17,11 @@ spec:
     #subHostedZone:
     #  create: true
     #  domainNameRef: sallaman.people.aws.dev
-    cidr:
-      vpcCidr: "10.0.0.0/16"
+    cidr: {}
     gitops:
       addonsRepoRevision: "seb"
       fleetRepoRevision: "seb"
       platformRepoRevision: "seb"
       workloadRepoRevision: "seb"
-    addons:
-      external_dns_namespace: 'external-dns'
+    addons: {}
    
