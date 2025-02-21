@@ -18,8 +18,8 @@ spec:
     domainName: cluster3.rosa.allamand.com
     cidr: {}
     gitops:
-      addonsRepoRevision: "seb"
-      fleetRepoRevision: "seb"
-      platformRepoRevision: "seb"
-      workloadRepoRevision: "seb"
+      addonsRepoRevision: "centralized-argocd"
+      fleetRepoRevision: "centralized-argocd"
+      platformRepoRevision: "centralized-argocd"
+      workloadRepoRevision: "centralized-argocd"
     addons: {}
