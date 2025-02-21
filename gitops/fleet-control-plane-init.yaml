@@ -12,7 +12,7 @@ spec:
     - path: gitops/fleet/bootstrap/control-plane
       repoURL: >-
         https://github.com/aws-samples/fleet-management-on-amazon-eks-workshop
-      targetRevision: HEAD
+      targetRevision: seb
   syncPolicy:
     automated:
       allowEmpty: true

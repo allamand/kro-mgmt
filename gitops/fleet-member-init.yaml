@@ -1,24 +1,24 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: fleet-members-init
-  namespace: argocd
-spec:
-  destination:
-    name: in-cluster
-    namespace: argocd
-  project: default
-  sources:
-    - path: gitops/fleet/bootstrap/control-plane/members-init
-      repoURL: >-        
-        https://github.com/aws-samples/fleet-management-on-amazon-eks-workshop
-      targetRevision: HEAD
-  syncPolicy:
-    automated:
-      allowEmpty: true
-      selfHeal: true
-    retry:
-      limit: 100
-    syncOptions:
-      - CreateNamespace=true
-      - ServerSideApply=true
+# apiVersion: argoproj.io/v1alpha1
+# kind: Application
+# metadata:
+#   name: fleet-members-init
+#   namespace: argocd
+# spec:
+#   destination:
+#     name: in-cluster
+#     namespace: argocd
+#   project: default
+#   sources:
+#     - path: gitops/fleet/bootstrap/control-plane/members-init
+#       repoURL: >-        
+#         https://github.com/aws-samples/fleet-management-on-amazon-eks-workshop
+#       targetRevision: HEAD
+#   syncPolicy:
+#     automated:
+#       allowEmpty: true
+#       selfHeal: true
+#     retry:
+#       limit: 100
+#     syncOptions:
+#       - CreateNamespace=true
+#       - ServerSideApply=true
