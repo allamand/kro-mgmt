@@ -54,8 +54,4 @@ spec:
       external_dns_policy: "sync"
       external_secrets_namespace: "external-secrets"
       external_secrets_service_account: "external-secrets-sa"
-      aws_load_balancer_controller_namespace: "kube-system"
-      aws_load_balancer_controller_service_account: "aws-load-balancer-controller-sa"
       amp_endpoint_url: ""
-      karpenter_namespace: "karpenter"
-      karpenter_service_account: "karpenter-sa"        

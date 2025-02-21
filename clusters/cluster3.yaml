@@ -16,45 +16,10 @@ spec:
     adminRoleName: Admin
     fleetSecretManagerSecretNameSuffix: argocd-secret-name2
     domainName: cluster3.rosa.allamand.com
-    cidr:
-      vpcCidr: "10.0.0.0/16"
-      publicSubnet1Cidr: "10.0.1.0/24"
-      publicSubnet2Cidr: "10.0.2.0/24"
-      privateSubnet1Cidr: "10.0.11.0/24"
-      privateSubnet2Cidr: "10.0.12.0/24"
+    cidr: {}
     gitops:
-      addonsRepoBasePath: "gitops/addons/"
-      addonsRepoPath: "bootstrap"
       addonsRepoRevision: "seb"
-      #addonsRepoRevision: "HEAD"
-      addonsRepoSecretKey: "eks-fleet-workshop-gitops-addons"
-      addonsRepoUrl: "https://github.com/aws-samples/fleet-management-on-amazon-eks-workshop"
-      fleetRepoBasePath: "gitops/fleet/"
-      fleetRepoPath: "bootstrap"
       fleetRepoRevision: "seb"
-      fleetRepoSecretKey: "eks-fleet-workshop-gitops-fleet"
-      fleetRepoUrl: "https://github.com/aws-samples/fleet-management-on-amazon-eks-workshop" 
-      platformRepoBasePath: "gitops/platform/"
-      platformRepoPath: "bootstrap"
       platformRepoRevision: "seb"
-      platformRepoSecretKey: "eks-fleet-workshop-gitops-platform"
-      platformRepoUrl: "https://github.com/aws-samples/fleet-management-on-amazon-eks-workshop"
-      workloadRepoBasePath: "gitops/apps/"
-      workloadRepoPath: ""
       workloadRepoRevision: "seb"
-      workloadRepoSecretKey: "eks-fleet-workshop-gitops-workloads"
-      workloadRepoUrl: "https://github.com/aws-samples/fleet-management-on-amazon-eks-workshop"
-
-    addons:
-      adot_collector_namespace: "adot-collector-kubeprometheus"
-      adot_collector_service_account: "adot-collector-kubeprometheus"
-      external_dns_namespace: "external-dns"
-      external_dns_service_account: "external-dns-sa"
-      external_dns_policy: "sync"
-      external_secrets_namespace: "external-secrets"
-      external_secrets_service_account: "external-secrets-sa"
-      aws_load_balancer_controller_namespace: "kube-system"
-      aws_load_balancer_controller_service_account: "aws-load-balancer-controller-sa"
-      amp_endpoint_url: ""
-      karpenter_namespace: "karpenter"
-      karpenter_service_account: "karpenter-sa"        
+    addons: {}
