@@ -245,6 +245,21 @@ spec:
             environment: "${schema.spec.environment}"
             aws_cluster_name: "${schema.spec.name}"
             workloads: "true"
+            #using : useSelector: true for centralized mode
+            enable_metrics_server: "true"
+            enable_external_secrets: "true"
+            enable_external_dns: "true"
+            enable_adot_collector: "true"
+            enable_cw_prometheus: "true"
+            enable_kyverno: "true"
+            enable_kyverno_policies: "true"
+            enable_kyverno_policy_reporter: "true"
+            enable_cni_metrics_helper: "true"
+            enable_prometheus_node_exporter: "true"
+            enable_kube_state_metrics: "true"
+            enable_opentelemetry_operator: "true"
+            enable_cert_manager: "true"
+
           annotations:
             # GitOps Bridge
             accountId: "${schema.spec.accountId}"
