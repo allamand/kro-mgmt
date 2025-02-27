@@ -6,7 +6,7 @@ resources:
 - rg/eks-w-vpc.yaml
 #- cluster1.yaml
 #- cluster2.yaml
-- cluster3.yaml
+#- cluster3.yaml
 #- cluster4.yaml
 #- cluster5.yaml
 
